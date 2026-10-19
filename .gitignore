@@ -1,0 +1,21 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies and builds
+node_modules/
+.next/
+out/
+build/
+coverage/
+.vercel/
+*.tsbuildinfo
+
+# Office lock files, OS and editor files
+~$*
+Thumbs.db
+desktop.ini
+.DS_Store
+.idea/
+*.log
