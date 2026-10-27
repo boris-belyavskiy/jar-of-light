@@ -21,7 +21,7 @@ AI helps along the way, but it only suggests: nothing is published or sent witho
 
 ## Status
 
-**Discovery and design.** No code yet. Next: a private journal without AI, built in parallel with customer research.
+**Foundation (P0).** Product decisions for the first build step are made; no code yet. Next: a minimal private journal — Google sign-in, entries with date, time and categories, visible only to their author — followed by the rest of the journal in parallel with customer research.
 
 ## Documents
 
@@ -34,7 +34,7 @@ AI helps along the way, but it only suggests: nothing is published or sent witho
 
 ## Planned stack
 
-Next.js (PWA) on Vercel · Supabase Postgres (EU) · Anthropic API behind a provider abstraction · PostHog · Sentry. Product languages: Russian and English.
+Next.js on Vercel · Supabase Postgres (EU) with Row Level Security · Google sign-in · Anthropic API behind a provider abstraction (from P2) · PostHog · Sentry. The first phases run on free tiers at $0 ([ADR-0002](docs/adr/0002-free-stack-supabase-keepalive-backups.md)). Product languages: Russian and English.
 
 ## About
 

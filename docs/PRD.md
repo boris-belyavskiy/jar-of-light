@@ -1,11 +1,11 @@
 # PRD — Jar of Light
 
-> **Status:** Draft v0.2 · **Updated:** 2026-10-19 · **Owner (PM):** Boris Belyavskiy · **Tech review:** Claude (lead dev)
-> **Built from:** Plan v0.1 (2026-10-16) and PM notes on audience, JTBD and features (2026-10-19).
+> **Status:** Draft v0.3 · **Updated:** 2026-10-27 · **Owner (PM):** Boris Belyavskiy · **Tech review:** Claude (lead dev)
+> **Built from:** Plan v0.1 (2026-10-16), PM notes on audience, JTBD and features (2026-10-19) and the PM's decisions on the first build step (2026-10-27).
 > **Related:** [Tech Spec](TECH_SPEC.md) · [Roadmap](ROADMAP.md) · [ADR log](adr/README.md)
 
 **Priorities:** `Must` blocks the release · `Should` is important · `Could` is nice to have · `Later` is out of the current horizon.
-**Phases** (see [Roadmap](ROADMAP.md)): **P0** foundation · **P1** private journal without AI + customer research · **P2** AI layer · **P3** gratitude → action · **P4** public page · **P5** "Who is grateful to me?"
+**Phases** (see [Roadmap](ROADMAP.md)): **P0** foundation · **P1** private journal without AI + customer research (**P1a** minimal journal, the first build step; **P1b** the rest of the journal and the closed beta) · **P2** AI layer · **P3** gratitude → action · **P4** public page · **P5** "Who is grateful to me?"
 
 ---
 
@@ -107,7 +107,7 @@ The four jobs form a **ladder**. Each step widens the circle: notice the good �
 
 **Tone of voice.** Warm, calm, simple. Second person, short sentences. No guilt, no hype, no promises of happiness: we offer a practice, not a cure.
 
-**Visual identity.** Light blue and warm beige, with golden "light" accents. Details: [Tech Spec §9](TECH_SPEC.md#9-visual-design).
+**Visual identity.** Light blue and warm beige, with golden "light" accents: option A "Morning sky", chosen on 2026-10-27 out of three ([options](design/palettes/)). Details: [Tech Spec §9](TECH_SPEC.md#9-visual-design).
 
 ---
 
@@ -126,46 +126,52 @@ The four jobs form a **ladder**. Each step widens the circle: notice the good �
 ## 7. Requirements
 
 Format: **ID — requirement** *(priority, phase)*. Acceptance criteria (AC) for key items.
+
+**First build step (P1a), decided 2026-10-27:** sign in with Google · profile (name, time zone, language) · entries with text, date and time, and several categories · edit and delete · feed with a category filter · own categories · account deletion · privacy note. Every entry is visible only to its author. RU + EN. Everything else in P1 comes in P1b.
 PM's feature list (2026-10-19) maps as: F1 → ENT-01 · F2 → ENT-02 · F3 → CUM-02/03 · F4 → ACT/CARD · F5 → PUB · F6 → COM-01 · F7 → ID-01.
 
 ### 7.1 Account and onboarding
 
-- **ACC-01** — Sign in with email (one-time code or magic link) or Google. No passwords. *(Must, P1)*
-- **ACC-02** — The first entry can be written **before sign-up**: the draft is kept locally and moved into the account after sign-in. *(Should, P1)*
-- **ACC-03** — Three-screen onboarding: language and time zone (auto-detected), reminder schedule, AI consent with a plain explanation. *(Must, P1 without the AI step; AI step in P2)*
-- **ACC-04** — Profile: display name, pseudonym, language, time zone. *(Must, P1)*
+- **ACC-01** — Sign in with **Google**. Anyone with a Google account can sign up. No passwords. *(Must, P1a)*
+  - Email sign-in (one-time code) comes later: it needs an own domain and an email service. *(Should, P1b)*
+- **ACC-02** — The first entry can be written **before sign-up**: the draft is kept locally and moved into the account after sign-in. *(Should, P1b)*
+- **ACC-03** — Three-screen onboarding: language and time zone (auto-detected), reminder schedule, AI consent with a plain explanation. *(Must, P1b without the AI step; AI step in P2)*
+- **ACC-04** — Profile: display name (from Google, editable), time zone (auto-detected from the browser, editable), interface language RU / EN. *(Must, P1a)* Pseudonym. *(Must, P4)*
+  - **AC:** "today" and the default entry time follow the user's time zone, not the server's.
 
 ### 7.2 Entries
 
-- **ENT-01 Free-form entry (F1)** — One text field (1–2,000 characters), date (today by default, backdating allowed), optional "to whom / to what", optional brightness 1–5, categories. If "to whom" is filled the entry is a **gratitude**, otherwise a **bright moment** (user can override). *(Must, P1)*
-  - **AC:** from an open app an entry takes ≤ 3 actions; saving is optimistic (UI does not wait for the server); text survives a lost connection (local draft).
-- **ENT-02 Guided entry (F2)** — A template with optional fields: **What happened** · **Who was there** · **When** · **Where** · **Who made it possible / whom I thank** · *Why it matters* (optional). Only "What happened" is required. The user can switch between free-form and guided without losing text. *(Must, P1)*
+- **ENT-01 Free-form entry (F1)** — One text field (**1–4,000 characters**), **date and time** (now by default, in the user's time zone; past allowed, future not), one or more categories. *(Must, P1a)*
+  - **AC:** from an open app an entry takes ≤ 3 actions; a character counter shows the limit; an entry is visible only to its author.
+  - Later, in P1b: optional "to whom / to what" and brightness 1–5; if "to whom" is filled the entry is a **gratitude**, otherwise a **bright moment** (user can override); optimistic saving and a local draft that survives a lost connection.
+- **ENT-02 Guided entry (F2)** — A template with optional fields: **What happened** · **Who was there** · **When** · **Where** · **Who made it possible / whom I thank** · *Why it matters* (optional). Only "What happened" is required. The user can switch between free-form and guided without losing text. *(Must, P1b)*
   - **AC:** guided fields are stored as structured data (people and places as separate records, not concatenated text) so that P1 stats work without AI; "who" and "where" fields autocomplete from the user's earlier entries.
-- **ENT-03** — Prompts against the blank page, rotating ("Who made your day easier today?", "What small moment do you want to remember?"). *(Should, P1)*
-- **ENT-04** — Feed grouped by day; sort by created or event date; filter by kind, category, person, place and brightness; full-text search. *(Must, P1)*
-- **ENT-05** — Edit and delete. Deleting a published entry removes it from the public page (§7.8). *(Must, P1)*
+- **ENT-03** — Prompts against the blank page, rotating ("Who made your day easier today?", "What small moment do you want to remember?"). *(Should, P1b)*
+- **ENT-04** — Feed of entries, newest first by entry date and time, with a **filter by category**. *(Must, P1a)* Grouping by day, other sorts, filters by kind, person, place and brightness, full-text search. *(Must, P1b)*
+- **ENT-05** — Edit and delete; deleting asks for confirmation and is immediate (no trash). *(Must, P1a)* Deleting a published entry removes it from the public page (§7.8). *(Must, P4)*
 - **ENT-06** — Voice input via the keyboard's system dictation (free, no extra work). Own audio transcription and photos — *Later*.
 
 ### 7.3 Categories
 
-- **CAT-01** — System categories (life areas, [Tech Spec §6.3](TECH_SPEC.md#63-taxonomies)) are on by default and can be hidden or renamed. *(Must, P1)*
-- **CAT-02** — Custom categories: name, color, icon, order. *(Must, P1)*
+- **CAT-01** — System categories are on by default. Starter set: **Family · Friends · Work · Study · Health · Chance encounter** (RU: Семья · Друзья · Работа · Учёба · Здоровье · Случайная встреча). System categories can be hidden, but not renamed or deleted. An entry can have **several** categories. *(Must, P1a)*
+- **CAT-02** — Custom categories: create, rename, delete. *(Must, P1a)* Color, icon, order. *(Should, P1b)*
+  - **AC:** deleting a custom category removes it from entries but never deletes the entries.
 - **CAT-03** — AI suggests 1–3 categories after saving; the user accepts with one tap or edits. AI may propose a **new** category. *(Must, P2)*
   - **AC:** accepted and rejected suggestions are logged (quality metric); a rejected suggestion is not shown again for that entry.
 
 ### 7.4 Habit and reminders
 
-- **HAB-01** — Reminder schedule: time and frequency (daily / 3× a week / weekly; default 3× a week in the evening). *(Must, P1)*
-- **HAB-02** — Channels: web push (on iOS after the PWA is added to the home screen) and email. *(Must, P1)* Telegram bot — *Later*.
-- **HAB-03** — Reminder texts rotate and contain a prompt; tapping opens the composer. *(Should, P1)*
-- **HAB-04** — Gentle counter "days with light this month", no resettable streak. *(Should, P1)*
+- **HAB-01** — Reminder schedule: time and frequency (daily / 3× a week / weekly; default 3× a week in the evening). *(Must, P1b)*
+- **HAB-02** — Channels: web push (on iOS after the PWA is added to the home screen) and email. *(Must, P1b)* Telegram bot — *Later*.
+- **HAB-03** — Reminder texts rotate and contain a prompt; tapping opens the composer. *(Should, P1b)*
+- **HAB-04** — Gentle counter "days with light this month", no resettable streak. *(Should, P1b)*
 
 ### 7.5 Looking back (the cumulative effect)
 
 **Cumulative effect** means: (a) for the user, past entries regularly come back and add up to a visible picture; (b) for the community, thanks to addressees accumulate on the public page.
 
-- **CUM-01 Open the jar** — The "I need some light" button shows a random past entry (weighted by brightness); the user can keep drawing. *(Must, P1)*
-- **CUM-02 Simple stats (no AI)** — Entries per week, top people, top places, top categories, built from guided fields and categories. *(Should, P1)*
+- **CUM-01 Open the jar** — The "I need some light" button shows a random past entry (weighted by brightness); the user can keep drawing. *(Must, P1b)*
+- **CUM-02 Simple stats (no AI)** — Entries per week, top people, top places, top categories, built from guided fields and categories. *(Should, P1b)*
 - **CUM-03 AI summaries (F3)** — Summaries by **period** (week, month, year), **place**, **topic** and **people**: "October: 23 bright moments, most often with Anna and in the park; you thanked doctors three times." Works for free-form entries too, thanks to AI extraction. *(Must, P2)*
 - **CUM-04 Weekly digest** — In-app and email: count, top categories and people, 1–2 bright entries, an AI summary and one gentle reflection question. *(Should, P2)*
 - **CUM-05 On this day** — Entries from a month, six months and a year ago. *(Should, P2)*
@@ -244,9 +250,10 @@ Readable without an account.
 
 ### 7.12 User data
 
-- **DATA-01** — Export all entries to JSON and Markdown. *(Must, P1)*
-- **DATA-02** — Account deletion: immediate deletion of entries, posts, cards and identities; backups expire on the provider's schedule (stated in the policy). *(Must, P1)*
+- **DATA-01** — Export all entries to JSON and Markdown. *(Must, P1b)*
+- **DATA-02** — Account deletion: immediate deletion of the profile, entries and categories (later also posts, cards and identities); encrypted backups expire within 30 days (stated in the privacy note). *(Must, P1a)*
 - **DATA-03** — Privacy policy and terms in plain language: what goes to the AI provider and what gets published. *(Must before public beta)*
+- **DATA-04** — Short privacy note on the site, linked from the sign-in screen: only you see your entries, and the database itself enforces it; the operator technically has database access and does not read entries; no end-to-end encryption, and why; backups and how long they are kept. It is also the privacy-policy link that Google sign-in requires. *(Must, P1a)*
 
 ### 7.13 Reflection coach *(Later)*
 
@@ -336,10 +343,10 @@ Technical risks are in the [Tech Spec §10](TECH_SPEC.md#10-non-functional-requi
 
 | # | Question | Recommendation | Status | Needed by |
 |---|---|---|---|---|
-| Q1 | Platform: PWA, Telegram Mini App or native? | **PWA** (Next.js): one link, no app stores | Proposed | P0 |
-| Q2 | Languages: RU, EN or both? | **RU + EN from day one**; first beta users Russian-speaking, portfolio case in English | Proposed | P0 |
+| Q1 | Platform: PWA, Telegram Mini App or native? | **Web app on Next.js**, mobile-first; PWA install and offline in P1b | ✅ Decided 2026-10-27 | — |
+| Q2 | Languages: RU, EN or both? | **RU + EN from day one**; first beta users Russian-speaking, portfolio case in English | ✅ Decided 2026-10-27 | — |
 | Q3 | Hours per week for the build | 12–15 h/week (roadmap estimates assume this) | Open | P0 |
-| Q4 | Monthly budget for infrastructure and AI | ≤ $50/month in beta | Open | P1 |
+| Q4 | Monthly budget for infrastructure and AI | **$0 and no payment card in P0–P1**: free tiers only ([ADR-0002](adr/0002-free-stack-supabase-keepalive-backups.md)). Revisit before P2, when AI adds cost | ✅ Decided for P0–P1, 2026-10-27 | P2 |
 | Q5 | Product name | **Jar of Light** («Банка света») | ✅ Decided 2026-10-19 | — |
 | Q6 | Public repository? | Yes, without secrets | ✅ Decided 2026-10-19 | — |
 | Q7 | Models: mix (A) or one strong model (B)? | Start with the mix; run B on the same evals and decide on data | Proposed | P2 |
@@ -352,6 +359,10 @@ Technical risks are in the [Tech Spec §10](TECH_SPEC.md#10-non-functional-requi
 | Q14 | Private people in full-text levels (L3–L4) | First names allowed; full names and contact details blocked | Open | P4 |
 | Q15 | Keep L1 "count only"? | Yes: the cheapest way to fill public pages with zero privacy risk | Open | P4 |
 | Q16 | Beachhead segment: S1 or S2? | Decide after interviews; compare activation and W2 retention | Open | End of P1 |
+| Q17 | Sign-in methods at start | **Google only**; email later (needs a domain) | ✅ Decided 2026-10-27 | — |
+| Q18 | Who can sign up | **Anyone with a Google account** | ✅ Decided 2026-10-27 | — |
+| Q19 | Database on a free tier that pauses when idle | **Supabase Free + daily keep-alive + own nightly backups** ([ADR-0002](adr/0002-free-stack-supabase-keepalive-backups.md)) | ✅ Decided 2026-10-27 | — |
+| Q20 | Color palette | **Option A "Morning sky"** out of three ([options](design/palettes/)) | ✅ Decided 2026-10-27 | — |
 
 ---
 

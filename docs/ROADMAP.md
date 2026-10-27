@@ -1,9 +1,9 @@
 # Roadmap — Jar of Light
 
-> **Status:** Draft v0.2 · **Updated:** 2026-10-19 · **Owner:** Boris Belyavskiy (PM)
+> **Status:** Draft v0.3 · **Updated:** 2026-10-27 · **Owner:** Boris Belyavskiy (PM)
 > **Related:** [PRD](PRD.md) · [Tech Spec](TECH_SPEC.md) · [ADR log](adr/README.md)
 
-**Logic of the sequence.** First a simple private journal **without AI**, built while doing **customer research**. Then the **AI layer**, then **gratitude → action**, then the **public page**, then **profile search**. Each phase climbs one step of the JTBD ladder (Notice → Own → Connect → Give back) and ends with a decision gate.
+**Logic of the sequence.** From simple to complex. First a minimal private journal (P1a: sign in, write, categorize), then the rest of the journal **without AI**, built while doing **customer research**. Then the **AI layer**, then **gratitude → action**, then the **public page**, then **profile search**. Each phase climbs one step of the JTBD ladder (Notice → Own → Connect → Give back) and ends with a decision gate.
 
 **Assumptions:** one builder (PM + Claude Code), ~12–15 hours a week (Q3). Windows are targets, not commitments; at full time, divide by ~2.5.
 
@@ -13,8 +13,9 @@
 
 | Phase | What | Target window | Release |
 |---|---|---|---|
-| **P0** | Foundation: repo, docs, accounts, skeleton, design tokens | Late Oct 2026 (1–2 wks) | Skeleton live on `jar-of-light.vercel.app` |
-| **P1** | Private journal **without AI** + **customer research** (two parallel tracks) | Nov – mid Dec 2026 (5–6 wks) | **R1: closed beta** (10–20 people) |
+| **P0** | Foundation: repo, docs, accounts, skeleton, design tokens | Late Oct – early Nov 2026 (1–2 wks) | Skeleton live on `jar-of-light.vercel.app` |
+| **P1a** | **First build step:** Google sign-in, entries with date, time and categories, feed with filter | Nov 2026 (2–3 wks) | **R0:** the author and first friends use it |
+| **P1b** | Rest of the private journal **without AI** + **customer research** (two parallel tracks) | Late Nov – mid Dec 2026 (3–4 wks) | **R1: closed beta** (10–20 people) |
 | **P2** | AI layer: entry parsing, suggestions, summaries, digest | Mid Dec 2026 – mid Jan 2027 (3 wks + holiday buffer) | Beta update |
 | **P3** | Gratitude → action + thank-you cards | Late Jan – early Feb 2027 (2–3 wks) | Beta update |
 | **P4** | Public page: visibility levels, moderation, addressee pages | Feb – mid Mar 2027 (4–5 wks) | **R2: public beta** |
@@ -27,7 +28,8 @@ gantt
   axisFormat %b
   section Build
   P0 Foundation             :p0, 2026-10-19, 14d
-  P1 Private journal (no AI):p1, after p0, 42d
+  P1a Minimal journal       :p1a, after p0, 21d
+  P1b Journal + closed beta :p1, after p1a, 25d
   P2 AI layer               :p2, after p1, 35d
   P3 Gratitude to action    :p3, after p2, 21d
   P4 Public page            :p4, after p3, 35d
@@ -41,39 +43,59 @@ gantt
 
 ## P0 — Foundation
 
-- [x] Public GitHub repository; PRD, Tech Spec, Roadmap, ADR-0001 *(2026-10-19)*
-- [ ] Accounts: Vercel (Hobby), Supabase dev project (EU), PostHog EU, Sentry
+- [x] PRD, Tech Spec, Roadmap, ADR-0001 *(2026-10-19)*
+- [x] First-step decisions: Q1, Q2, Q4, Q17–Q20, [ADR-0002](adr/0002-free-stack-supabase-keepalive-backups.md) *(2026-10-27)*
+- [x] Three palette options on real screens; option A chosen ([PDFs](design/palettes/)) *(2026-10-27)*
+- [ ] Public GitHub repository on the personal account `boris-belyavskiy`
+- [ ] Accounts, all free and without a payment card: Vercel (Hobby), Supabase **dev** + **prod** (EU), Google Cloud project with an OAuth client. PostHog and Sentry move to P1b
+- [ ] Node.js LTS installed locally
 - [ ] Next.js skeleton: TypeScript, Tailwind, shadcn/ui, `next-intl` (RU/EN), deployed to `jar-of-light.vercel.app`
-- [ ] Design tokens and base layout in light and dark themes ([Tech Spec §9](TECH_SPEC.md#9-visual-design))
-- [ ] Low-fi wireframes (Figma): composer (free-form / guided), feed, jar, settings
+- [ ] Design tokens (option A) and base layout in light and dark themes ([Tech Spec §9](TECH_SPEC.md#9-visual-design))
 - [ ] `CLAUDE.md`, CI (lint, type check, tests), PR template
-- [ ] Decide Q1–Q3 ([PRD §11](PRD.md#11-open-questions))
+- [ ] Private repository `jar-of-light-backups` with the daily keep-alive ([Tech Spec §3.1](TECH_SPEC.md#31-keep-alive-and-backups))
+- [ ] Decide Q3 (hours per week)
 
-**Definition of Done:** the app skeleton is live from `main`; every pull request gets a preview link.
+**Definition of Done:** the app skeleton is live from `main` and connected to Supabase; CI is green; every pull request gets a preview link; keep-alive runs daily.
 
 ---
 
-## P1 — Private journal without AI + customer research
+## P1a — Minimal private journal (first build step)
 
-Two tracks run in parallel: building the journal, and talking to users. Interviewees become the first beta users.
+Requirements: ACC-01, ACC-04, ENT-01, ENT-04 (category filter), ENT-05, CAT-01, CAT-02, DATA-02, DATA-04.
+
+- [ ] Google sign-in (anyone with a Google account), sign out
+- [ ] Profile: name, time zone, language RU / EN
+- [ ] Entries: text up to 4,000 characters, date and time, several categories; create, edit, delete
+- [ ] Feed, newest first, with a category filter
+- [ ] Categories: six system ones (hide only) + own (create, rename, delete)
+- [ ] Account deletion
+- [ ] Privacy note `/privacy`; Google app published to "In production"
+- [ ] Nightly encrypted backups of **prod** + one restore test, before the first real users
+
+**Definition of Done:** RLS tests prove that user A cannot read or change user B's entries or categories; unit tests for validation (length, no future dates); sign-in checked on production; backups run and a restore has been tested; RU and EN strings complete.
+
+---
+
+## P1b — Rest of the private journal without AI + customer research
+
+Two tracks run in parallel: building the journal, and talking to users. Interviewees become the first beta users. Customer research can start during P1a.
 
 ### Track A — Build
 
-Requirements: ACC-01…04, ENT-01…05, CAT-01…02, HAB-01…04, CUM-01…02, DATA-01…02.
+Requirements: ACC-01 (email), ACC-02, ACC-03, ENT-01 (addressee, brightness, local draft), ENT-02, ENT-03, ENT-04 (full), CAT-02 (color, icon, order), HAB-01…04, CUM-01…02, DATA-01.
 
-- [ ] Sign-in (email code / Google), onboarding, profile, time zone
-- [ ] Free-form and guided entries; edit, delete; feed with filters and search
+- [ ] Optional email sign-in (needs an own domain + Resend), onboarding
+- [ ] Guided entries; "to whom", brightness; grouping by day, more filters and search
 - [ ] People and places of my life (autocomplete from earlier entries)
-- [ ] System and custom categories
+- [ ] Category color, icon, order
 - [ ] Open the jar
 - [ ] Simple stats: entries per week, top people, places, categories
 - [ ] Reminders: push + email on schedule (`pg_cron`)
-- [ ] Export (JSON, Markdown) and account deletion
+- [ ] Export (JSON, Markdown)
 - [ ] PWA: install, icon, offline draft
-- [ ] Analytics events for P1 ([Tech Spec §12](TECH_SPEC.md#12-analytics-events))
-- [ ] Before inviting beta users: Supabase Pro (backups), own domain + Resend for emails, short privacy notice
+- [ ] Accounts: PostHog EU, Sentry; analytics events for P1 ([Tech Spec §12](TECH_SPEC.md#12-analytics-events))
 
-**Definition of Done:** e2e tests for key scenarios (sign in → entry → feed → export → delete); RLS tests (user A cannot see user B's entries); 10–20 beta users write for at least two weeks; activation and retention dashboard in PostHog.
+**Definition of Done:** e2e tests for key scenarios (sign in → entry → feed → export → delete); RLS tests extended to new tables; 10–20 beta users write for at least two weeks; activation and retention dashboard in PostHog.
 
 ### Track B — Customer research
 
