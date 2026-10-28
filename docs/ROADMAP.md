@@ -49,10 +49,10 @@ gantt
 - [ ] Public GitHub repository on the personal account `boris-belyavskiy`
 - [x] Accounts, all free and without a payment card: Vercel (Hobby), Supabase **dev** + **prod** (US East, Ohio), Google Cloud project with an OAuth client. PostHog and Sentry move to P1b *(2026-10-27)*
 - [x] Node.js LTS (v24) installed locally *(2026-10-27)*
-- [ ] Next.js skeleton: TypeScript, Tailwind, shadcn/ui, `next-intl` (RU/EN), deployed to `jaroflight.vercel.app`
-- [ ] Design tokens (option A) and base layout in light and dark themes ([Tech Spec §9](TECH_SPEC.md#9-visual-design))
+- [x] Next.js skeleton: TypeScript, Tailwind, shadcn/ui, `next-intl` (RU/EN), deployed to `jaroflight.vercel.app` *(code 2026-10-27; deploy pending)*
+- [x] Design tokens (option A) and base layout in light and dark themes ([Tech Spec §9](TECH_SPEC.md#9-visual-design)) *(2026-10-27)*
 - [x] `CLAUDE.md` *(2026-10-27)*
-- [ ] CI (lint, type check, tests), PR template
+- [x] CI (lint, type check, tests), PR template *(2026-10-27)*
 - [ ] Private repository `jar-of-light-backups` with the daily keep-alive ([Tech Spec §3.1](TECH_SPEC.md#31-keep-alive-and-backups))
 - [ ] Decide Q3 (hours per week)
 

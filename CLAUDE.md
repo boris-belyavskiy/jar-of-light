@@ -7,14 +7,16 @@ Guidance for Claude Code working in this repository.
 - [docs/PRD.md](docs/PRD.md) — what we build and why; requirement IDs (ACC-01, ENT-01, …); open questions in §11.
 - [docs/TECH_SPEC.md](docs/TECH_SPEC.md) — stack, data model, privacy, routes, visual design.
 - [docs/ROADMAP.md](docs/ROADMAP.md) — phases; **current work is P0 → P1a** (first build step).
-- [docs/DECISIONS.md](docs/DECISIONS.md) — all architecture decisions (ADRs) in one append-only file: ADR-0001 (no own servers), ADR-0002 (free stack, keep-alive, backups). A new decision is a new record at the end; never rewrite an accepted one.
+- [docs/DECISIONS.md](docs/DECISIONS.md) — all architecture decisions (ADRs) in one append-only file: ADR-0001 (no own servers), ADR-0002 (free stack, keep-alive, backups), ADR-0003 (app foundations: no Cache Components, language without URL prefix, RLS tests on PGlite). A new decision is a new record at the end; never rewrite an accepted one.
 
 These documents are the source of truth. If a decision changes, update the document (or add a record to `docs/DECISIONS.md`) in the same pull request.
 
 ## Current state (2026-10-27)
 
-- The repository exists **only locally**: its commits (docs, decisions, this file) have never been pushed. First task: check `gh auth status` shows `boris-belyavskiy` active, create the **public** repo `boris-belyavskiy/jar-of-light`, push `main`, and set its description and homepage `https://jaroflight.vercel.app`.
+- Code is in progress for **P1a** (Next.js 16 app, migration in `supabase/migrations/`, RLS tests in `tests/db/`). Migrations are applied by hand in the Supabase SQL editor (see `supabase/README.md`).
 - Accounts are ready: Vercel, Supabase dev + prod, Google Cloud OAuth client. Not done yet: Vercel project import, `jar-of-light-backups` repo, Session pooler string for backups.
+- Commands: `npm run dev`, `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`. Environment variables: copy `.env.example` to `.env.local`.
+- Next.js 16 has breaking changes against older docs (`proxy.ts` instead of `middleware.ts`, typed `PageProps`/`LayoutProps`): read `node_modules/next/dist/docs/` before using an unfamiliar API.
 
 ## People and language
 

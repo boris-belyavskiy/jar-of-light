@@ -21,7 +21,7 @@ AI helps along the way, but it only suggests: nothing is published or sent witho
 
 ## Status
 
-**Foundation (P0).** Product decisions for the first build step are made; no code yet. Next: a minimal private journal — Google sign-in, entries with date, time and categories, visible only to their author — followed by the rest of the journal in parallel with customer research.
+**First build step (P1a) in progress.** The app skeleton and the minimal private journal are in code: Google sign-in, entries with date, time and categories (visible only to their author, enforced by the database and covered by tests), own categories, profile settings, account deletion and a privacy note. Next: deploy to `jaroflight.vercel.app`, backups, then the rest of the journal in parallel with customer research.
 
 ## Documents
 
