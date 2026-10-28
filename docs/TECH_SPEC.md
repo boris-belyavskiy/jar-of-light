@@ -1,6 +1,6 @@
 # Tech Spec — Jar of Light
 
-> **Status:** Draft v0.3 · **Updated:** 2026-10-27 · **Owner:** Boris Belyavskiy (PM) · **Tech lead / reviewer:** Claude
+> **Status:** Draft v0.3 · **Updated:** 2026-10-28 · **Owner:** Boris Belyavskiy (PM) · **Tech lead / reviewer:** Claude
 > **Related:** [PRD](PRD.md) · [Roadmap](ROADMAP.md) · [Decisions](DECISIONS.md)
 > Requirement IDs (ENT-01, PUB-03, …) refer to the [PRD](PRD.md#7-requirements). Phases P0–P5 refer to the [Roadmap](ROADMAP.md).
 
@@ -116,8 +116,8 @@ Supabase Free pauses a project after 7 days without requests and keeps no backup
 | Job | Schedule | What it does |
 |---|---|---|
 | Keep-alive | Daily | One lightweight request to the **dev** and **prod** projects, so neither ever reaches 7 idle days. A failed run emails the owner |
-| Backup | Nightly | `pg_dump` of **prod** through the Session pooler connection (GitHub runners have no IPv6) → compressed → encrypted with `age` (public key in the workflow, private key kept offline by the owner) → stored as a workflow artifact with **30-day retention** |
-| Restore test | Before inviting the first users, then quarterly | Restore the latest dump into **dev** and check row counts |
+| Backup | Nightly | `pg_dump` of **prod** (schemas `public` and `auth`) through the Session pooler connection (GitHub runners have no IPv6) → **restored into a throwaway Postgres on the same runner and row counts compared with prod** → encrypted with `age` (public key in the workflow, private key kept offline by the owner) → stored as a workflow artifact with **30-day retention**. The plaintext dump never leaves the temporary runner |
+| Restore test | Every night (automatic, above); decrypting a real artifact with the offline key: before inviting the first users, then quarterly | The nightly restore proves the dump is complete; the manual check proves the offline key opens it. First passed 2026-10-28 |
 
 Data deleted by a user stays in encrypted backups for up to 30 days; the privacy note says so (PRD DATA-02, DATA-04).
 

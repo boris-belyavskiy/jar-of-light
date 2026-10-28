@@ -1,6 +1,6 @@
 # PRD — Jar of Light
 
-> **Status:** Draft v0.3 · **Updated:** 2026-10-27 · **Owner (PM):** Boris Belyavskiy · **Tech review:** Claude (lead dev)
+> **Status:** Draft v0.3 · **Updated:** 2026-10-28 · **Owner (PM):** Boris Belyavskiy · **Tech review:** Claude (lead dev)
 > **Built from:** Plan v0.1 (2026-10-16), PM notes on audience, JTBD and features (2026-10-19) and the PM's decisions on the first build step (2026-10-27).
 > **Related:** [Tech Spec](TECH_SPEC.md) · [Roadmap](ROADMAP.md) · [Decisions](DECISIONS.md)
 
