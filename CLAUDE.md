@@ -7,9 +7,9 @@ Guidance for Claude Code working in this repository.
 - [docs/PRD.md](docs/PRD.md) — what we build and why; requirement IDs (ACC-01, ENT-01, …); open questions in §11.
 - [docs/TECH_SPEC.md](docs/TECH_SPEC.md) — stack, data model, privacy, routes, visual design.
 - [docs/ROADMAP.md](docs/ROADMAP.md) — phases; **current work is P0 → P1a** (first build step).
-- [docs/adr/](docs/adr/) — accepted decisions: ADR-0001 (no own servers), ADR-0002 (free stack, keep-alive, backups).
+- [docs/DECISIONS.md](docs/DECISIONS.md) — all architecture decisions (ADRs) in one append-only file: ADR-0001 (no own servers), ADR-0002 (free stack, keep-alive, backups). A new decision is a new record at the end; never rewrite an accepted one.
 
-These documents are the source of truth. If a decision changes, update the document (or add an ADR) in the same pull request.
+These documents are the source of truth. If a decision changes, update the document (or add a record to `docs/DECISIONS.md`) in the same pull request.
 
 ## Current state (2026-10-27)
 
@@ -48,4 +48,5 @@ Google sign-in open to any Google account · profile (name, time zone, language 
 - **Commits:** Conventional Commits (`feat:`, `fix:`, `docs:` …). Author is Boris's noreply address `340406159+boris-belyavskiy@users.noreply.github.com` (already in the repo's git config).
 - **GitHub CLI:** the machine also has an edu account (`borisbelyavskiy-edu`). Before pushing or creating repos, check `gh auth status` shows `boris-belyavskiy` as active; switch with `gh auth switch`.
 - **Line endings:** files use LF. Do not rewrite whole files with tools that convert to CRLF.
+- **Outside the repository** (parent folder `Архив/`): early plans and notes from before 2026-10-19. Historical only, superseded by the PRD; never add them to the repository.
 - **Definition of Done for any task:** merged via PR · migrations with grants and RLS policies · tests for new logic · RU and EN strings · docs updated if a decision changed.

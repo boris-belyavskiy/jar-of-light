@@ -30,11 +30,11 @@ AI helps along the way, but it only suggests: nothing is published or sent witho
 | [PRD](docs/PRD.md) | Problem, audience, jobs to be done, requirements, metrics, open questions |
 | [Tech Spec](docs/TECH_SPEC.md) | Architecture, data model, privacy levels, AI design, visual design |
 | [Roadmap](docs/ROADMAP.md) | Phases from a private journal to the public page, research plan, decision gates |
-| [ADR log](docs/adr/README.md) | Architecture decisions and why we made them |
+| [Decisions](docs/DECISIONS.md) | Architecture decisions (ADRs) and why we made them |
 
 ## Planned stack
 
-Next.js on Vercel · Supabase Postgres (US East) with Row Level Security · Google sign-in · Anthropic API behind a provider abstraction (from P2) · PostHog · Sentry. The first phases run on free tiers at $0 ([ADR-0002](docs/adr/0002-free-stack-supabase-keepalive-backups.md)). Product languages: Russian and English.
+Next.js on Vercel · Supabase Postgres (US East) with Row Level Security · Google sign-in · Anthropic API behind a provider abstraction (from P2) · PostHog · Sentry. The first phases run on free tiers at $0 ([ADR-0002](docs/DECISIONS.md#adr-0002)). Product languages: Russian and English.
 
 ## About
 

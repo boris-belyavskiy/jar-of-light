@@ -2,7 +2,7 @@
 
 > **Status:** Draft v0.3 · **Updated:** 2026-10-27 · **Owner (PM):** Boris Belyavskiy · **Tech review:** Claude (lead dev)
 > **Built from:** Plan v0.1 (2026-10-16), PM notes on audience, JTBD and features (2026-10-19) and the PM's decisions on the first build step (2026-10-27).
-> **Related:** [Tech Spec](TECH_SPEC.md) · [Roadmap](ROADMAP.md) · [ADR log](adr/README.md)
+> **Related:** [Tech Spec](TECH_SPEC.md) · [Roadmap](ROADMAP.md) · [Decisions](DECISIONS.md)
 
 **Priorities:** `Must` blocks the release · `Should` is important · `Could` is nice to have · `Later` is out of the current horizon.
 **Phases** (see [Roadmap](ROADMAP.md)): **P0** foundation · **P1** private journal without AI + customer research (**P1a** minimal journal, the first build step; **P1b** the rest of the journal and the closed beta) · **P2** AI layer · **P3** gratitude → action · **P4** public page · **P5** "Who is grateful to me?"
@@ -335,7 +335,7 @@ In the current horizon we do **not** build:
 | R6 | Scope creep for a solo builder | High | Medium | Strict phases, a *Later* bucket, decision gates in the [Roadmap](ROADMAP.md) |
 | R7 | Legal: GDPR, Russian data localization law (152-FZ), AI provider terms | Medium | High | Plain-language note on where data is stored (US East), privacy policy, server-side LLM calls only, legal check before public beta (Q9) |
 
-Technical risks are in the [Tech Spec §10](TECH_SPEC.md#10-non-functional-requirements) and [ADR log](adr/README.md).
+Technical risks are in the [Tech Spec §10](TECH_SPEC.md#10-non-functional-requirements) and [Decisions](DECISIONS.md).
 
 ---
 
@@ -346,7 +346,7 @@ Technical risks are in the [Tech Spec §10](TECH_SPEC.md#10-non-functional-requi
 | Q1 | Platform: PWA, Telegram Mini App or native? | **Web app on Next.js**, mobile-first; PWA install and offline in P1b | ✅ Decided 2026-10-27 | — |
 | Q2 | Languages: RU, EN or both? | **RU + EN from day one**; first beta users Russian-speaking, portfolio case in English | ✅ Decided 2026-10-27 | — |
 | Q3 | Hours per week for the build | 12–15 h/week (roadmap estimates assume this) | Open | P0 |
-| Q4 | Monthly budget for infrastructure and AI | **$0 and no payment card in P0–P1**: free tiers only ([ADR-0002](adr/0002-free-stack-supabase-keepalive-backups.md)). Revisit before P2, when AI adds cost | ✅ Decided for P0–P1, 2026-10-27 | P2 |
+| Q4 | Monthly budget for infrastructure and AI | **$0 and no payment card in P0–P1**: free tiers only ([ADR-0002](DECISIONS.md#adr-0002)). Revisit before P2, when AI adds cost | ✅ Decided for P0–P1, 2026-10-27 | P2 |
 | Q5 | Product name | **Jar of Light** («Банка света») | ✅ Decided 2026-10-19 | — |
 | Q6 | Public repository? | Yes, without secrets | ✅ Decided 2026-10-19 | — |
 | Q7 | Models: mix (A) or one strong model (B)? | Start with the mix; run B on the same evals and decide on data | Proposed | P2 |
@@ -361,7 +361,7 @@ Technical risks are in the [Tech Spec §10](TECH_SPEC.md#10-non-functional-requi
 | Q16 | Beachhead segment: S1 or S2? | Decide after interviews; compare activation and W2 retention | Open | End of P1 |
 | Q17 | Sign-in methods at start | **Google only**; email later (needs a domain) | ✅ Decided 2026-10-27 | — |
 | Q18 | Who can sign up | **Anyone with a Google account** | ✅ Decided 2026-10-27 | — |
-| Q19 | Database on a free tier that pauses when idle | **Supabase Free + daily keep-alive + own nightly backups** ([ADR-0002](adr/0002-free-stack-supabase-keepalive-backups.md)) | ✅ Decided 2026-10-27 | — |
+| Q19 | Database on a free tier that pauses when idle | **Supabase Free + daily keep-alive + own nightly backups** ([ADR-0002](DECISIONS.md#adr-0002)) | ✅ Decided 2026-10-27 | — |
 | Q20 | Color palette | **Option A "Morning sky"** out of three ([options](design/palettes/)) | ✅ Decided 2026-10-27 | — |
 
 ---

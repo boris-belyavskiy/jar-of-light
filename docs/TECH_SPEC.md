@@ -1,7 +1,7 @@
 # Tech Spec — Jar of Light
 
 > **Status:** Draft v0.3 · **Updated:** 2026-10-27 · **Owner:** Boris Belyavskiy (PM) · **Tech lead / reviewer:** Claude
-> **Related:** [PRD](PRD.md) · [Roadmap](ROADMAP.md) · [ADR log](adr/README.md)
+> **Related:** [PRD](PRD.md) · [Roadmap](ROADMAP.md) · [Decisions](DECISIONS.md)
 > Requirement IDs (ENT-01, PUB-03, …) refer to the [PRD](PRD.md#7-requirements). Phases P0–P5 refer to the [Roadmap](ROADMAP.md).
 
 ---
@@ -25,12 +25,12 @@
 
 ## 1. Scope and principles
 
-1. **No self-hosted servers** ([ADR-0001](adr/0001-no-self-hosted-servers.md)). Managed hosting, managed Postgres, LLM via API.
+1. **No self-hosted servers** ([ADR-0001](DECISIONS.md#adr-0001)). Managed hosting, managed Postgres, LLM via API.
 2. **Privacy by design.** Entries are private by default; Row Level Security on every user table; entry text never reaches logs, analytics or error tracking.
 3. **AI behind an abstraction.** Product code calls tasks (`parseEntry`, `draftAction`, …), never a vendor SDK directly. The model can be swapped per task.
 4. **Works without AI.** Every core flow has a manual path (PRD principle 7). AI features ship behind flags.
 5. **Boring, portable tech.** Standard Postgres, TypeScript, open formats for export. Lock-in only where it buys a lot of speed.
-6. **Start free.** P0–P1 cost $0 and need no payment card anywhere (PRD Q4, [ADR-0002](adr/0002-free-stack-supabase-keepalive-backups.md)); paid plans only when real users or limits require them (§3).
+6. **Start free.** P0–P1 cost $0 and need no payment card anywhere (PRD Q4, [ADR-0002](DECISIONS.md#adr-0002)); paid plans only when real users or limits require them (§3).
 
 ---
 
@@ -42,7 +42,7 @@
 |---|---|---|---|
 | Client | Mobile-first web app on **Next.js** (App Router), TypeScript, Tailwind CSS, shadcn/ui; **PWA** features (install, offline draft, push) in P1b | One codebase, a link to share, no app stores, web push works | Telegram Mini App, Expo / React Native |
 | Server | Next.js Server Actions + Route Handlers on **Vercel** (Hobby); functions in **Cleveland (`cle1`)**, next to the database | Zero DevOps, free start, a preview deployment for every PR | Render, Fly.io, Netlify |
-| Database, auth, storage | **Supabase Free**: Postgres, Row Level Security, Auth, `pg_cron`, `pg_trgm`; region **US East (Ohio)**, close to the PM and the first users (decided 2026-10-27); daily keep-alive and own nightly backups (§3.1, [ADR-0002](adr/0002-free-stack-supabase-keepalive-backups.md)) | Relational data and aggregates, RLS built in, portable Postgres | Neon + Better Auth, Cloudflare D1, Firebase (all compared in ADR-0002) |
+| Database, auth, storage | **Supabase Free**: Postgres, Row Level Security, Auth, `pg_cron`, `pg_trgm`; region **US East (Ohio)**, close to the PM and the first users (decided 2026-10-27); daily keep-alive and own nightly backups (§3.1, [ADR-0002](DECISIONS.md#adr-0002)) | Relational data and aggregates, RLS built in, portable Postgres | Neon + Better Auth, Cloudflare D1, Firebase (all compared in ADR-0002) |
 | Sign-in | **Google only** (P1a): Google Identity Services button → ID token → Supabase `signInWithIdToken` | Google's dialog names our site instead of `*.supabase.co`; no passwords to store | Supabase OAuth redirect flow; email one-time codes in P1b (need a domain) |
 | LLM | **Anthropic API** (`@anthropic-ai/sdk`) behind `lib/ai/provider.ts` | Quality on RU and EN, structured outputs, prompt caching, Batch API | Open-weight models via hosted inference (ADR-0001) |
 | Background jobs | `after()` in Next.js for entry parsing; **Supabase `pg_cron`** for frequent schedules (reminders, retries); Vercel Cron for daily jobs; **GitHub Actions** for keep-alive and backups (§3.1) | Vercel Hobby cron runs at most once a day, so frequent jobs live in Postgres | Inngest, Trigger.dev |
@@ -378,7 +378,7 @@ Process: datasets in `evals/datasets`, a runner in CI on changes to `prompts/` o
 | Scenario B | ~$60 | ~$600 | ~$6,000 |
 | Own GPU server 24/7 (rough, to verify) | $500–1,500 + DevOps | $500–1,500 + DevOps | from $1,500, needs scaling |
 
-Conclusion and revisit triggers: [ADR-0001](adr/0001-no-self-hosted-servers.md).
+Conclusion and revisit triggers: [ADR-0001](DECISIONS.md#adr-0001).
 
 ---
 

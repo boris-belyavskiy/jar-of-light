@@ -1,7 +1,7 @@
 # Roadmap — Jar of Light
 
 > **Status:** Draft v0.3 · **Updated:** 2026-10-27 · **Owner:** Boris Belyavskiy (PM)
-> **Related:** [PRD](PRD.md) · [Tech Spec](TECH_SPEC.md) · [ADR log](adr/README.md)
+> **Related:** [PRD](PRD.md) · [Tech Spec](TECH_SPEC.md) · [Decisions](DECISIONS.md)
 
 **Logic of the sequence.** From simple to complex. First a minimal private journal (P1a: sign in, write, categorize), then the rest of the journal **without AI**, built while doing **customer research**. Then the **AI layer**, then **gratitude → action**, then the **public page**, then **profile search**. Each phase climbs one step of the JTBD ladder (Notice → Own → Connect → Give back) and ends with a decision gate.
 
@@ -44,7 +44,7 @@ gantt
 ## P0 — Foundation
 
 - [x] PRD, Tech Spec, Roadmap, ADR-0001 *(2026-10-19)*
-- [x] First-step decisions: Q1, Q2, Q4, Q17–Q20, [ADR-0002](adr/0002-free-stack-supabase-keepalive-backups.md) *(2026-10-27)*
+- [x] First-step decisions: Q1, Q2, Q4, Q17–Q20, [ADR-0002](DECISIONS.md#adr-0002) *(2026-10-27)*
 - [x] Three palette options on real screens; option A chosen ([PDFs](design/palettes/)) *(2026-10-27)*
 - [ ] Public GitHub repository on the personal account `boris-belyavskiy`
 - [x] Accounts, all free and without a payment card: Vercel (Hobby), Supabase **dev** + **prod** (US East, Ohio), Google Cloud project with an OAuth client. PostHog and Sentry move to P1b *(2026-10-27)*
@@ -216,4 +216,4 @@ Requirements: ID-01…04.
 
 ## Later
 
-Reflection coach (with a psychologist, [PRD §7.13](PRD.md#713-reflection-coach-later)) · full jar visualization · organization pages (B2B) · Telegram bot for reminders · Book of the year · photos and own voice transcription · revisit self-hosting ([ADR-0001](adr/0001-no-self-hosted-servers.md) triggers).
+Reflection coach (with a psychologist, [PRD §7.13](PRD.md#713-reflection-coach-later)) · full jar visualization · organization pages (B2B) · Telegram bot for reminders · Book of the year · photos and own voice transcription · revisit self-hosting ([ADR-0001](DECISIONS.md#adr-0001) triggers).
