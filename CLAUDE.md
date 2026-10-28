@@ -11,6 +11,11 @@ Guidance for Claude Code working in this repository.
 
 These documents are the source of truth. If a decision changes, update the document (or add an ADR) in the same pull request.
 
+## Current state (2026-10-27)
+
+- The repository exists **only locally**: its commits (docs, decisions, this file) have never been pushed. First task: check `gh auth status` shows `boris-belyavskiy` active, create the **public** repo `boris-belyavskiy/jar-of-light`, push `main`, and set its description and homepage `https://jaroflight.vercel.app`.
+- Accounts are ready: Vercel, Supabase dev + prod, Google Cloud OAuth client. Not done yet: Vercel project import, `jar-of-light-backups` repo, Session pooler string for backups.
+
 ## People and language
 
 - **Boris Belyavskiy** — product manager and owner. Chat with him in **Russian**; everything in the repository (code, comments, docs, commits, PRs) is in **English**.
@@ -31,7 +36,7 @@ Google sign-in open to any Google account · profile (name, time zone, language 
 | Supabase prod | ref `ntnbpcmgyddklrbwfgqq` → `https://ntnbpcmgyddklrbwfgqq.supabase.co` |
 | Google sign-in | Google Identity Services button → `supabase.auth.signInWithIdToken`; OAuth web client ID `30285081957-pejubc544ttl7h1jbj9007de2omp8vdu.apps.googleusercontent.com` (public); Google provider enabled in both Supabase projects; app is in "Testing" mode until `/privacy` exists |
 | Supabase project security | Data API on · automatically expose new tables **off** · automatic RLS **on** → every migration grants table privileges to `authenticated` explicitly and adds RLS policies |
-| Backups | Private repo `boris-belyavskiy/jar-of-light-backups` — keep-alive and nightly backup workflows go there (Tech Spec §3.1) |
+| Backups | Private repo `boris-belyavskiy/jar-of-light-backups` (not created yet) — keep-alive and nightly backup workflows go there (Tech Spec §3.1) |
 | Node.js | v24 LTS |
 
 ## Rules
