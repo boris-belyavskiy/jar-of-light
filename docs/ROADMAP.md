@@ -46,7 +46,7 @@ gantt
 - [x] PRD, Tech Spec, Roadmap, ADR-0001 *(2026-10-19)*
 - [x] First-step decisions: Q1, Q2, Q4, Q17–Q20, [ADR-0002](DECISIONS.md#adr-0002) *(2026-10-27)*
 - [x] Three palette options on real screens; option A chosen ([PDFs](design/palettes/)) *(2026-10-27)*
-- [ ] Public GitHub repository on the personal account `boris-belyavskiy`
+- [x] Public GitHub repository on the personal account `boris-belyavskiy` *(2026-10-27)*
 - [x] Accounts, all free and without a payment card: Vercel (Hobby), Supabase **dev** + **prod** (US East, Ohio), Google Cloud project with an OAuth client. PostHog and Sentry move to P1b *(2026-10-27)*
 - [x] Node.js LTS (v24) installed locally *(2026-10-27)*
 - [x] Next.js skeleton: TypeScript, Tailwind, shadcn/ui, `next-intl` (RU/EN), deployed to `jaroflight.vercel.app` *(code 2026-10-27; deploy pending)*
