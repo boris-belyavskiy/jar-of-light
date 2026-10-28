@@ -49,7 +49,7 @@ gantt
 - [x] Public GitHub repository on the personal account `boris-belyavskiy` *(2026-10-27)*
 - [x] Accounts, all free and without a payment card: Vercel (Hobby), Supabase **dev** + **prod** (US East, Ohio), Google Cloud project with an OAuth client. PostHog and Sentry move to P1b *(2026-10-27)*
 - [x] Node.js LTS (v24) installed locally *(2026-10-27)*
-- [x] Next.js skeleton: TypeScript, Tailwind, shadcn/ui, `next-intl` (RU/EN), deployed to `jaroflight.vercel.app` *(code 2026-10-27; deploy pending)*
+- [x] Next.js skeleton: TypeScript, Tailwind, shadcn/ui, `next-intl` (RU/EN), deployed to `jaroflight.vercel.app` *(2026-10-28)*
 - [x] Design tokens (option A) and base layout in light and dark themes ([Tech Spec §9](TECH_SPEC.md#9-visual-design)) *(2026-10-27)*
 - [x] `CLAUDE.md` *(2026-10-27)*
 - [x] CI (lint, type check, tests), PR template *(2026-10-27)*
@@ -64,13 +64,13 @@ gantt
 
 Requirements: ACC-01, ACC-04, ENT-01, ENT-04 (category filter), ENT-05, CAT-01, CAT-02, DATA-02, DATA-04.
 
-- [ ] Google sign-in (anyone with a Google account), sign out
-- [ ] Profile: name, time zone, language RU / EN
-- [ ] Entries: text up to 4,000 characters, date and time, several categories; create, edit, delete
-- [ ] Feed, newest first, with a category filter
-- [ ] Categories: six system ones (hide only) + own (create, rename, delete)
-- [ ] Account deletion
-- [ ] Privacy note `/privacy`; Google app published to "In production"
+- [x] Google sign-in (anyone with a Google account), sign out *(2026-10-28)*
+- [x] Profile: name, time zone, language RU / EN *(2026-10-28)*
+- [x] Entries: text up to 4,000 characters, date and time (future allowed), several categories; create, edit, delete *(2026-10-28)*
+- [x] Feed, newest first, with a filter by several categories and a date range *(2026-10-28)*
+- [x] Categories: six system ones (hide only) + own (create, rename, delete) *(2026-10-28)*
+- [x] Account deletion *(2026-10-28)*
+- [ ] Privacy note `/privacy` *(done 2026-10-28)*; Google app published to "In production"
 - [ ] Nightly encrypted backups of **prod** + one restore test, before the first real users
 
 **Definition of Done:** RLS tests prove that user A cannot read or change user B's entries or categories; unit tests for validation (length, date and time format, time zones); sign-in checked on production; backups run and a restore has been tested; RU and EN strings complete.

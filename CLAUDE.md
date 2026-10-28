@@ -11,10 +11,10 @@ Guidance for Claude Code working in this repository.
 
 These documents are the source of truth. If a decision changes, update the document (or add a record to `docs/DECISIONS.md`) in the same pull request.
 
-## Current state (2026-10-27)
+## Current state (2026-10-28)
 
-- Code is in progress for **P1a** (Next.js 16 app, migration in `supabase/migrations/`, RLS tests in `tests/db/`). Migrations are applied by hand in the Supabase SQL editor (see `supabase/README.md`).
-- Accounts are ready: Vercel, Supabase dev + prod, Google Cloud OAuth client. Not done yet: Vercel project import, `jar-of-light-backups` repo, Session pooler string for backups.
+- **P1a is live** at `https://jaroflight.vercel.app` (Vercel project `jaroflight`, deploys from `main`; previews use the dev database). Both migrations in `supabase/migrations/` are applied to dev and prod by hand in the Supabase SQL editor (see `supabase/README.md`); a new migration must be applied to both.
+- Not done yet: `jar-of-light-backups` repo with keep-alive and nightly backups, Session pooler string, restore test, Google app published to "In production" (until then only test users can sign in).
 - Commands: `npm run dev`, `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`. Environment variables: copy `.env.example` to `.env.local`.
 - Next.js 16 has breaking changes against older docs (`proxy.ts` instead of `middleware.ts`, typed `PageProps`/`LayoutProps`): read `node_modules/next/dist/docs/` before using an unfamiliar API.
 
