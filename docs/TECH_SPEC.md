@@ -1,6 +1,6 @@
 # Tech Spec — Jar of Light
 
-> **Status:** Draft v0.3 · **Updated:** 2026-10-27 · **Owner:** Boris Belyavskiy (PM) · **Tech lead / reviewer:** Claude
+> **Status:** Draft v0.3 · **Updated:** 2026-10-28 · **Owner:** Boris Belyavskiy (PM) · **Tech lead / reviewer:** Claude
 > **Related:** [PRD](PRD.md) · [Roadmap](ROADMAP.md) · [Decisions](DECISIONS.md)
 > Requirement IDs (ENT-01, PUB-03, …) refer to the [PRD](PRD.md#7-requirements). Phases P0–P5 refer to the [Roadmap](ROADMAP.md).
 

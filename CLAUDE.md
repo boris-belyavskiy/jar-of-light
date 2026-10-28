@@ -6,7 +6,7 @@ Guidance for Claude Code working in this repository.
 
 - [docs/PRD.md](docs/PRD.md) — what we build and why; requirement IDs (ACC-01, ENT-01, …); open questions in §11.
 - [docs/TECH_SPEC.md](docs/TECH_SPEC.md) — stack, data model, privacy, routes, visual design.
-- [docs/ROADMAP.md](docs/ROADMAP.md) — phases; **current work is P0 → P1a** (first build step).
+- [docs/ROADMAP.md](docs/ROADMAP.md) — phases; **P0 and P1a are done (2026-10-28); next is P1b** (rest of the journal without AI + customer research).
 - [docs/DECISIONS.md](docs/DECISIONS.md) — all architecture decisions (ADRs) in one append-only file: ADR-0001 (no own servers), ADR-0002 (free stack, keep-alive, backups), ADR-0003 (app foundations: no Cache Components, language without URL prefix, RLS tests on PGlite). A new decision is a new record at the end; never rewrite an accepted one.
 
 These documents are the source of truth. If a decision changes, update the document (or add a record to `docs/DECISIONS.md`) in the same pull request.
@@ -14,7 +14,8 @@ These documents are the source of truth. If a decision changes, update the docum
 ## Current state (2026-10-28)
 
 - **P1a is live** at `https://jaroflight.vercel.app` (Vercel project `jaroflight`, deploys from `main`; previews use the dev database). Both migrations in `supabase/migrations/` are applied to dev and prod by hand in the Supabase SQL editor (see `supabase/README.md`); a new migration must be applied to both.
-- Backups run: private repo `boris-belyavskiy/jar-of-light-backups` has the daily keep-alive and the nightly encrypted prod backup with an automatic restore check; the decryption key is kept offline by Boris. Not done yet: Google app published to "In production" (until then only test users can sign in).
+- Backups run: private repo `boris-belyavskiy/jar-of-light-backups` has the daily keep-alive and the nightly encrypted prod backup with an automatic restore check; the decryption key is kept offline by Boris.
+- The Google app is published "In production": any Google account can sign in. It requests only non-sensitive scopes (`openid`, `email`, `profile`) and has no logo, so no Google verification is needed; adding a logo or a sensitive scope would trigger verification.
 - Commands: `npm run dev`, `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`. Environment variables: copy `.env.example` to `.env.local`.
 - Next.js 16 has breaking changes against older docs (`proxy.ts` instead of `middleware.ts`, typed `PageProps`/`LayoutProps`): read `node_modules/next/dist/docs/` before using an unfamiliar API.
 
@@ -23,7 +24,7 @@ These documents are the source of truth. If a decision changes, update the docum
 - **Boris Belyavskiy** — product manager and owner. Chat with him in **Russian**; everything in the repository (code, comments, docs, commits, PRs) is in **English**.
 - Setup and build steps are also **learning** for Boris: explain in plain words what each concept is, why we need it and where each value comes from — not only which button to press.
 
-## First build step (P1a) in one paragraph
+## First build step (P1a) in one paragraph — done 2026-10-28
 
 Google sign-in open to any Google account · profile (name, time zone, language RU/EN) · entries: text 1–4,000 chars, local date **and** time (now by default; past and future allowed), one or more categories · create, edit, delete · feed newest first with a category filter · six system categories (family, friends, work, study, health, chance encounter; hide-only) + own categories (create, rename, delete) · account deletion · `/privacy` note. Every entry is visible only to its author (RLS). Details: PRD §7, Tech Spec §4, §7.1a, §8; Definition of Done: Roadmap P1a.
 
@@ -36,7 +37,7 @@ Google sign-in open to any Google account · profile (name, time zone, language 
 | Database + auth | Supabase Free, region US East (Ohio) |
 | Supabase dev | ref `tudnruekssfzxhqkwgyd` → `https://tudnruekssfzxhqkwgyd.supabase.co` |
 | Supabase prod | ref `ntnbpcmgyddklrbwfgqq` → `https://ntnbpcmgyddklrbwfgqq.supabase.co` |
-| Google sign-in | Google Identity Services button → `supabase.auth.signInWithIdToken`; OAuth web client ID `30285081957-pejubc544ttl7h1jbj9007de2omp8vdu.apps.googleusercontent.com` (public); Google provider enabled in both Supabase projects; app is in "Testing" mode until `/privacy` exists |
+| Google sign-in | Google Identity Services button → `supabase.auth.signInWithIdToken`; OAuth web client ID `30285081957-pejubc544ttl7h1jbj9007de2omp8vdu.apps.googleusercontent.com` (public); Google provider enabled in both Supabase projects; app published "In production" on 2026-10-28 (privacy policy link: `/privacy`) |
 | Supabase project security | Data API on · automatically expose new tables **off** · automatic RLS **on** → every migration grants table privileges to `authenticated` explicitly and adds RLS policies |
 | Backups | Private repo `boris-belyavskiy/jar-of-light-backups`: daily keep-alive, nightly encrypted prod backup with a restore check, 30-day retention (Tech Spec §3.1). A new table must be added to `COUNTS_SQL` in its `backup.yml` |
 | Node.js | v24 LTS |

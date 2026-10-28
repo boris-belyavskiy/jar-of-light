@@ -1,6 +1,6 @@
 # Roadmap — Jar of Light
 
-> **Status:** Draft v0.3 · **Updated:** 2026-10-27 · **Owner:** Boris Belyavskiy (PM)
+> **Status:** Draft v0.3 · **Updated:** 2026-10-28 · **Owner:** Boris Belyavskiy (PM)
 > **Related:** [PRD](PRD.md) · [Tech Spec](TECH_SPEC.md) · [Decisions](DECISIONS.md)
 
 **Logic of the sequence.** From simple to complex. First a minimal private journal (P1a: sign in, write, categorize), then the rest of the journal **without AI**, built while doing **customer research**. Then the **AI layer**, then **gratitude → action**, then the **public page**, then **profile search**. Each phase climbs one step of the JTBD ladder (Notice → Own → Connect → Give back) and ends with a decision gate.
@@ -13,8 +13,8 @@
 
 | Phase | What | Target window | Release |
 |---|---|---|---|
-| **P0** | Foundation: repo, docs, accounts, skeleton, design tokens | Late Oct – early Nov 2026 (1–2 wks) | Skeleton live on `jaroflight.vercel.app` |
-| **P1a** | **First build step:** Google sign-in, entries with date, time and categories, feed with filter | Nov 2026 (2–3 wks) | **R0:** the author and first friends use it |
+| **P0** | Foundation: repo, docs, accounts, skeleton, design tokens | Late Oct – early Nov 2026 (1–2 wks) | Skeleton live on `jaroflight.vercel.app` · ✅ done 2026-10-28 (Q3 still open) |
+| **P1a** | **First build step:** Google sign-in, entries with date, time and categories, feed with filter | Nov 2026 (2–3 wks) | **R0:** the author and first friends use it · ✅ done 2026-10-28 |
 | **P1b** | Rest of the private journal **without AI** + **customer research** (two parallel tracks) | Late Nov – mid Dec 2026 (3–4 wks) | **R1: closed beta** (10–20 people) |
 | **P2** | AI layer: entry parsing, suggestions, summaries, digest | Mid Dec 2026 – mid Jan 2027 (3 wks + holiday buffer) | Beta update |
 | **P3** | Gratitude → action + thank-you cards | Late Jan – early Feb 2027 (2–3 wks) | Beta update |
@@ -70,7 +70,7 @@ Requirements: ACC-01, ACC-04, ENT-01, ENT-04 (category filter), ENT-05, CAT-01, 
 - [x] Feed, newest first, with a filter by several categories and a date range *(2026-10-28)*
 - [x] Categories: six system ones (hide only) + own (create, rename, delete) *(2026-10-28)*
 - [x] Account deletion *(2026-10-28)*
-- [ ] Privacy note `/privacy` *(done 2026-10-28)*; Google app published to "In production"
+- [x] Privacy note `/privacy`; Google app published to "In production" (any Google account can sign in) *(2026-10-28)*
 - [x] Nightly encrypted backups of **prod** + one restore test, before the first real users *(2026-10-28)*
 
 **Definition of Done:** RLS tests prove that user A cannot read or change user B's entries or categories; unit tests for validation (length, date and time format, time zones); sign-in checked on production; backups run and a restore has been tested; RU and EN strings complete.

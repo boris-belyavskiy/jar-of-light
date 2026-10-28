@@ -21,7 +21,7 @@ AI helps along the way, but it only suggests: nothing is published or sent witho
 
 ## Status
 
-**First build step (P1a) is live** at [jaroflight.vercel.app](https://jaroflight.vercel.app): Google sign-in, entries with date, time and categories (visible only to their author, enforced by the database and covered by tests), filters by categories and dates, own categories, profile settings in RU and EN, account deletion and a privacy note. Next: nightly backups and a restore test, then opening sign-in to everyone and the rest of the journal in parallel with customer research.
+**First build step (P1a) is done and open to everyone** at [jaroflight.vercel.app](https://jaroflight.vercel.app): sign in with any Google account; entries with date, time and categories, visible only to their author (enforced by the database and covered by tests); filters by categories and dates; own categories; profile settings in RU and EN; account deletion; a privacy note. The database is backed up nightly, encrypted, with an automatic restore check. Next: the rest of the private journal (P1b) in parallel with customer research.
 
 ## Documents
 
