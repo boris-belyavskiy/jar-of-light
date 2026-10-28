@@ -141,7 +141,7 @@ PM's feature list (2026-10-19) maps as: F1 → ENT-01 · F2 → ENT-02 · F3 →
 
 ### 7.2 Entries
 
-- **ENT-01 Free-form entry (F1)** — One text field (**1–4,000 characters**), **date and time** (now by default, in the user's time zone; past allowed, future not), one or more categories. *(Must, P1a)*
+- **ENT-01 Free-form entry (F1)** — One text field (**1–4,000 characters**), **date and time** (now by default, in the user's time zone; past and future dates allowed — decided by the PM on 2026-10-28), one or more categories. *(Must, P1a)*
   - **AC:** from an open app an entry takes ≤ 3 actions; a character counter shows the limit; an entry is visible only to its author.
   - Later, in P1b: optional "to whom / to what" and brightness 1–5; if "to whom" is filled the entry is a **gratitude**, otherwise a **bright moment** (user can override); optimistic saving and a local draft that survives a lost connection.
 - **ENT-02 Guided entry (F2)** — A template with optional fields: **What happened** · **Who was there** · **When** · **Where** · **Who made it possible / whom I thank** · *Why it matters* (optional). Only "What happened" is required. The user can switch between free-form and guided without losing text. *(Must, P1b)*

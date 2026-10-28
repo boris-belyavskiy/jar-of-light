@@ -131,10 +131,11 @@ describe("validation in the database", () => {
     ).rejects.toThrow(/check constraint/);
   });
 
-  it("rejects entries in the future", async () => {
-    await expect(
-      asUser(db, A, () => db.query("insert into public.entries (body, occurred_on, occurred_time) values ('later', '2999-01-01', '10:00')")),
-    ).rejects.toThrow(/future/);
+  it("accepts entries in the future (ENT-01, changed 2026-10-28)", async () => {
+    const res = await asUser(db, A, () =>
+      db.query("insert into public.entries (body, occurred_on, occurred_time) values ('later', '2999-01-01', '10:00')"),
+    );
+    expect(res.affectedRows).toBe(1);
   });
 
   it("anon has no access at all", async () => {

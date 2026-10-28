@@ -29,9 +29,14 @@
     "all": "All",
     "filterLabel": "Filter by category",
     "empty": "The jar is empty for now. What good thing happened today?",
-    "emptyFiltered": "No entries in this category yet.",
+    "emptyFiltered": "No entries match this filter.",
     "writeFirst": "Write the first entry",
-    "edit": "Edit"
+    "edit": "Edit",
+    "anyOf": "Showing entries with any of the selected categories.",
+    "from": "From",
+    "to": "To",
+    "applyDates": "Show",
+    "resetDates": "Reset dates"
   },
   "entry": {
     "newTitle": "A new light",
@@ -55,10 +60,10 @@
       "tooLong": "The text is too long: up to 4,000 characters.",
       "date": "Pick a date.",
       "time": "Pick a time.",
-      "future": "The date and time can't be in the future.",
       "save": "Couldn't save the entry. Please try again.",
       "categories": "The entry is saved, but its categories weren't. Please try again."
-    }
+    },
+    "editCategories": "Edit categories"
   },
   "categories": {
     "title": "Categories",
@@ -91,7 +96,8 @@
       "tooLong": "Up to 40 characters.",
       "duplicate": "You already have a category with this name.",
       "save": "Couldn't save. Please try again."
-    }
+    },
+    "backToEntry": "Back to the entry"
   },
   "settings": {
     "title": "Settings",

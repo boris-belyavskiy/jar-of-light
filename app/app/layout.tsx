@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { signOut } from "@/app/actions/account";
 import { JarMark } from "@/components/jar-mark";
+import { LanguageSwitch } from "@/components/language-switch";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { requireUserId } from "@/lib/db/queries";
 
@@ -16,9 +17,10 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
         <div className="mx-auto flex h-14 w-full max-w-2xl items-center gap-2 px-4">
           <Link href="/app" className="mr-auto flex items-center gap-2 text-primary">
             <JarMark className="size-7" />
-            <span className="font-heading text-lg font-semibold text-foreground">{tm("title")}</span>
+            <span className="hidden font-heading text-lg font-semibold text-foreground sm:inline">{tm("title")}</span>
           </Link>
-          <nav className="flex items-center gap-1 text-sm">
+          <LanguageSwitch />
+          <nav className="flex items-center text-sm sm:gap-1">
             <Link href="/app/categories" className={buttonVariants({ variant: "ghost", size: "sm" })}>
               {t("categories")}
             </Link>

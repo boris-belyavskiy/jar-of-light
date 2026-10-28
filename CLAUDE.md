@@ -25,7 +25,7 @@ These documents are the source of truth. If a decision changes, update the docum
 
 ## First build step (P1a) in one paragraph
 
-Google sign-in open to any Google account · profile (name, time zone, language RU/EN) · entries: text 1–4,000 chars, local date **and** time (now by default, no future), one or more categories · create, edit, delete · feed newest first with a category filter · six system categories (family, friends, work, study, health, chance encounter; hide-only) + own categories (create, rename, delete) · account deletion · `/privacy` note. Every entry is visible only to its author (RLS). Details: PRD §7, Tech Spec §4, §7.1a, §8; Definition of Done: Roadmap P1a.
+Google sign-in open to any Google account · profile (name, time zone, language RU/EN) · entries: text 1–4,000 chars, local date **and** time (now by default; past and future allowed), one or more categories · create, edit, delete · feed newest first with a category filter · six system categories (family, friends, work, study, health, chance encounter; hide-only) + own categories (create, rename, delete) · account deletion · `/privacy` note. Every entry is visible only to its author (RLS). Details: PRD §7, Tech Spec §4, §7.1a, §8; Definition of Done: Roadmap P1a.
 
 ## Stack and environments
 

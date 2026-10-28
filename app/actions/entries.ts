@@ -2,9 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getProfile, requireUserId } from "@/lib/db/queries";
+import { requireUserId } from "@/lib/db/queries";
 import { createClient } from "@/lib/supabase/server";
-import { isInFuture } from "@/lib/time";
 import { entrySchema } from "@/lib/validation";
 import type { FormState } from "./state";
 
@@ -18,15 +17,7 @@ async function validate(formData: FormData) {
     categoryIds: formData.getAll("categoryIds"),
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "entry.errors.save" } as const;
-  const { timezone } = await getProfile();
-  if (isInFuture(parsed.data.occurredOn, parsed.data.occurredTime, timezone)) {
-    return { error: "entry.errors.future" } as const;
-  }
   return { data: parsed.data } as const;
-}
-
-function saveError(code: string) {
-  return { error: code === "23514" ? "entry.errors.future" : "entry.errors.save" };
 }
 
 export async function createEntry(_prev: FormState, formData: FormData): Promise<FormState> {
@@ -41,7 +32,7 @@ export async function createEntry(_prev: FormState, formData: FormData): Promise
     .insert({ user_id: userId, body, occurred_on: occurredOn, occurred_time: occurredTime })
     .select("id")
     .single();
-  if (error) return saveError(error.code);
+  if (error) return { error: "entry.errors.save" };
 
   if (categoryIds.length > 0) {
     const links = categoryIds.map((category_id) => ({ entry_id: data.id, category_id }));
@@ -65,7 +56,7 @@ export async function updateEntry(id: string, _prev: FormState, formData: FormDa
     .eq("id", id)
     .select("id, cats:entry_categories(category_id)")
     .maybeSingle();
-  if (error) return saveError(error.code);
+  if (error) return { error: "entry.errors.save" };
   if (!updated) return { error: "entry.notFound" };
 
   const current = new Set(updated.cats.map((c) => c.category_id));

@@ -73,7 +73,7 @@ Requirements: ACC-01, ACC-04, ENT-01, ENT-04 (category filter), ENT-05, CAT-01, 
 - [ ] Privacy note `/privacy`; Google app published to "In production"
 - [ ] Nightly encrypted backups of **prod** + one restore test, before the first real users
 
-**Definition of Done:** RLS tests prove that user A cannot read or change user B's entries or categories; unit tests for validation (length, no future dates); sign-in checked on production; backups run and a restore has been tested; RU and EN strings complete.
+**Definition of Done:** RLS tests prove that user A cannot read or change user B's entries or categories; unit tests for validation (length, date and time format, time zones); sign-in checked on production; backups run and a restore has been tested; RU and EN strings complete.
 
 ---
 

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { GoogleSignIn } from "@/components/google-sign-in";
 import { JarMark } from "@/components/jar-mark";
+import { LanguageSwitch } from "@/components/language-switch";
 
 export default async function LandingPage({ searchParams }: PageProps<"/">) {
   const t = await getTranslations("landing");
@@ -9,7 +10,8 @@ export default async function LandingPage({ searchParams }: PageProps<"/">) {
   const { deleted } = await searchParams;
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-8 px-6 py-12 text-center">
+    <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-8 px-6 py-12 text-center">
+      <LanguageSwitch className="absolute top-4 right-4" />
       <div className="flex flex-col items-center gap-4">
         <div className="rounded-full bg-sky p-5 text-primary shadow-sm">
           <JarMark className="size-16" />

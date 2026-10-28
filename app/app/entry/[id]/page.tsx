@@ -4,8 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { deleteEntry, updateEntry } from "@/app/actions/entries";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { EntryForm } from "@/components/journal/entry-form";
-import { getEntry, getProfile, listCategories } from "@/lib/db/queries";
-import { nowInTimeZone } from "@/lib/time";
+import { getEntry, listCategories } from "@/lib/db/queries";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -29,7 +28,7 @@ export default async function EditEntryPage({ params }: PageProps<"/app/entry/[i
     );
   }
 
-  const [profile, categories] = await Promise.all([getProfile(), listCategories()]);
+  const categories = await listCategories();
   // Hidden categories stay selectable on entries that already use them.
   const options = categories.filter((c) => !c.hidden || entry.categoryIds.includes(c.id));
 
@@ -40,7 +39,6 @@ export default async function EditEntryPage({ params }: PageProps<"/app/entry/[i
         action={updateEntry.bind(null, entry.id)}
         categories={options}
         initial={entry}
-        today={nowInTimeZone(profile.timezone).date}
       />
       <div className="mt-10 border-t pt-6">
         <ConfirmDialog

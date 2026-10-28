@@ -57,6 +57,18 @@ export async function updateProfile(_prev: FormState, formData: FormData): Promi
   return { ok: true };
 }
 
+/** The RU / EN switch in the header: saves to the profile when signed in. */
+export async function setLocale(formData: FormData) {
+  const locale = formData.get("locale");
+  if (!isLocale(locale)) return;
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+  const userId = data?.claims?.sub;
+  if (userId) await supabase.from("profiles").update({ locale }).eq("id", userId);
+  await rememberLocale(locale);
+  revalidatePath("/", "layout");
+}
+
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();

@@ -1,6 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { redirect } from "next/navigation";
+import type { FeedFilter } from "@/lib/feed-filter";
 import { createClient } from "@/lib/supabase/server";
 import { FALLBACK_TIME_ZONE } from "@/lib/time";
 import { isLocale, type Locale } from "@/i18n/config";
@@ -94,12 +95,13 @@ function toEntry(row: EntryRow): Entry {
   };
 }
 
-/** Feed: newest first by the entry's own date and time (ENT-04). */
-export async function listEntries(categoryId?: string): Promise<Entry[]> {
+/** Feed: newest first by the entry's own date and time (ENT-04), filtered as in lib/feed-filter. */
+export async function listEntries(filter: FeedFilter): Promise<Entry[]> {
   await requireUserId();
   const supabase = await createClient();
+  const byCategory = filter.categoryIds.length > 0;
   // The second, inner-joined embed only filters; `cats` still lists every category of the entry.
-  const columns = categoryId ? `${ENTRY_COLUMNS}, f:entry_categories!inner(category_id)` : ENTRY_COLUMNS;
+  const columns = byCategory ? `${ENTRY_COLUMNS}, f:entry_categories!inner(category_id)` : ENTRY_COLUMNS;
   let query = supabase
     .from("entries")
     .select(columns)
@@ -107,7 +109,9 @@ export async function listEntries(categoryId?: string): Promise<Entry[]> {
     .order("occurred_time", { ascending: false })
     .order("created_at", { ascending: false })
     .limit(200);
-  if (categoryId) query = query.eq("f.category_id", categoryId);
+  if (byCategory) query = query.in("f.category_id", filter.categoryIds);
+  if (filter.from) query = query.gte("occurred_on", filter.from);
+  if (filter.to) query = query.lte("occurred_on", filter.to);
   const { data, error } = await query;
   if (error) throw new Error(`entries: ${error.code}`);
   return (data as unknown as EntryRow[]).map(toEntry);

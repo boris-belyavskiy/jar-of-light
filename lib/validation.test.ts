@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { localeFromAcceptLanguage } from "@/i18n/config";
-import { isInFuture, nowInTimeZone } from "@/lib/time";
+import { nowInTimeZone } from "@/lib/time";
 import { categoryNameSchema, charCount, entrySchema } from "@/lib/validation";
 
 const valid = { body: "Coffee with Mom", occurredOn: "2026-10-27", occurredTime: "09:30", categoryIds: [] };
@@ -44,16 +44,6 @@ describe("time zones", () => {
     expect(nowInTimeZone("America/Los_Angeles", now)).toEqual({ date: "2026-10-27", time: "16:30" });
   });
 
-  it("checks 'not in the future' against the user's zone, not the server's", () => {
-    // 01:00 on the 28th is already past in Moscow but still the future in Los Angeles.
-    expect(isInFuture("2026-10-28", "01:00", "Europe/Moscow", now)).toBe(false);
-    expect(isInFuture("2026-10-28", "01:00", "America/Los_Angeles", now)).toBe(true);
-  });
-
-  it("allows one minute of slack", () => {
-    expect(isInFuture("2026-10-27", "23:31", "UTC", now)).toBe(false);
-    expect(isInFuture("2026-10-27", "23:32", "UTC", now)).toBe(true);
-  });
 });
 
 describe("categoryNameSchema", () => {

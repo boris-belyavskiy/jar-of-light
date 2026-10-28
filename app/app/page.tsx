@@ -2,15 +2,17 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { categoryLabel } from "@/components/journal/category-label";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { listCategories, listEntries } from "@/lib/db/queries";
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+import { feedHref, isFiltered, parseFeedFilter, toggleCategory } from "@/lib/feed-filter";
 
 export default async function FeedPage({ searchParams }: PageProps<"/app">) {
-  const { category } = await searchParams;
-  const filter = typeof category === "string" && UUID.test(category) ? category : undefined;
+  const filter = parseFeedFilter(await searchParams);
+  const filtered = isFiltered(filter);
+  const hasDates = Boolean(filter.from || filter.to);
 
   const [entries, categories, t, tc, tn, format] = await Promise.all([
     listEntries(filter),
@@ -21,23 +23,60 @@ export default async function FeedPage({ searchParams }: PageProps<"/app">) {
     getFormatter(),
   ]);
   const byId = new Map(categories.map((c) => [c.id, c]));
-  const chips = categories.filter((c) => !c.hidden || c.id === filter);
+  const chips = categories.filter((c) => !c.hidden || filter.categoryIds.includes(c.id));
 
   return (
     <>
       <h1 className="font-heading text-2xl font-semibold">{t("title")}</h1>
 
       <nav aria-label={t("filterLabel")} className="-mx-4 mt-4 flex gap-2 overflow-x-auto px-4 pb-1">
-        <FilterChip href="/app" active={!filter} label={t("all")} />
+        <FilterChip
+          href={feedHref({ ...filter, categoryIds: [] })}
+          active={filter.categoryIds.length === 0}
+          label={t("all")}
+        />
         {chips.map((c) => (
-          <FilterChip key={c.id} href={`/app?category=${c.id}`} active={c.id === filter} label={categoryLabel(c, tc)} />
+          <FilterChip
+            key={c.id}
+            href={feedHref(toggleCategory(filter, c.id))}
+            active={filter.categoryIds.includes(c.id)}
+            label={categoryLabel(c, tc)}
+          />
         ))}
       </nav>
+      {filter.categoryIds.length > 1 && <p className="mt-2 text-xs text-muted-foreground">{t("anyOf")}</p>}
+
+      {/* A plain GET form: the dates go into the URL next to the selected categories. */}
+      <form action="/app" className="mt-4 flex flex-wrap items-end gap-3">
+        {filter.categoryIds.map((id) => (
+          <input key={id} type="hidden" name="category" value={id} />
+        ))}
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="from" className="text-xs text-muted-foreground">
+            {t("from")}
+          </Label>
+          <Input id="from" name="from" type="date" defaultValue={filter.from} className="w-40 bg-card" />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="to" className="text-xs text-muted-foreground">
+            {t("to")}
+          </Label>
+          <Input id="to" name="to" type="date" defaultValue={filter.to} className="w-40 bg-card" />
+        </div>
+        <Button type="submit" variant="outline">
+          {t("applyDates")}
+        </Button>
+        {hasDates && (
+          <Link href={feedHref({ categoryIds: filter.categoryIds })} className={buttonVariants({ variant: "ghost" })}>
+            {t("resetDates")}
+          </Link>
+        )}
+      </form>
 
       {entries.length === 0 ? (
         <div className="mt-12 flex flex-col items-center gap-4 text-center">
-          <p className="text-muted-foreground">{filter ? t("emptyFiltered") : t("empty")}</p>
-          {!filter && (
+          <p className="text-muted-foreground">{filtered ? t("emptyFiltered") : t("empty")}</p>
+          {!filtered && (
             <Link href="/app/entry/new" className={buttonVariants()}>
               {t("writeFirst")}
             </Link>

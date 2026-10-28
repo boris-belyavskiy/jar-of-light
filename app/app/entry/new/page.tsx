@@ -21,7 +21,6 @@ export default async function NewEntryPage() {
         action={createEntry}
         categories={categories.filter((c) => !c.hidden)}
         initial={{ body: "", occurredOn: now.date, occurredTime: now.time, categoryIds: [] }}
-        today={now.date}
       />
     </>
   );
