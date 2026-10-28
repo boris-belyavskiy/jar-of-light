@@ -1,0 +1,124 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* Dark mode follows the system setting ("evening journaling"). */
+@custom-variant dark (@media (prefers-color-scheme: dark));
+
+/*
+ * Palette A "Morning sky" (Tech Spec §9.2). Our tokens come first; the
+ * shadcn/ui variable names below are mapped onto them so the components
+ * pick up the palette without edits.
+ */
+:root {
+  --bg: #f4efe6;
+  --surface: #fbf8f3;
+  --surface-sunken: #ece4d6;
+  --line: #e2d9cb;
+  --ink: #1e2a36;
+  --ink-muted: #5b6670;
+  --sky: #cfe3f3;
+  --primary-token: #2f6b9a;
+  --on-primary: #ffffff;
+  --light: #f2c14e;
+  --success: #2e6b4a;
+  --danger: #b3473a;
+
+  --radius: 0.75rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121a23;
+    --surface: #1a2531;
+    --surface-sunken: #0e141b;
+    --line: #2a3746;
+    --ink: #f1eadf;
+    --ink-muted: #a9b4bf;
+    --sky: #22374a;
+    --primary-token: #8ec3ea;
+    --on-primary: #121a23;
+    --light: #f5c96a;
+    --success: #8fd1a8;
+    --danger: #f2a397;
+  }
+}
+
+:root {
+  --background: var(--bg);
+  --foreground: var(--ink);
+  --card: var(--surface);
+  --card-foreground: var(--ink);
+  --popover: var(--surface);
+  --popover-foreground: var(--ink);
+  --primary: var(--primary-token);
+  --primary-foreground: var(--on-primary);
+  --secondary: var(--sky);
+  --secondary-foreground: var(--ink);
+  --muted: var(--surface-sunken);
+  --muted-foreground: var(--ink-muted);
+  --accent: var(--sky);
+  --accent-foreground: var(--ink);
+  --destructive: var(--danger);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--primary-token);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sky: var(--sky);
+  --color-light: var(--light);
+  --color-success: var(--success);
+  --color-surface: var(--surface);
+  --color-surface-sunken: var(--surface-sunken);
+
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-source-serif);
+  --font-heading: var(--font-source-serif);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.33);
+  --radius-2xl: calc(var(--radius) * 1.8);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+    color-scheme: light dark;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

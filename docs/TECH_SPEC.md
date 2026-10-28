@@ -127,7 +127,7 @@ Data deleted by a user stays in encrypted backups for up to 30 days; the privacy
 
 Draft schema. All user tables have RLS: a row is visible only when `user_id = auth.uid()`.
 
-**P1a subset.** The first build step creates only `profiles` (display name, locale, timezone), `entries` (body, `occurred_on`, `occurred_time`), `categories` and `entry_categories`. Other columns and tables arrive with their phase through new migrations. Date and time are stored as the user's **local** date and time, as entered, so the journal does not shift when the user travels; "not in the future" is checked against the profile's time zone. System categories have `user_id = NULL` and a `slug`; their RU/EN names come from the UI translations, while custom categories store `name`. Hiding a system category is stored per user.
+**P1a subset.** The first build step creates only `profiles` (display name, locale, timezone), `entries` (body, `occurred_on`, `occurred_time`), `categories` and `entry_categories`. Other columns and tables arrive with their phase through new migrations. Date and time are stored as the user's **local** date and time, as entered, so the journal does not shift when the user travels; "now" for a new entry is taken in the profile's time zone. Future dates are allowed (PRD ENT-01, 2026-10-28). System categories have `user_id = NULL` and a `slug`; their RU/EN names come from the UI translations, while custom categories store `name`. Hiding a system category is stored per user.
 
 ```sql
 -- Types

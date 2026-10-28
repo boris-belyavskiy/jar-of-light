@@ -19,3 +19,6 @@ desktop.ini
 .DS_Store
 .idea/
 *.log
+
+# Next.js generated
+next-env.d.ts

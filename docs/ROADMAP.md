@@ -46,13 +46,13 @@ gantt
 - [x] PRD, Tech Spec, Roadmap, ADR-0001 *(2026-10-19)*
 - [x] First-step decisions: Q1, Q2, Q4, Q17–Q20, [ADR-0002](DECISIONS.md#adr-0002) *(2026-10-27)*
 - [x] Three palette options on real screens; option A chosen ([PDFs](design/palettes/)) *(2026-10-27)*
-- [ ] Public GitHub repository on the personal account `boris-belyavskiy`
+- [x] Public GitHub repository on the personal account `boris-belyavskiy` *(2026-10-27)*
 - [x] Accounts, all free and without a payment card: Vercel (Hobby), Supabase **dev** + **prod** (US East, Ohio), Google Cloud project with an OAuth client. PostHog and Sentry move to P1b *(2026-10-27)*
 - [x] Node.js LTS (v24) installed locally *(2026-10-27)*
-- [ ] Next.js skeleton: TypeScript, Tailwind, shadcn/ui, `next-intl` (RU/EN), deployed to `jaroflight.vercel.app`
-- [ ] Design tokens (option A) and base layout in light and dark themes ([Tech Spec §9](TECH_SPEC.md#9-visual-design))
+- [x] Next.js skeleton: TypeScript, Tailwind, shadcn/ui, `next-intl` (RU/EN), deployed to `jaroflight.vercel.app` *(code 2026-10-27; deploy pending)*
+- [x] Design tokens (option A) and base layout in light and dark themes ([Tech Spec §9](TECH_SPEC.md#9-visual-design)) *(2026-10-27)*
 - [x] `CLAUDE.md` *(2026-10-27)*
-- [ ] CI (lint, type check, tests), PR template
+- [x] CI (lint, type check, tests), PR template *(2026-10-27)*
 - [ ] Private repository `jar-of-light-backups` with the daily keep-alive ([Tech Spec §3.1](TECH_SPEC.md#31-keep-alive-and-backups))
 - [ ] Decide Q3 (hours per week)
 
@@ -73,7 +73,7 @@ Requirements: ACC-01, ACC-04, ENT-01, ENT-04 (category filter), ENT-05, CAT-01, 
 - [ ] Privacy note `/privacy`; Google app published to "In production"
 - [ ] Nightly encrypted backups of **prod** + one restore test, before the first real users
 
-**Definition of Done:** RLS tests prove that user A cannot read or change user B's entries or categories; unit tests for validation (length, no future dates); sign-in checked on production; backups run and a restore has been tested; RU and EN strings complete.
+**Definition of Done:** RLS tests prove that user A cannot read or change user B's entries or categories; unit tests for validation (length, date and time format, time zones); sign-in checked on production; backups run and a restore has been tested; RU and EN strings complete.
 
 ---
 

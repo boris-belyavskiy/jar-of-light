@@ -16,6 +16,7 @@ Architecture Decision Records (ADRs) in one file. Each record captures one signi
 |---|---|---|---|
 | [0001](#adr-0001) | No self-hosted servers for now: managed hosting and LLM via API | Accepted | 2026-10-19 |
 | [0002](#adr-0002) | Free stack for P0–P1: Next.js on Vercel, Supabase Free with keep-alive and own backups | Accepted | 2026-10-27 |
+| [0003](#adr-0003) | App foundations for P1a: no Cache Components, language without a URL prefix, RLS tests on in-memory Postgres | Accepted | 2026-10-27 |
 
 ## Candidates
 
@@ -172,6 +173,54 @@ Free-tier facts were checked on the providers' pricing pages on 2026-10-27; rech
 4. The project becomes commercial (Vercel Hobby is non-commercial).
 
 First step at that point: Supabase Pro ($25/month).
+
+---
+
+<a id="adr-0003"></a>
+
+## ADR-0003: App foundations for P1a
+
+- **Status:** Accepted
+- **Date:** 2026-10-27
+- **Deciders:** Boris Belyavskiy (owner, by merging the first build pull request), Claude Code (lead developer)
+
+### Context
+
+The first build step needs three technical choices that the Tech Spec leaves open:
+
+1. **Caching.** Next.js 16 creates new apps with *Cache Components* on. With it, every page that reads the session must stream behind a loading boundary, and data can be cached on the server per user.
+2. **Language in the URL.** `next-intl` supports `/ru/app` and `/en/app` style routes or a language without a URL prefix.
+3. **RLS tests in CI.** The Definition of Done asks for automated tests proving that user A cannot read or change user B's rows. Supabase's local stack needs Docker, and testing against the dev project would put database keys into CI.
+
+### Decision
+
+| Question | Choice |
+|---|---|
+| Caching | **Cache Components off.** Every page under `/app` is private and rendered per request; no personal data is cached on the server |
+| Language | **No URL prefix.** The language comes from the profile (kept in a `NEXT_LOCALE` cookie), and from the browser's `Accept-Language` before sign-in. Routes stay as in Tech Spec §8 |
+| RLS tests | **PGlite** (Postgres compiled to WebAssembly) runs our real migrations in memory with a small stub of Supabase's `auth` schema and roles. Tests switch to the `authenticated` role with a user id, the way Supabase does for API requests |
+
+### Options considered
+
+| Option | Pros | Cons |
+|---|---|---|
+| Cache Components on | Faster navigation later; the default Next.js direction | Every session read needs a loading boundary; easy to cache private data by mistake; more concepts for a first build step |
+| `/ru/…` and `/en/…` routes | Shareable links in a fixed language; good for SEO | Nothing in P1a is public except the landing and `/privacy`; the language is a profile setting, so URLs would duplicate it |
+| Supabase CLI + Docker for tests | The exact Supabase stack | Docker is not installed; heavy for CI on every pull request |
+| Tests against the dev project | Real Supabase | Needs the secret key in CI; tests leave data behind; slower and flaky |
+
+### Consequences
+
+- Pages under `/app` render on each request. At P1a scale (one query per page, ~100 users) this is fast enough.
+- The landing page shows the browser's language; after sign-in the profile's language wins.
+- RLS tests run in about a second on every pull request with no secrets. The stub covers only `auth.users` and `auth.uid()`; other Supabase features (storage, realtime) need their own tests when we use them.
+- Migrations are applied to the dev and prod projects by hand in the SQL editor until we add the Supabase CLI.
+
+### Revisit when
+
+1. Next.js makes Cache Components mandatory (announced for the next major version);
+2. A public page needs fixed-language URLs (P4);
+3. A migration uses Supabase features the PGlite stub cannot imitate.
 
 ---
 

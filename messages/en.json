@@ -1,0 +1,166 @@
+{
+  "meta": {
+    "title": "Jar of Light",
+    "description": "A private journal for gratitude and bright moments."
+  },
+  "landing": {
+    "tagline": "A private journal for gratitude and bright moments.",
+    "lead": "Each entry is a small light you put into the jar. Notice the good, see who makes it possible, and come back to it on a darker day.",
+    "points": {
+      "quick": "Write a bright moment in under 30 seconds.",
+      "private": "Only you can see your entries. The database itself enforces it.",
+      "languages": "In Russian and English."
+    },
+    "signInHint": "Sign in with your Google account to start. No passwords.",
+    "privacyLink": "How we protect your entries",
+    "deleted": "Your account and all entries have been deleted.",
+    "signInFailed": "Sign-in didn't work. Please try again.",
+    "notConfigured": "Sign-in is not configured yet."
+  },
+  "nav": {
+    "feed": "Journal",
+    "categories": "Categories",
+    "settings": "Settings",
+    "signOut": "Sign out",
+    "newEntry": "New entry"
+  },
+  "feed": {
+    "title": "Your jar",
+    "all": "All",
+    "filterLabel": "Filter by category",
+    "empty": "The jar is empty for now. What good thing happened today?",
+    "emptyFiltered": "No entries match this filter.",
+    "writeFirst": "Write the first entry",
+    "edit": "Edit",
+    "anyOf": "Showing entries with any of the selected categories.",
+    "from": "From",
+    "to": "To",
+    "applyDates": "Show",
+    "resetDates": "Reset dates"
+  },
+  "entry": {
+    "newTitle": "A new light",
+    "editTitle": "Edit entry",
+    "bodyLabel": "What happened?",
+    "bodyPlaceholder": "Who made your day easier today? What small moment do you want to remember?",
+    "counter": "{count} / {max}",
+    "date": "Date",
+    "time": "Time",
+    "categories": "Categories",
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "delete": "Delete entry",
+    "deleteTitle": "Delete this entry?",
+    "deleteBody": "It will be deleted right away and can't be restored.",
+    "deleteConfirm": "Delete",
+    "notFound": "This entry doesn't exist or has been deleted.",
+    "errors": {
+      "empty": "Write at least a few words.",
+      "tooLong": "The text is too long: up to 4,000 characters.",
+      "date": "Pick a date.",
+      "time": "Pick a time.",
+      "save": "Couldn't save the entry. Please try again.",
+      "categories": "The entry is saved, but its categories weren't. Please try again."
+    },
+    "editCategories": "Edit categories"
+  },
+  "categories": {
+    "title": "Categories",
+    "systemTitle": "Starter categories",
+    "systemHint": "You can hide the ones you don't need. Entries keep them.",
+    "ownTitle": "Your categories",
+    "ownEmpty": "You have no categories of your own yet.",
+    "hide": "Hide",
+    "show": "Show",
+    "hidden": "Hidden",
+    "newPlaceholder": "New category",
+    "add": "Add",
+    "rename": "Rename",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "deleteTitle": "Delete “{name}”?",
+    "deleteBody": "The category will be removed from your entries. The entries themselves stay.",
+    "deleteConfirm": "Delete",
+    "system": {
+      "family": "Family",
+      "friends": "Friends",
+      "work": "Work",
+      "study": "Study",
+      "health": "Health",
+      "chance_encounter": "Chance encounter"
+    },
+    "errors": {
+      "empty": "Give the category a name.",
+      "tooLong": "Up to 40 characters.",
+      "duplicate": "You already have a category with this name.",
+      "save": "Couldn't save. Please try again."
+    },
+    "backToEntry": "Back to the entry"
+  },
+  "settings": {
+    "title": "Settings",
+    "profileTitle": "Profile",
+    "displayName": "Name",
+    "language": "Interface language",
+    "timezone": "Time zone",
+    "timezoneHint": "“Today” and the default time of a new entry follow this zone.",
+    "useBrowserTimezone": "Use this device's zone ({zone})",
+    "save": "Save",
+    "saved": "Saved.",
+    "dangerTitle": "Delete account",
+    "dangerBody": "This deletes your profile, all entries and categories right away. Encrypted backups expire within 30 days.",
+    "deleteAccount": "Delete my account",
+    "deleteTitle": "Delete your account and all entries?",
+    "deleteBody": "This can't be undone.",
+    "deleteConfirm": "Delete everything",
+    "cancel": "Cancel",
+    "errors": {
+      "nameTooLong": "Up to 80 characters.",
+      "timezone": "Pick a time zone from the list.",
+      "save": "Couldn't save. Please try again.",
+      "delete": "Couldn't delete the account. Please try again."
+    }
+  },
+  "languages": {
+    "ru": "Русский",
+    "en": "English"
+  },
+  "privacy": {
+    "title": "Your privacy",
+    "updated": "Last updated: 27 October 2026",
+    "intro": "Jar of Light is a private journal. Here is, in plain words, who can see what and how we protect it.",
+    "sections": [
+      {
+        "heading": "Only you see your entries",
+        "body": "Every entry, category and profile setting is tied to your account. The database itself checks every request with row-level security, so another account can't read or change your data, even through a bug in the app."
+      },
+      {
+        "heading": "What we store",
+        "body": "Your name and email from Google, your interface language and time zone, and the entries and categories you create. We don't store your Google password and never see it. Nothing is published or shared: there are no public features yet."
+      },
+      {
+        "heading": "Who else has technical access",
+        "body": "The operator of the service (the author of this project) technically has access to the database to keep it running and does not read entries. Entries are encrypted in transit and at rest by our providers, but not end-to-end: end-to-end encryption would make future features such as search and summaries impossible, so we chose strict access rules instead."
+      },
+      {
+        "heading": "Where the data lives",
+        "body": "The app runs on Vercel, and the database on Supabase in the United States (Ohio). Sign-in uses Google. There is no advertising and no analytics in this version."
+      },
+      {
+        "heading": "Backups",
+        "body": "To protect your journal from loss, we make nightly encrypted backups and keep each one for 30 days."
+      },
+      {
+        "heading": "Deleting your data",
+        "body": "You can delete any entry, or your whole account, in the app at any time. Deletion is immediate; copies in encrypted backups disappear within 30 days."
+      },
+      {
+        "heading": "Questions",
+        "body": "Write to the author through the project's GitHub page."
+      }
+    ],
+    "back": "Back"
+  }
+}
