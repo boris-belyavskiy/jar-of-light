@@ -47,11 +47,12 @@ gantt
 - [x] First-step decisions: Q1, Q2, Q4, Q17–Q20, [ADR-0002](adr/0002-free-stack-supabase-keepalive-backups.md) *(2026-10-27)*
 - [x] Three palette options on real screens; option A chosen ([PDFs](design/palettes/)) *(2026-10-27)*
 - [ ] Public GitHub repository on the personal account `boris-belyavskiy`
-- [ ] Accounts, all free and without a payment card: Vercel (Hobby), Supabase **dev** + **prod** (US East, Ohio), Google Cloud project with an OAuth client. PostHog and Sentry move to P1b
-- [ ] Node.js LTS installed locally
+- [x] Accounts, all free and without a payment card: Vercel (Hobby), Supabase **dev** + **prod** (US East, Ohio), Google Cloud project with an OAuth client. PostHog and Sentry move to P1b *(2026-10-27)*
+- [x] Node.js LTS (v24) installed locally *(2026-10-27)*
 - [ ] Next.js skeleton: TypeScript, Tailwind, shadcn/ui, `next-intl` (RU/EN), deployed to `jaroflight.vercel.app`
 - [ ] Design tokens (option A) and base layout in light and dark themes ([Tech Spec §9](TECH_SPEC.md#9-visual-design))
-- [ ] `CLAUDE.md`, CI (lint, type check, tests), PR template
+- [x] `CLAUDE.md` *(2026-10-27)*
+- [ ] CI (lint, type check, tests), PR template
 - [ ] Private repository `jar-of-light-backups` with the daily keep-alive ([Tech Spec §3.1](TECH_SPEC.md#31-keep-alive-and-backups))
 - [ ] Decide Q3 (hours per week)
 
