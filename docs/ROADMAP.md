@@ -53,7 +53,7 @@ gantt
 - [x] Design tokens (option A) and base layout in light and dark themes ([Tech Spec §9](TECH_SPEC.md#9-visual-design)) *(2026-10-27)*
 - [x] `CLAUDE.md` *(2026-10-27)*
 - [x] CI (lint, type check, tests), PR template *(2026-10-27)*
-- [ ] Private repository `jar-of-light-backups` with the daily keep-alive ([Tech Spec §3.1](TECH_SPEC.md#31-keep-alive-and-backups))
+- [x] Private repository `jar-of-light-backups` with the daily keep-alive ([Tech Spec §3.1](TECH_SPEC.md#31-keep-alive-and-backups)) *(2026-10-28)*
 - [ ] Decide Q3 (hours per week)
 
 **Definition of Done:** the app skeleton is live from `main` and connected to Supabase; CI is green; every pull request gets a preview link; keep-alive runs daily.
@@ -71,7 +71,7 @@ Requirements: ACC-01, ACC-04, ENT-01, ENT-04 (category filter), ENT-05, CAT-01, 
 - [x] Categories: six system ones (hide only) + own (create, rename, delete) *(2026-10-28)*
 - [x] Account deletion *(2026-10-28)*
 - [ ] Privacy note `/privacy` *(done 2026-10-28)*; Google app published to "In production"
-- [ ] Nightly encrypted backups of **prod** + one restore test, before the first real users
+- [x] Nightly encrypted backups of **prod** + one restore test, before the first real users *(2026-10-28)*
 
 **Definition of Done:** RLS tests prove that user A cannot read or change user B's entries or categories; unit tests for validation (length, date and time format, time zones); sign-in checked on production; backups run and a restore has been tested; RU and EN strings complete.
 

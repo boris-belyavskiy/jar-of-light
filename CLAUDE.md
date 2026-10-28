@@ -14,7 +14,7 @@ These documents are the source of truth. If a decision changes, update the docum
 ## Current state (2026-10-28)
 
 - **P1a is live** at `https://jaroflight.vercel.app` (Vercel project `jaroflight`, deploys from `main`; previews use the dev database). Both migrations in `supabase/migrations/` are applied to dev and prod by hand in the Supabase SQL editor (see `supabase/README.md`); a new migration must be applied to both.
-- Not done yet: `jar-of-light-backups` repo with keep-alive and nightly backups, Session pooler string, restore test, Google app published to "In production" (until then only test users can sign in).
+- Backups run: private repo `boris-belyavskiy/jar-of-light-backups` has the daily keep-alive and the nightly encrypted prod backup with an automatic restore check; the decryption key is kept offline by Boris. Not done yet: Google app published to "In production" (until then only test users can sign in).
 - Commands: `npm run dev`, `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`. Environment variables: copy `.env.example` to `.env.local`.
 - Next.js 16 has breaking changes against older docs (`proxy.ts` instead of `middleware.ts`, typed `PageProps`/`LayoutProps`): read `node_modules/next/dist/docs/` before using an unfamiliar API.
 
@@ -38,7 +38,7 @@ Google sign-in open to any Google account · profile (name, time zone, language 
 | Supabase prod | ref `ntnbpcmgyddklrbwfgqq` → `https://ntnbpcmgyddklrbwfgqq.supabase.co` |
 | Google sign-in | Google Identity Services button → `supabase.auth.signInWithIdToken`; OAuth web client ID `30285081957-pejubc544ttl7h1jbj9007de2omp8vdu.apps.googleusercontent.com` (public); Google provider enabled in both Supabase projects; app is in "Testing" mode until `/privacy` exists |
 | Supabase project security | Data API on · automatically expose new tables **off** · automatic RLS **on** → every migration grants table privileges to `authenticated` explicitly and adds RLS policies |
-| Backups | Private repo `boris-belyavskiy/jar-of-light-backups` (not created yet) — keep-alive and nightly backup workflows go there (Tech Spec §3.1) |
+| Backups | Private repo `boris-belyavskiy/jar-of-light-backups`: daily keep-alive, nightly encrypted prod backup with a restore check, 30-day retention (Tech Spec §3.1). A new table must be added to `COUNTS_SQL` in its `backup.yml` |
 | Node.js | v24 LTS |
 
 ## Rules
