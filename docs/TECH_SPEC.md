@@ -41,15 +41,15 @@
 | Layer | Choice | Why | Alternatives |
 |---|---|---|---|
 | Client | Mobile-first web app on **Next.js** (App Router), TypeScript, Tailwind CSS, shadcn/ui; **PWA** features (install, offline draft, push) in P1b | One codebase, a link to share, no app stores, web push works | Telegram Mini App, Expo / React Native |
-| Server | Next.js Server Actions + Route Handlers on **Vercel** (Hobby) | Zero DevOps, free start, a preview deployment for every PR | Render, Fly.io, Netlify |
-| Database, auth, storage | **Supabase Free**: Postgres, Row Level Security, Auth, `pg_cron`, `pg_trgm`; region **EU (Frankfurt)**; daily keep-alive and own nightly backups (§3.1, [ADR-0002](adr/0002-free-stack-supabase-keepalive-backups.md)) | Relational data and aggregates, RLS built in, portable Postgres | Neon + Better Auth, Cloudflare D1, Firebase (all compared in ADR-0002) |
+| Server | Next.js Server Actions + Route Handlers on **Vercel** (Hobby); functions in **Cleveland (`cle1`)**, next to the database | Zero DevOps, free start, a preview deployment for every PR | Render, Fly.io, Netlify |
+| Database, auth, storage | **Supabase Free**: Postgres, Row Level Security, Auth, `pg_cron`, `pg_trgm`; region **US East (Ohio)**, close to the PM and the first users (decided 2026-10-27); daily keep-alive and own nightly backups (§3.1, [ADR-0002](adr/0002-free-stack-supabase-keepalive-backups.md)) | Relational data and aggregates, RLS built in, portable Postgres | Neon + Better Auth, Cloudflare D1, Firebase (all compared in ADR-0002) |
 | Sign-in | **Google only** (P1a): Google Identity Services button → ID token → Supabase `signInWithIdToken` | Google's dialog names our site instead of `*.supabase.co`; no passwords to store | Supabase OAuth redirect flow; email one-time codes in P1b (need a domain) |
 | LLM | **Anthropic API** (`@anthropic-ai/sdk`) behind `lib/ai/provider.ts` | Quality on RU and EN, structured outputs, prompt caching, Batch API | Open-weight models via hosted inference (ADR-0001) |
 | Background jobs | `after()` in Next.js for entry parsing; **Supabase `pg_cron`** for frequent schedules (reminders, retries); Vercel Cron for daily jobs; **GitHub Actions** for keep-alive and backups (§3.1) | Vercel Hobby cron runs at most once a day, so frequent jobs live in Postgres | Inngest, Trigger.dev |
 | Email | Resend (+ React Email), also as SMTP for Supabase Auth; from P1b | Simple API; Supabase's built-in email is for testing only | Postmark |
 | Push | Web Push (VAPID, `web-push`) | Standard and free | OneSignal |
 | i18n | `next-intl`, RU + EN from day one | Portfolio in EN, first users in RU | — |
-| Analytics | PostHog (EU cloud): events, funnels, retention, feature flags | Everything a PM needs in one place | Amplitude |
+| Analytics | PostHog (cloud region chosen in P1b): events, funnels, retention, feature flags | Everything a PM needs in one place | Amplitude |
 | Errors | Sentry with PII scrubbing | Standard | — |
 | Tests | Vitest (unit), Playwright (e2e), own eval runner or promptfoo | — | — |
 | CI/CD | GitHub + GitHub Actions + Vercel previews | — | — |
@@ -63,7 +63,7 @@ flowchart LR
   V[Public page visitor] --> N
   R[Card recipient] --> N
   A[Admin panel] --> N
-  N --> DB[(Supabase Postgres<br/>+ RLS, EU)]
+  N --> DB[(Supabase Postgres<br/>+ RLS, US East)]
   N --> AU[Supabase Auth]
   N --> AI[lib/ai: tasks T1–T7]
   AI --> LLM[Anthropic API]
@@ -72,7 +72,7 @@ flowchart LR
   VC[Vercel Cron, daily] --> N
   N --> EM[Resend email]
   N --> WP[Web Push]
-  N --> PH[PostHog EU]
+  N --> PH[PostHog]
   N --> SE[Sentry]
 ```
 
@@ -82,7 +82,7 @@ flowchart LR
 |---|---|---|---|
 | Local | `next dev` | Supabase **dev** project (or local Supabase CLI) | Development |
 | Preview | Vercel preview per pull request | Supabase **dev** project | Review a change by link before merging |
-| Production | Vercel production (`jar-of-light.vercel.app`, own domain later) | Supabase **prod** project | Real users |
+| Production | Vercel production (`jaroflight.vercel.app`, own domain later) | Supabase **prod** project | Real users |
 
 Both Supabase projects are on the Free plan (it allows two active projects).
 
@@ -98,13 +98,13 @@ Secrets live only in Vercel, Supabase and GitHub Actions settings and in a local
 
 | Service | P0–P1 (build + closed beta) | Later | Notes |
 |---|---|---|---|
-| **Vercel** | Hobby, **$0**, no card, URL `jar-of-light.vercel.app` | Pro (~$20/month) once the project is commercial or outgrows limits | Hobby is for personal, non-commercial use; cron at most once a day |
+| **Vercel** | Hobby, **$0**, no card, URL `jaroflight.vercel.app` | Pro (~$20/month) once the project is commercial or outgrows limits | Hobby is for personal, non-commercial use; cron at most once a day |
 | **Supabase** | Free, **$0**, no card: **dev** + **prod** projects | Pro ($25/month) only if we outgrow 500 MB or want provider backups and point-in-time restore | Free: 2 active projects, 500 MB database, 50,000 monthly active users for auth, paused after 7 days without requests, **no backups** → keep-alive and own backups (§3.1) |
 | **Google Cloud** | **$0**, no billing account: one project with an OAuth client for Google sign-in | — | Sign-in is free at any number of users. Never activate the "free trial": it asks for a card and we do not need it |
 | **GitHub** | Free: public code repository + private backups repository; Actions minutes within the free quota | — | — |
 | **Anthropic API** | **$0** (no AI in P1) | Pay as you go, ≈ $0.10–0.15 per active user per month (§6.6) | Prepaid credits; spending limit set in the console |
 | **Resend** | Not needed in P1a | Free tier from P1b if email is added | Sending to real users requires a verified own domain |
-| **Domain** | Not needed | ~$10–15/year, only if we want email sign-in, reminder emails, or the app name instead of the URL in Google's sign-in dialog; needed before the public page | Until then: `jar-of-light.vercel.app` |
+| **Domain** | Not needed | ~$10–15/year, only if we want email sign-in, reminder emails, or the app name instead of the URL in Google's sign-in dialog; needed before the public page | Until then: `jaroflight.vercel.app` |
 | PostHog, Sentry | Not needed in P1a | Free tiers from P1b | — |
 
 **Bottom line:** P0 and P1 cost **$0** and need no payment card. The first real cost is the AI layer in P2; a domain (~$1/month) is optional until the public page.
@@ -267,7 +267,7 @@ stateDiagram-v2
 | Area | Measure |
 |---|---|
 | Access control | RLS on every user table, with automated tests ("user A cannot read user B's entries"). Service keys only on the server |
-| Data location | Supabase EU region; PostHog EU cloud |
+| Data location | Supabase US East (Ohio); Vercel functions in Cleveland (`cle1`). Stated in the privacy note |
 | Third parties | Entry text goes only to the LLM provider, only when AI is on, only server-side. Listed in the privacy policy |
 | Logs and analytics | No entry text in logs, Sentry, PostHog or `ai_runs` |
 | Encryption | TLS in transit; encryption at rest by the provider. **No end-to-end encryption**: it is incompatible with AI and the public page. Mitigation: AI can be switched off per user or per entry, and then text never leaves our database |
@@ -394,7 +394,7 @@ Conclusion and revisit triggers: [ADR-0001](adr/0001-no-self-hosted-servers.md).
 
 ### 7.1a Sign-in (P1a)
 
-1. The sign-in page shows the Google Identity Services button; the page origin is our domain, so Google's dialog names `jar-of-light.vercel.app`.
+1. The sign-in page shows the Google Identity Services button; the page origin is our domain, so Google's dialog names `jaroflight.vercel.app`.
 2. Google returns an ID token → `supabase.auth.signInWithIdToken({ provider: 'google', token, nonce })` → Supabase session in cookies (`@supabase/ssr`).
 3. On the first sign-in a database trigger creates `profiles` with the Google name; the client sends the browser time zone and language.
 4. Signing out clears the session. Account deletion (PRD DATA-02) runs a server action with the service key: delete the auth user, and `ON DELETE CASCADE` removes the profile, entries, categories and links.
@@ -550,6 +550,6 @@ CLAUDE.md            project conventions for Claude Code
 
 ## 12. Analytics events
 
-Events **never contain entry text**, only metadata. Sent to PostHog EU.
+Events **never contain entry text**, only metadata. Sent to PostHog.
 
 `signup_completed`, `entry_created {kind, mode: free|guided, has_people, has_place, length_bucket, source: composer|prompt|onboarding}`, `entry_ai_processed {task, latency_ms, status}`, `category_suggestion_{accepted|rejected|edited}`, `person_suggestion_{accepted|rejected}`, `jar_opened`, `stats_viewed`, `summary_viewed {dimension: period|place|topic|people}`, `on_this_day_viewed`, `digest_opened`, `reminder_{sent|opened}`, `action_{suggested|opened|completed}`, `card_{created|opened|claimed|revoked}`, `visibility_changed {from, to}`, `public_post_{submitted|published|rejected|unpublished}`, `commons_viewed {page_type}`, `profile_search {n_identities}`, `report_submitted`, `pulse_answered {job}`, `ai_disabled`, `data_exported`, `account_deleted`.

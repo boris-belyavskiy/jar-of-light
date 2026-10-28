@@ -13,7 +13,7 @@
 
 | Phase | What | Target window | Release |
 |---|---|---|---|
-| **P0** | Foundation: repo, docs, accounts, skeleton, design tokens | Late Oct – early Nov 2026 (1–2 wks) | Skeleton live on `jar-of-light.vercel.app` |
+| **P0** | Foundation: repo, docs, accounts, skeleton, design tokens | Late Oct – early Nov 2026 (1–2 wks) | Skeleton live on `jaroflight.vercel.app` |
 | **P1a** | **First build step:** Google sign-in, entries with date, time and categories, feed with filter | Nov 2026 (2–3 wks) | **R0:** the author and first friends use it |
 | **P1b** | Rest of the private journal **without AI** + **customer research** (two parallel tracks) | Late Nov – mid Dec 2026 (3–4 wks) | **R1: closed beta** (10–20 people) |
 | **P2** | AI layer: entry parsing, suggestions, summaries, digest | Mid Dec 2026 – mid Jan 2027 (3 wks + holiday buffer) | Beta update |
@@ -47,9 +47,9 @@ gantt
 - [x] First-step decisions: Q1, Q2, Q4, Q17–Q20, [ADR-0002](adr/0002-free-stack-supabase-keepalive-backups.md) *(2026-10-27)*
 - [x] Three palette options on real screens; option A chosen ([PDFs](design/palettes/)) *(2026-10-27)*
 - [ ] Public GitHub repository on the personal account `boris-belyavskiy`
-- [ ] Accounts, all free and without a payment card: Vercel (Hobby), Supabase **dev** + **prod** (EU), Google Cloud project with an OAuth client. PostHog and Sentry move to P1b
+- [ ] Accounts, all free and without a payment card: Vercel (Hobby), Supabase **dev** + **prod** (US East, Ohio), Google Cloud project with an OAuth client. PostHog and Sentry move to P1b
 - [ ] Node.js LTS installed locally
-- [ ] Next.js skeleton: TypeScript, Tailwind, shadcn/ui, `next-intl` (RU/EN), deployed to `jar-of-light.vercel.app`
+- [ ] Next.js skeleton: TypeScript, Tailwind, shadcn/ui, `next-intl` (RU/EN), deployed to `jaroflight.vercel.app`
 - [ ] Design tokens (option A) and base layout in light and dark themes ([Tech Spec §9](TECH_SPEC.md#9-visual-design))
 - [ ] `CLAUDE.md`, CI (lint, type check, tests), PR template
 - [ ] Private repository `jar-of-light-backups` with the daily keep-alive ([Tech Spec §3.1](TECH_SPEC.md#31-keep-alive-and-backups))
@@ -93,7 +93,7 @@ Requirements: ACC-01 (email), ACC-02, ACC-03, ENT-01 (addressee, brightness, loc
 - [ ] Reminders: push + email on schedule (`pg_cron`)
 - [ ] Export (JSON, Markdown)
 - [ ] PWA: install, icon, offline draft
-- [ ] Accounts: PostHog EU, Sentry; analytics events for P1 ([Tech Spec §12](TECH_SPEC.md#12-analytics-events))
+- [ ] Accounts: PostHog, Sentry; analytics events for P1 ([Tech Spec §12](TECH_SPEC.md#12-analytics-events))
 
 **Definition of Done:** e2e tests for key scenarios (sign in → entry → feed → export → delete); RLS tests extended to new tables; 10–20 beta users write for at least two weeks; activation and retention dashboard in PostHog.
 

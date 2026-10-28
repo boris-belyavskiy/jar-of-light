@@ -20,8 +20,8 @@ PM constraints (PRD Q4):
 
 | Need | Choice |
 |---|---|
-| App hosting | **Vercel Hobby**, `jar-of-light.vercel.app` |
-| Database and auth | **Supabase Free**, region EU (Frankfurt): two projects, **dev** and **prod** |
+| App hosting | **Vercel Hobby**, `jaroflight.vercel.app` |
+| Database and auth | **Supabase Free**, region **US East (Ohio)**: two projects, **dev** and **prod**. Vercel functions run in Cleveland (`cle1`) next to the database |
 | Isolation between users | Postgres **Row Level Security** on every user table, covered by automated tests |
 | Sign-in | **Google only**, through the Google Identity Services button and Supabase `signInWithIdToken`; Google Cloud project without a billing account |
 | Not pausing | **Daily keep-alive** request to both projects from GitHub Actions |
@@ -52,9 +52,11 @@ Free-tier facts were checked on the providers' pricing pages on 2026-10-27; rech
 
 - *We own backups.* The workflow, the encryption key and restore tests are our job; a failed run emails the owner; the restore test is in the P1a Definition of Done.
 - *Keep-alive is one more moving part.* If it fails, Supabase warns by email before pausing, and a paused project keeps its data and can be resumed.
-- *Google's dialog shows `jar-of-light.vercel.app`, not the app name*, until we have an own domain.
+- *Google's dialog shows `jaroflight.vercel.app`, not the app name*, until we have an own domain.
 - *Google sign-in does not work on preview deployments* (no wildcard origins); sign-in is tested locally and on production.
 - *Deleted data stays in encrypted backups for up to 30 days*; the privacy note says so.
+- *Data is hosted in the US, not in the EU* as ADR-0001 assumed: the PM and the likely first users are in the Americas, and latency matters more than an "EU-hosted" claim at this stage. The privacy note states the location; Q9 (legal check) stays open before the public beta.
+- *`jar-of-light.vercel.app` was taken*, so the app runs at `jaroflight.vercel.app`; the brand stays Jar of Light.
 
 ## Revisit when
 

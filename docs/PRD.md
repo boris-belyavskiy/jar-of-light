@@ -333,7 +333,7 @@ In the current horizon we do **not** build:
 | R4 | Abuse: harassment disguised as "thanks", ads, boosting organizations | Medium | High | No private people by full name, AI moderation, reports, limits, pre-moderation |
 | R5 | Crisis content; S2 makes this more likely | Medium | Critical | Crisis signal, help screen, "not therapy" disclaimer, coach only *Later* with an expert |
 | R6 | Scope creep for a solo builder | High | Medium | Strict phases, a *Later* bucket, decision gates in the [Roadmap](ROADMAP.md) |
-| R7 | Legal: GDPR, Russian data localization law (152-FZ), AI provider terms | Medium | High | EU hosting, plain-language policy, server-side LLM calls only, legal check before public beta (Q9) |
+| R7 | Legal: GDPR, Russian data localization law (152-FZ), AI provider terms | Medium | High | Plain-language note on where data is stored (US East), privacy policy, server-side LLM calls only, legal check before public beta (Q9) |
 
 Technical risks are in the [Tech Spec §10](TECH_SPEC.md#10-non-functional-requirements) and [ADR log](adr/README.md).
 
@@ -351,7 +351,7 @@ Technical risks are in the [Tech Spec §10](TECH_SPEC.md#10-non-functional-requi
 | Q6 | Public repository? | Yes, without secrets | ✅ Decided 2026-10-19 | — |
 | Q7 | Models: mix (A) or one strong model (B)? | Start with the mix; run B on the same evals and decide on data | Proposed | P2 |
 | Q8 | Visual metaphor for "looking back" | **The jar** follows from the name; validate with a prototype | Partly decided | P2 |
-| Q9 | Do we target users in Russia (152-FZ, data localization)? | Position as an international product hosted in the EU; legal check before public beta | Open | P4 |
+| Q9 | Do we target users in Russia (152-FZ, data localization)? | Position as an international product; data is hosted in the US (Supabase Ohio, decided 2026-10-27); legal check before public beta | Open | P4 |
 | Q10 | Allow public figures by name (artists, scientists)? | Yes, with pre-moderation | Proposed | P4 |
 | Q11 | Sign-up required to read the public page? | No: reading is open, publishing needs an account | Proposed | P4 |
 | Q12 | Value of the K threshold | K = 3 | Proposed | P4 |
