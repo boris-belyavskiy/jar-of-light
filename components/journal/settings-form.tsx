@@ -14,7 +14,13 @@ import { DISPLAY_NAME_MAX_LENGTH } from "@/lib/validation";
 const selectClass =
   "h-9 w-full rounded-lg border border-input bg-card px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50";
 
-export function SettingsForm({ profile, timeZones }: { profile: Profile; timeZones: string[] }) {
+export function SettingsForm({
+  profile,
+  timeZones,
+}: {
+  profile: Profile;
+  timeZones: { value: string; label: string }[];
+}) {
   const t = useTranslations("settings");
   const tl = useTranslations("languages");
   const tAll = useTranslations();
@@ -64,13 +70,13 @@ export function SettingsForm({ profile, timeZones }: { profile: Profile; timeZon
               className={selectClass}
             >
               {timeZones.map((z) => (
-                <option key={z} value={z}>
-                  {z.replaceAll("_", " ")}
+                <option key={z.value} value={z.value}>
+                  {z.label}
                 </option>
               ))}
             </select>
             <p className="text-sm text-muted-foreground">{t("timezoneHint")}</p>
-            {browserZone && browserZone !== timezone && timeZones.includes(browserZone) && (
+            {browserZone && browserZone !== timezone && timeZones.some((z) => z.value === browserZone) && (
               <Button type="button" variant="link" className="h-auto self-start p-0" onClick={() => setTimezone(browserZone)}>
                 {t("useBrowserTimezone", { zone: browserZone.replaceAll("_", " ") })}
               </Button>

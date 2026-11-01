@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { localeFromAcceptLanguage } from "@/i18n/config";
 import { nowInTimeZone } from "@/lib/time";
-import { categoryNameSchema, charCount, entrySchema } from "@/lib/validation";
+import { categoryNamesSchema, charCount, entrySchema, systemCategoryNamesSchema } from "@/lib/validation";
 
 const valid = { body: "Coffee with Mom", occurredOn: "2026-10-27", occurredTime: "09:30", categoryIds: [] };
 
@@ -46,11 +46,19 @@ describe("time zones", () => {
 
 });
 
-describe("categoryNameSchema", () => {
-  it("trims and limits to 40 characters", () => {
-    expect(categoryNameSchema.parse("  Travel ")).toBe("Travel");
-    expect(categoryNameSchema.safeParse("x".repeat(41)).success).toBe(false);
-    expect(categoryNameSchema.safeParse(" ").success).toBe(false);
+describe("categoryNamesSchema", () => {
+  it("trims, limits to 40 characters and turns an empty name into null", () => {
+    expect(categoryNamesSchema.parse({ nameRu: "  Прогулки ", nameEn: " " })).toEqual({ nameRu: "Прогулки", nameEn: null });
+    expect(categoryNamesSchema.safeParse({ nameRu: "", nameEn: "x".repeat(41) }).success).toBe(false);
+  });
+
+  it("needs a name in at least one language", () => {
+    expect(categoryNamesSchema.safeParse({ nameRu: " ", nameEn: "" }).success).toBe(false);
+    expect(categoryNamesSchema.parse({ nameRu: "", nameEn: "Walks" })).toEqual({ nameRu: null, nameEn: "Walks" });
+  });
+
+  it("lets a built-in category go back to its own name", () => {
+    expect(systemCategoryNamesSchema.parse({ nameRu: "", nameEn: "" })).toEqual({ nameRu: null, nameEn: null });
   });
 });
 

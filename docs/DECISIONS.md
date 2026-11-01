@@ -19,6 +19,7 @@ Architecture Decision Records (ADRs) in one file. Each record captures one signi
 | [0003](#adr-0003) | App foundations for P1a: no Cache Components, language without a URL prefix, RLS tests on in-memory Postgres | Accepted | 2026-10-27 |
 | [0004](#adr-0004) | UX principles: one experience on web and mobile, one shell with the content always in the same place | Accepted | 2026-10-31 |
 | [0005](#adr-0005) | A fixed frame where only the content column scrolls; entries open in place in the feed, addressed by the URL | Accepted | 2026-11-01 |
+| [0006](#adr-0006) | Full-width pages, the window's own scrollbar, an opened entry as a window over the feed | Accepted | 2026-11-01 |
 
 ## Candidates
 
@@ -300,6 +301,39 @@ With ADR-0004 live, the page still scrolled as a whole: the title, the composer,
 
 1. Beta users on phones find the folded filters hard to discover;
 2. AI suggestions or actions on an entry need more room than the main column gives.
+
+---
+
+<a id="adr-0006"></a>
+
+## ADR-0006: Full-width pages, the window's scrollbar, an opened entry as a window
+
+- **Status:** Accepted
+- **Date:** 2026-11-01
+- **Deciders:** Boris Belyavskiy (owner), Claude Code (lead developer)
+
+Refines [ADR-0004](#adr-0004) (where the content sits) and [ADR-0005](#adr-0005) (how scrolling works and how an entry opens). Both stay in force where this record does not change them.
+
+### Context
+
+ADR-0005 scrolled an inner column, so its scrollbar sat next to the text and appeared whenever the column's bottom padding pushed it over. Pages other than the feed used a narrow column in the middle, which looked unaligned with the logo and the footer links. An entry opened in place was as narrow as the feed.
+
+### Decision
+
+1. **The window scrolls.** Its own scrollbar on the right appears only when the content does not fit. The header, the page head (title; on the feed also the composer and, on phones, the folded filters), the feed's side column and the footer links stick in place, so only the content moves — the effect of ADR-0005 without an inner scroll box.
+2. **Widths.** Every page except the feed uses the full width of the frame: from the left edge of the logo (and of "About" in the footer) to the right edge of sign-out. On the feed the filters start at that same left edge and the entries keep a reading column (42rem).
+3. **An opened entry is a window over the feed**, as wide as the frame, between the header and the footer. A click outside it, Escape or ✕ close it and return to the same place in the feed; "Edit" turns the window into the form. A new entry still expands in place from the composer (ADR-0005).
+4. **The landing page** is left-aligned across the full width; text outside the cards starts where the cards' bullets start.
+
+### Consequences
+
+- Sticky positions assume the header is 3.5rem high and the footer about 3rem; changing either means updating `PageLayout` and the entry window.
+- Long lines on wide screens for About and Privacy are accepted for alignment.
+
+### Revisit when
+
+1. Reading tests show full-width text on About is hard to read on large monitors;
+2. The header or footer height changes.
 
 ---
 

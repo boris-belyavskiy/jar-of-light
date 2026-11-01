@@ -19,7 +19,7 @@ beforeAll(async () => {
 
   await asUser(db, B, async () => {
     categoryOfB = (
-      await db.query<{ id: string }>("insert into public.categories (user_id, name) values ($1, 'Bob only') returning id", [B])
+      await db.query<{ id: string }>("insert into public.categories (user_id, name_en) values ($1, 'Bob only') returning id", [B])
     ).rows[0].id;
     entryOfB = (
       await db.query<{ id: string }>(
@@ -96,7 +96,7 @@ describe("categories", () => {
   });
 
   it("A cannot rename, delete or use B's category", async () => {
-    const upd = await asUser(db, A, () => db.query("update public.categories set name = 'x' where id = $1", [categoryOfB]));
+    const upd = await asUser(db, A, () => db.query("update public.categories set name_en = 'x' where id = $1", [categoryOfB]));
     const del = await asUser(db, A, () => db.query("delete from public.categories where id = $1", [categoryOfB]));
     expect(upd.affectedRows).toBe(0);
     expect(del.affectedRows).toBe(0);
@@ -120,6 +120,50 @@ describe("categories", () => {
     await asUser(db, A, () => db.query("insert into public.hidden_categories (category_id) values ($1)", [systemCategory]));
     const hiddenForB = await asUser(db, B, () => db.query("select * from public.hidden_categories"));
     expect(hiddenForB.rows).toHaveLength(0);
+  });
+
+  it("a user names system categories for themselves only", async () => {
+    await asUser(db, A, () =>
+      db.query("insert into public.category_names (category_id, name_ru, name_en) values ($1, 'Родные', 'Kin')", [
+        systemCategory,
+      ]),
+    );
+    const own = await asUser(db, A, () => db.query<{ name_en: string }>("select name_en from public.category_names"));
+    const forB = await asUser(db, B, () => db.query("select * from public.category_names"));
+    const changedByB = await asUser(db, B, () =>
+      db.query("update public.category_names set name_en = 'x' where user_id = $1", [A]),
+    );
+    expect(own.rows).toEqual([{ name_en: "Kin" }]);
+    expect(forB.rows).toHaveLength(0);
+    expect(changedByB.affectedRows).toBe(0);
+  });
+
+  it("category_names cannot point at a custom category or carry no name", async () => {
+    await expect(
+      asUser(db, A, () =>
+        db.query("insert into public.category_names (category_id, name_en) values ($1, 'Mine now')", [categoryOfB]),
+      ),
+    ).rejects.toThrow(/row-level security/);
+    const ownCustom = await asUser(db, A, () =>
+      db.query<{ id: string }>("insert into public.categories (user_id, name_ru) values ($1, 'Прогулки') returning id", [A]),
+    );
+    await expect(
+      asUser(db, A, () =>
+        db.query("insert into public.category_names (category_id, name_en) values ($1, 'Walks')", [ownCustom.rows[0].id]),
+      ),
+    ).rejects.toThrow(/row-level security/);
+    await expect(
+      asUser(db, A, () => db.query("update public.category_names set name_ru = null, name_en = null")),
+    ).rejects.toThrow(/check constraint/);
+  });
+
+  it("a custom category needs a name in at least one language, unique per language", async () => {
+    await expect(
+      asUser(db, A, () => db.query("insert into public.categories (user_id) values ($1)", [A])),
+    ).rejects.toThrow(/check constraint/);
+    await expect(
+      asUser(db, A, () => db.query("insert into public.categories (user_id, name_ru) values ($1, ' прогулки ')", [A])),
+    ).rejects.toThrow(/duplicate key/);
   });
 
   it("deleting a custom category keeps the entries (CAT-02)", async () => {
@@ -161,7 +205,7 @@ describe("validation in the database", () => {
 describe("account deletion (DATA-02)", () => {
   it("removes the profile, entries and categories", async () => {
     await db.query("delete from auth.users where id = $1", [B]);
-    for (const table of ["profiles", "entries", "categories", "hidden_categories"]) {
+    for (const table of ["profiles", "entries", "categories", "hidden_categories", "category_names"]) {
       const col = table === "profiles" ? "id" : "user_id";
       const res = await db.query(`select 1 from public.${table} where ${col} = $1`, [B]);
       expect(res.rows, table).toHaveLength(0);

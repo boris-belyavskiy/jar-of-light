@@ -23,11 +23,19 @@ export const entrySchema = z.object({
 });
 export type EntryInput = z.infer<typeof entrySchema>;
 
-export const categoryNameSchema = z
+const categoryName = z
   .string()
   .trim()
-  .min(1, "categories.errors.empty")
-  .refine((s) => charCount(s) <= CATEGORY_NAME_MAX_LENGTH, "categories.errors.tooLong");
+  .refine((s) => charCount(s) <= CATEGORY_NAME_MAX_LENGTH, "categories.errors.tooLong")
+  .transform((s) => s || null);
+
+/** A category's names in Russian and English: either may be empty, not both (CAT-02). */
+export const categoryNamesSchema = z
+  .object({ nameRu: categoryName, nameEn: categoryName })
+  .refine((n) => n.nameRu || n.nameEn, "categories.errors.empty");
+
+/** The same for a built-in category, where both empty means "back to the built-in name". */
+export const systemCategoryNamesSchema = z.object({ nameRu: categoryName, nameEn: categoryName });
 
 export const profileSchema = z.object({
   displayName: z

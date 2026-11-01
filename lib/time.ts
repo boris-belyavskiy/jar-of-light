@@ -41,3 +41,28 @@ export function entryDateLabel(date: string, time: string, locale: string) {
   );
   return `${day} · ${time}`;
 }
+
+/** A time zone's offset from UTC at `now`, in minutes (Moscow: 180; New York in winter: −300). */
+export function utcOffsetMinutes(timeZone: string, now: Date = new Date()) {
+  const name =
+    new Intl.DateTimeFormat("en-US", { timeZone, timeZoneName: "longOffset" })
+      .formatToParts(now)
+      .find((p) => p.type === "timeZoneName")?.value ?? "GMT";
+  const m = /GMT([+-])(\d{2}):(\d{2})/.exec(name);
+  return m ? (m[1] === "-" ? -1 : 1) * (Number(m[2]) * 60 + Number(m[3])) : 0;
+}
+
+/** "UTC+03:00" — written with UTC, which is what GMT means on clocks too. */
+export function formatUtcOffset(minutes: number) {
+  const sign = minutes < 0 ? "−" : "+";
+  const abs = Math.abs(minutes);
+  return `UTC${sign}${String(Math.floor(abs / 60)).padStart(2, "0")}:${String(abs % 60).padStart(2, "0")}`;
+}
+
+/** Time zones for a picker, west to east, labelled "(UTC+03:00) Europe/Moscow"; offsets as of `now` (DST-aware). */
+export function timeZoneOptions(zones: string[], now: Date = new Date()) {
+  return zones
+    .map((zone) => ({ zone, offset: utcOffsetMinutes(zone, now) }))
+    .sort((a, b) => a.offset - b.offset || a.zone.localeCompare(b.zone))
+    .map(({ zone, offset }) => ({ value: zone, label: `(${formatUtcOffset(offset)}) ${zone.replaceAll("_", " ")}` }));
+}
