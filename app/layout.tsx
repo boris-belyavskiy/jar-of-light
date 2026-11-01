@@ -26,7 +26,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const locale = await getLocale();
   return (
     <html lang={locale} className={`${inter.variable} ${sourceSerif.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col">
+      {/* A fixed frame (ADR-0005): header, side column and footer stay put; only the page's text column scrolls. */}
+      <body className="flex h-dvh flex-col overflow-hidden">
         <NextIntlClientProvider>
           {children}
           <SiteFooter />

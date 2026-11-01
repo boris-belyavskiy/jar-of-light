@@ -32,3 +32,12 @@ export function displayDate(iso: string, locale: string) {
   const [year, month, day] = iso.split("-");
   return locale === "en" ? `${month}-${day}-${year}` : `${day}.${month}.${year}`;
 }
+
+/** An entry's local date and time as shown on its pill, e.g. "23 октября 2026 г. · 21:00". */
+export function entryDateLabel(date: string, time: string, locale: string) {
+  // The date is the user's local date: format it as-is, without shifting zones.
+  const day = new Intl.DateTimeFormat(locale, { dateStyle: "long", timeZone: "UTC" }).format(
+    new Date(`${date}T00:00:00Z`),
+  );
+  return `${day} · ${time}`;
+}

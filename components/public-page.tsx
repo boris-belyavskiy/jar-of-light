@@ -10,18 +10,18 @@ import { getUserId } from "@/lib/db/queries";
  * app like any other tab; signed out, it uses the public shell and ends with
  * the sign-in button.
  */
-export async function PublicPage({ children }: { children: React.ReactNode }) {
+export async function PublicPage({ head, children }: { head: React.ReactNode; children: React.ReactNode }) {
   if (await getUserId()) {
     return (
       <AppShell>
-        <PageLayout>{children}</PageLayout>
+        <PageLayout head={head}>{children}</PageLayout>
       </AppShell>
     );
   }
   const t = await getTranslations("landing");
   return (
     <PublicShell>
-      <PageLayout>
+      <PageLayout head={head}>
         {children}
         <div className="mt-12 flex flex-col items-center gap-3 rounded-2xl bg-card px-4 py-6 text-center ring-1 ring-border">
           <GoogleSignIn />

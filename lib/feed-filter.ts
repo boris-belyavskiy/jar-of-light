@@ -5,6 +5,14 @@
  */
 export type FeedFilter = { categoryIds: string[]; from?: string; to?: string };
 
+/**
+ * What the feed column shows (ADR-0005: everything opens in place, inside the
+ * same shell): the list, the composer expanded into a new entry, one entry,
+ * or one entry being edited. Lives in the URL next to the filter, so the
+ * browser's back button and reloads keep it.
+ */
+export type FeedView = { mode: "list" } | { mode: "new" } | { mode: "view" | "edit"; id: string };
+
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const MAX_CATEGORIES = 20;
@@ -29,11 +37,21 @@ export function parseFeedFilter(params: SearchParams): FeedFilter {
   return { categoryIds, from, to };
 }
 
-export function feedHref(filter: FeedFilter) {
+export function parseFeedView(params: SearchParams): FeedView {
+  const id = all(params.entry)[0];
+  if (id && UUID.test(id)) return { mode: all(params.edit)[0] === "1" ? "edit" : "view", id };
+  if (all(params.new)[0] === "1") return { mode: "new" };
+  return { mode: "list" };
+}
+
+export function feedHref(filter: FeedFilter, view: FeedView = { mode: "list" }) {
   const query = new URLSearchParams();
   for (const id of filter.categoryIds) query.append("category", id);
   if (filter.from) query.set("from", filter.from);
   if (filter.to) query.set("to", filter.to);
+  if (view.mode === "new") query.set("new", "1");
+  if (view.mode === "view" || view.mode === "edit") query.set("entry", view.id);
+  if (view.mode === "edit") query.set("edit", "1");
   const qs = query.toString();
   return qs ? `/app?${qs}` : "/app";
 }
@@ -48,4 +66,9 @@ export function toggleCategory(filter: FeedFilter, id: string): FeedFilter {
 
 export function isFiltered(filter: FeedFilter) {
   return filter.categoryIds.length > 0 || Boolean(filter.from || filter.to);
+}
+
+/** A place inside the feed to come back to after saving; anything else falls back to the feed. */
+export function safeFeedPath(value: unknown) {
+  return typeof value === "string" && /^\/app(\?[\w=&%.-]*)?$/.test(value) ? value : "/app";
 }

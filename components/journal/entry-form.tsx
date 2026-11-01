@@ -2,16 +2,14 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { FormState } from "@/app/actions/state";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { DatePicker } from "@/components/ui/date-picker";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { charCount, ENTRY_MAX_LENGTH } from "@/lib/validation";
 import { categoryLabel } from "./category-label";
+import { DateTimePill } from "./date-time-pill";
 
 type Option = { id: string; slug: string | null; name: string | null };
 type Values = { body: string; occurredOn: string; occurredTime: string; categoryIds: string[] };
@@ -47,19 +45,27 @@ function saveDraft(path: string, form: HTMLFormElement) {
   }
 }
 
+/**
+ * Writing or editing an entry, shown in place of the feed: the composer bar
+ * "expands" into this card (ADR-0005). `href` is this form's own address,
+ * `closeHref` where cancel and saving lead back to.
+ */
 export function EntryForm({
   action,
   categories,
   initial,
+  href,
+  closeHref,
 }: {
   action: (state: FormState, formData: FormData) => Promise<FormState>;
   categories: Option[];
   initial: Values;
+  href: string;
+  closeHref: string;
 }) {
   const t = useTranslations("entry");
   const tc = useTranslations("categories");
   const tAll = useTranslations();
-  const pathname = usePathname();
   const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction, pending] = useActionState(action, {});
   const [values, setValues] = useState(initial);
@@ -69,7 +75,7 @@ export function EntryForm({
   const tooLong = count > ENTRY_MAX_LENGTH;
 
   useEffect(() => {
-    const draft = readDraft(pathname);
+    const draft = readDraft(href);
     if (!draft) return;
     // Restoring browser-only state after hydration; the server cannot know it.
     /* eslint-disable react-hooks/set-state-in-effect */
@@ -77,24 +83,42 @@ export function EntryForm({
     setBody(draft.body);
     setVersion((v) => v + 1); // remount the uncontrolled inputs with the draft values
     /* eslint-enable react-hooks/set-state-in-effect */
-  }, [pathname]);
+  }, [href]);
 
   return (
-    <form ref={formRef} key={version} action={formAction} className="flex flex-col gap-5">
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="body">{t("bodyLabel")}</Label>
+    <form
+      ref={formRef}
+      key={version}
+      action={formAction}
+      className="flex min-h-full flex-col gap-4 rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border dark:shadow-none"
+    >
+      <input type="hidden" name="returnTo" value={closeHref} />
+      <div className="flex items-center justify-between gap-3">
+        <DateTimePill date={values.occurredOn} time={values.occurredTime} />
+        <Link
+          href={closeHref}
+          aria-label={t("cancel")}
+          className="flex size-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-sky hover:text-foreground"
+        >
+          <X className="size-5" aria-hidden="true" />
+        </Link>
+      </div>
+
+      <div className="flex flex-1 flex-col gap-1">
+        <label htmlFor="body" className="sr-only">
+          {t("bodyLabel")}
+        </label>
         <Textarea
           id="body"
           name="body"
           required
           autoFocus
-          rows={7}
           value={body}
           onChange={(e) => setBody(e.target.value)}
           placeholder={t("bodyPlaceholder")}
           aria-describedby="body-counter"
           aria-invalid={tooLong || undefined}
-          className="min-h-40 bg-card font-serif text-[1.0625rem] leading-[1.6]"
+          className="min-h-48 flex-1 resize-none border-0 bg-transparent px-0 font-serif text-[1.0625rem] leading-[1.6] shadow-none focus-visible:ring-0 dark:bg-transparent"
         />
         <p
           id="body-counter"
@@ -105,23 +129,12 @@ export function EntryForm({
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="occurredOn">{t("date")}</Label>
-          <DatePicker id="occurredOn" name="occurredOn" defaultValue={values.occurredOn} />
-        </div>
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="occurredTime">{t("time")}</Label>
-          <Input id="occurredTime" name="occurredTime" type="time" required defaultValue={values.occurredTime} />
-        </div>
-      </div>
-
-      <fieldset className="flex flex-col gap-2">
+      <fieldset className="flex flex-col gap-2 border-t pt-4">
         <div className="mb-2 flex items-baseline justify-between gap-3">
           <legend className="text-sm font-medium">{t("categories")}</legend>
           <Link
-            href={`/app/categories?back=${encodeURIComponent(pathname)}`}
-            onClick={() => formRef.current && saveDraft(pathname, formRef.current)}
+            href={`/app/categories?back=${encodeURIComponent(href)}`}
+            onClick={() => formRef.current && saveDraft(href, formRef.current)}
             className="text-sm text-primary underline-offset-4 hover:underline"
           >
             {t("editCategories")}
@@ -137,7 +150,7 @@ export function EntryForm({
                 defaultChecked={values.categoryIds.includes(c.id)}
                 className="peer sr-only"
               />
-              <span className="inline-block rounded-full bg-card px-3.5 py-1.5 text-sm ring-1 ring-border transition-colors peer-checked:bg-sky peer-checked:ring-primary peer-focus-visible:ring-2 peer-focus-visible:ring-ring">
+              <span className="inline-block rounded-full bg-background px-3.5 py-1.5 text-sm ring-1 ring-border transition-colors peer-checked:bg-sky peer-checked:ring-primary peer-focus-visible:ring-2 peer-focus-visible:ring-ring">
                 {categoryLabel(c, tc)}
               </span>
             </label>
@@ -155,7 +168,7 @@ export function EntryForm({
         <Button type="submit" disabled={pending || tooLong} className="flex-1 sm:flex-none">
           {pending ? t("saving") : t("save")}
         </Button>
-        <Link href="/app" className={buttonVariants({ variant: "outline" })}>
+        <Link href={closeHref} className={buttonVariants({ variant: "outline" })}>
           {t("cancel")}
         </Link>
       </div>
