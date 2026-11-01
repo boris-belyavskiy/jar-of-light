@@ -15,20 +15,23 @@
     "privacyLink": "How we protect your entries",
     "deleted": "Your account and all entries have been deleted.",
     "signInFailed": "Sign-in didn't work. Please try again.",
-    "notConfigured": "Sign-in is not configured yet."
+    "notConfigured": "Sign-in is not configured yet.",
+    "aboutLink": "About the project"
   },
   "nav": {
     "feed": "Journal",
     "categories": "Categories",
     "settings": "Settings",
     "signOut": "Sign out",
-    "newEntry": "New entry"
+    "newEntry": "New entry",
+    "about": "About",
+    "privacy": "Your privacy"
   },
   "feed": {
-    "title": "Your jar",
+    "title": "Your lights",
     "all": "All",
     "filterLabel": "Filter by category",
-    "empty": "The jar is empty for now. What good thing happened today?",
+    "empty": "No lights yet. What good thing happened today?",
     "emptyFiltered": "No entries match this filter.",
     "writeFirst": "Write the first entry",
     "edit": "Edit",
@@ -36,7 +39,11 @@
     "from": "From",
     "to": "To",
     "applyDates": "Show",
-    "resetDates": "Reset dates"
+    "resetDates": "Reset dates",
+    "composerPrompt": "What bright moment would you like to keep?",
+    "filtersTitle": "Set up the filter",
+    "categoriesTitle": "Categories",
+    "editCategories": "Order and edit categories"
   },
   "entry": {
     "newTitle": "A new light",
@@ -67,10 +74,6 @@
   },
   "categories": {
     "title": "Categories",
-    "systemTitle": "Starter categories",
-    "systemHint": "You can hide the ones you don't need. Entries keep them.",
-    "ownTitle": "Your categories",
-    "ownEmpty": "You have no categories of your own yet.",
     "hide": "Hide",
     "show": "Show",
     "hidden": "Hidden",
@@ -97,7 +100,14 @@
       "duplicate": "You already have a category with this name.",
       "save": "Couldn't save. Please try again."
     },
-    "backToEntry": "Back to the entry"
+    "backToEntry": "Back to the entry",
+    "orderHint": "Drag a category with the mouse (or press and hold on a phone) to change the order — categories appear in this order in the filter and the entry form. Built-in categories can be hidden (entries keep them); your own can be renamed and deleted.",
+    "builtIn": "Built-in",
+    "dragInstructions": "To move a category, press Space or Enter, move it with the up and down arrows, then press Space or Enter again. Press Escape to cancel.",
+    "dragStart": "Picked up “{name}”.",
+    "dragOver": "“{name}” is at position {position}.",
+    "dragEnd": "“{name}” dropped at position {position}.",
+    "dragCancel": "Moving “{name}” cancelled."
   },
   "settings": {
     "title": "Settings",
@@ -159,6 +169,43 @@
       {
         "heading": "Questions",
         "body": "Write to the author through the project's GitHub page."
+      }
+    ],
+    "back": "Back"
+  },
+  "datePicker": {
+    "placeholder": "MM-DD-YYYY",
+    "clear": "Clear"
+  },
+  "about": {
+    "title": "About",
+    "headline": "Fill your life with bright memories.",
+    "intro": "Jar of Light helps you build a habit of noticing the good and being grateful for it.",
+    "story": "Every day brings worries and anxieties, and it's easy to start feeling that life is hard, dark and dangerous. But there is another way: each day, write down one bright moment, one thing you're grateful for. A warm meeting, unexpected help, a bright evening with family and loved ones. Entry by entry, you fill your own jar of light with bright memories.",
+    "whyTitle": "Why it works",
+    "why": "An action we repeat regularly becomes automatic over time — a habit<ref>1</ref>. Gratitude also changes how the brain works: after a few weeks of gratitude writing, the brain's response to gratitude was stronger even three months later<ref>2</ref>. Studies show that writing down good things raises life satisfaction and helps people feel joy and look to the future with optimism more often<ref>3,4,5</ref>. As you add to your jar every day, you learn to meet life with trust and warmth.",
+    "outro": "And once the jar is full, you can return to it like a personal diary or a treasure chest: read it again and make your day brighter.",
+    "sourcesTitle": "Sources",
+    "sources": [
+      {
+        "text": "Lally P., van Jaarsveld C. H. M., Potts H. W. W., Wardle J. (2010). How are habits formed: Modelling habit formation in the real world. European Journal of Social Psychology, 40(6), 998–1009.",
+        "url": "https://doi.org/10.1002/ejsp.674"
+      },
+      {
+        "text": "Kini P., Wong J., McInnis S., Gabana N., Brown J. W. (2016). The effects of gratitude expression on neural activity. NeuroImage, 128, 1–10.",
+        "url": "https://doi.org/10.1016/j.neuroimage.2015.12.040"
+      },
+      {
+        "text": "Emmons R. A., McCullough M. E. (2003). Counting blessings versus burdens: An experimental investigation of gratitude and subjective well-being in daily life. Journal of Personality and Social Psychology, 84(2), 377–389.",
+        "url": "https://doi.org/10.1037/0022-3514.84.2.377"
+      },
+      {
+        "text": "Seligman M. E. P., Steen T. A., Park N., Peterson C. (2005). Positive psychology progress: Empirical validation of interventions. American Psychologist, 60(5), 410–421.",
+        "url": "https://doi.org/10.1037/0003-066X.60.5.410"
+      },
+      {
+        "text": "Davis D. E. et al. (2016). Thankful for the little things: A meta-analysis of gratitude interventions. Journal of Counseling Psychology, 63(1), 20–31.",
+        "url": "https://doi.org/10.1037/cou0000107"
       }
     ],
     "back": "Back"

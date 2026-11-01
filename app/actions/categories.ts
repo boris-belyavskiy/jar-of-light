@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireUserId } from "@/lib/db/queries";
+import { isSameSet } from "@/lib/category-order";
+import { listCategories, requireUserId } from "@/lib/db/queries";
 import { createClient } from "@/lib/supabase/server";
 import { categoryNameSchema } from "@/lib/validation";
 import type { FormState } from "./state";
@@ -52,5 +53,16 @@ export async function setCategoryHidden(id: string, hidden: boolean): Promise<vo
     : await supabase.from("hidden_categories").delete().eq("category_id", id);
   // 23505: already hidden (a double click) is fine.
   if (error && error.code !== "23505") throw new Error(`hide category: ${error.code}`);
+  refresh();
+}
+
+/** Saves the user's new order of categories after a drag and drop. */
+export async function reorderCategories(ids: string[]): Promise<void> {
+  const userId = await requireUserId();
+  const current = (await listCategories()).map((c) => c.id);
+  if (!isSameSet(ids, current)) throw new Error("reorder categories: stale list");
+  const supabase = await createClient();
+  const { error } = await supabase.from("profiles").update({ category_order: ids }).eq("id", userId);
+  if (error) throw new Error(`reorder categories: ${error.code}`);
   refresh();
 }

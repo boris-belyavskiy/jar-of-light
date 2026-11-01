@@ -122,3 +122,22 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* react-day-picker in the Morning sky palette (components/ui/date-picker.tsx). */
+.date-picker .rdp-root {
+  --rdp-accent-color: var(--primary);
+  --rdp-accent-background-color: var(--sky);
+  --rdp-day-height: 38px;
+  --rdp-day-width: 38px;
+  --rdp-day_button-height: 36px;
+  --rdp-day_button-width: 36px;
+  font-size: 0.875rem;
+}
+.date-picker .rdp-selected .rdp-day_button {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+.date-picker .rdp-dropdown_root select {
+  background-color: var(--popover);
+  color: var(--popover-foreground);
+}

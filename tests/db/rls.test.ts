@@ -40,6 +40,16 @@ describe("profiles", () => {
     const res = await asUser(db, A, () => db.query("update public.profiles set display_name = 'hacked' where id = $1", [B]));
     expect(res.affectedRows).toBe(0);
   });
+
+  it("keep each user's category order to themselves", async () => {
+    await asUser(db, A, () => db.query("update public.profiles set category_order = array[$1::uuid]", [systemCategory]));
+    const own = await asUser(db, A, () => db.query<{ category_order: string[] }>("select category_order from public.profiles"));
+    const other = await asUser(db, A, () =>
+      db.query("update public.profiles set category_order = '{}' where id = $1", [B]),
+    );
+    expect(own.rows[0].category_order).toEqual([systemCategory]);
+    expect(other.affectedRows).toBe(0);
+  });
 });
 
 describe("entries: user A and user B", () => {

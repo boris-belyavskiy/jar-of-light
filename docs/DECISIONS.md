@@ -17,6 +17,7 @@ Architecture Decision Records (ADRs) in one file. Each record captures one signi
 | [0001](#adr-0001) | No self-hosted servers for now: managed hosting and LLM via API | Accepted | 2026-10-19 |
 | [0002](#adr-0002) | Free stack for P0–P1: Next.js on Vercel, Supabase Free with keep-alive and own backups | Accepted | 2026-10-27 |
 | [0003](#adr-0003) | App foundations for P1a: no Cache Components, language without a URL prefix, RLS tests on in-memory Postgres | Accepted | 2026-10-27 |
+| [0004](#adr-0004) | UX principles: one experience on web and mobile, one shell with the content always in the same place | Accepted | 2026-10-31 |
 
 ## Candidates
 
@@ -221,6 +222,45 @@ The first build step needs three technical choices that the Tech Spec leaves ope
 1. Next.js makes Cache Components mandatory (announced for the next major version);
 2. A public page needs fixed-language URLs (P4);
 3. A migration uses Supabase features the PGlite stub cannot imitate.
+
+---
+
+<a id="adr-0004"></a>
+
+## ADR-0004: UX principles — one experience on web and mobile, one shell
+
+- **Status:** Accepted
+- **Date:** 2026-10-31
+- **Deciders:** Boris Belyavskiy (owner), Claude Code (lead developer)
+
+### Context
+
+After the first round of feedback on the live app, screens had drifted apart: the header lost its tabs on public pages, the "+" lived only on the feed, links to About and Privacy sat in different places, and the content column moved between the wide feed and the narrow forms. Phones and wide screens also offered different actions.
+
+### Decision
+
+1. **Omnichannel: the same features on web and mobile.** Every action is available on a phone and on a wide screen. Layout may adapt (icons instead of labels, a chip row instead of a side menu), but no feature exists on only one of them. When the app later ships as a PWA or a native app, it keeps the same functions.
+2. **One shell, the content always in the same place.** Every screen, signed in or not, uses the same frame:
+   - a header with the Jar of Light logo and the language switch — signed in, also the tabs (Journal, Categories, Settings, About) and sign-out; signed out, the logo leads to About;
+   - one page layout (`components/page-layout.tsx`): an optional side column on the left (the feed filters) and the main text column, which starts at the same place on the journal, Settings, About and every other page;
+   - the same footer links (About · Privacy) at the bottom of every screen;
+   - signed in, the "+" for a new entry in the bottom-right corner of every page.
+
+### Options considered
+
+- **A separate mobile layout with its own navigation** (bottom tab bar on phones, top on desktop) — rejected for now: two navigation patterns to build and test, and features drift apart.
+- **Each page picks its own width** — rejected: the text jumps when moving between tabs.
+
+### Consequences
+
+- A new page uses `PageLayout` inside the app or public shell; it does not set its own outer width.
+- On phones the tabs show icons only, so their labels must stay available to screen readers.
+- Reviews of new UI check both a phone width (375 px) and a desktop width.
+
+### Revisit when
+
+1. Usability tests in the closed beta show phone users miss a bottom tab bar;
+2. A screen needs a full-width layout (for example, the jar visualization).
 
 ---
 

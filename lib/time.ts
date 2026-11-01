@@ -26,3 +26,9 @@ export function isValidTimeZone(timeZone: string) {
 }
 
 export const FALLBACK_TIME_ZONE = "UTC";
+
+/** A "YYYY-MM-DD" date as the user reads it: MM-DD-YYYY in English, DD.MM.YYYY in Russian. */
+export function displayDate(iso: string, locale: string) {
+  const [year, month, day] = iso.split("-");
+  return locale === "en" ? `${month}-${day}-${year}` : `${day}.${month}.${year}`;
+}
