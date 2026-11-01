@@ -15,20 +15,23 @@
     "privacyLink": "Как мы защищаем ваши записи",
     "deleted": "Ваш аккаунт и все записи удалены.",
     "signInFailed": "Не получилось войти. Попробуйте ещё раз.",
-    "notConfigured": "Вход пока не настроен."
+    "notConfigured": "Вход пока не настроен.",
+    "aboutLink": "О проекте"
   },
   "nav": {
     "feed": "Дневник",
     "categories": "Категории",
     "settings": "Настройки",
     "signOut": "Выйти",
-    "newEntry": "Новая запись"
+    "newEntry": "Новая запись",
+    "about": "О проекте",
+    "privacy": "Ваша приватность"
   },
   "feed": {
-    "title": "Ваша банка",
+    "title": "Ваши огоньки",
     "all": "Все",
     "filterLabel": "Фильтр по категории",
-    "empty": "Банка пока пуста. Что хорошего случилось сегодня?",
+    "empty": "Огоньков пока нет. Что хорошего случилось сегодня?",
     "emptyFiltered": "Под этот фильтр записей нет.",
     "writeFirst": "Написать первую запись",
     "edit": "Изменить",
@@ -36,7 +39,11 @@
     "from": "С",
     "to": "По",
     "applyDates": "Показать",
-    "resetDates": "Сбросить даты"
+    "resetDates": "Сбросить даты",
+    "composerPrompt": "Какой светлый момент хочется запомнить?",
+    "filtersTitle": "Настройте фильтр",
+    "categoriesTitle": "Категории",
+    "editCategories": "Порядок и список категорий"
   },
   "entry": {
     "newTitle": "Новый огонёк",
@@ -67,10 +74,6 @@
   },
   "categories": {
     "title": "Категории",
-    "systemTitle": "Готовые категории",
-    "systemHint": "Ненужные можно скрыть. У записей они останутся.",
-    "ownTitle": "Ваши категории",
-    "ownEmpty": "Своих категорий пока нет.",
     "hide": "Скрыть",
     "show": "Показать",
     "hidden": "Скрыта",
@@ -97,7 +100,14 @@
       "duplicate": "Категория с таким названием уже есть.",
       "save": "Не получилось сохранить. Попробуйте ещё раз."
     },
-    "backToEntry": "Вернуться к записи"
+    "backToEntry": "Вернуться к записи",
+    "orderHint": "Перетащите категорию мышью (или долгим нажатием на телефоне), чтобы поменять порядок — в нём категории стоят в фильтре и в форме записи. Готовые категории можно скрыть (у записей они останутся), свои — переименовать и удалить.",
+    "builtIn": "Готовая",
+    "dragInstructions": "Чтобы переместить категорию, нажмите пробел или Enter, двигайте её стрелками вверх и вниз, затем снова нажмите пробел или Enter. Escape — отмена.",
+    "dragStart": "Категория «{name}» взята.",
+    "dragOver": "«{name}» на месте {position}.",
+    "dragEnd": "«{name}» поставлена на место {position}.",
+    "dragCancel": "Перемещение «{name}» отменено."
   },
   "settings": {
     "title": "Настройки",
@@ -159,6 +169,43 @@
       {
         "heading": "Вопросы",
         "body": "Напишите автору через страницу проекта на GitHub."
+      }
+    ],
+    "back": "Назад"
+  },
+  "datePicker": {
+    "placeholder": "ДД.ММ.ГГГГ",
+    "clear": "Очистить"
+  },
+  "about": {
+    "title": "О проекте",
+    "headline": "Наполните жизнь светлыми воспоминаниями.",
+    "intro": "«Банка света» помогает выработать привычку замечать хорошее и благодарить за него.",
+    "story": "Каждый день нас окружают заботы и тревоги, и легко начать думать, что жизнь трудная, тёмная и полная опасностей. Но можно иначе: каждый день записывать один светлый момент, одну благодарность. Тёплая встреча, неожиданная помощь, яркий вечер с семьёй и любимыми. Запись за записью у вас собирается своя банка света, полная светлых воспоминаний.",
+    "whyTitle": "Почему это работает",
+    "why": "Действие, которое мы регулярно повторяем, со временем становится автоматическим, то есть привычкой<ref>1</ref>. Благодарность тоже меняет работу мозга: после нескольких недель благодарственных записей отклик мозга на благодарность был сильнее ещё через три месяца<ref>2</ref>. Исследования показывают, что записи о хорошем повышают удовлетворённость жизнью, помогают чаще испытывать радость и смотреть в будущее с оптимизмом<ref>3,4,5</ref>. Пополняя банку каждый день, вы учитесь доверять жизни и относиться к ней с теплом.",
+    "outro": "А когда банка наполнится, к ней можно возвращаться как к личному дневнику или кладовой с сокровищами: перечитывать и делать свой день ярче.",
+    "sourcesTitle": "Источники",
+    "sources": [
+      {
+        "text": "Lally P., van Jaarsveld C. H. M., Potts H. W. W., Wardle J. (2010). How are habits formed: Modelling habit formation in the real world. European Journal of Social Psychology, 40(6), 998–1009.",
+        "url": "https://doi.org/10.1002/ejsp.674"
+      },
+      {
+        "text": "Kini P., Wong J., McInnis S., Gabana N., Brown J. W. (2016). The effects of gratitude expression on neural activity. NeuroImage, 128, 1–10.",
+        "url": "https://doi.org/10.1016/j.neuroimage.2015.12.040"
+      },
+      {
+        "text": "Emmons R. A., McCullough M. E. (2003). Counting blessings versus burdens: An experimental investigation of gratitude and subjective well-being in daily life. Journal of Personality and Social Psychology, 84(2), 377–389.",
+        "url": "https://doi.org/10.1037/0022-3514.84.2.377"
+      },
+      {
+        "text": "Seligman M. E. P., Steen T. A., Park N., Peterson C. (2005). Positive psychology progress: Empirical validation of interventions. American Psychologist, 60(5), 410–421.",
+        "url": "https://doi.org/10.1037/0003-066X.60.5.410"
+      },
+      {
+        "text": "Davis D. E. et al. (2016). Thankful for the little things: A meta-analysis of gratitude interventions. Journal of Counseling Psychology, 63(1), 20–31.",
+        "url": "https://doi.org/10.1037/cou0000107"
       }
     ],
     "back": "Назад"

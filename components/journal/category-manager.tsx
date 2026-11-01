@@ -1,47 +1,129 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState, useTransition } from "react";
+import { useActionState, useEffect, useOptimistic, useRef, useState, useTransition } from "react";
+import {
+  closestCenter,
+  DndContext,
+  KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { GripVertical } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { createCategory, deleteCategory, renameCategory, setCategoryHidden } from "@/app/actions/categories";
+import {
+  createCategory,
+  deleteCategory,
+  renameCategory,
+  reorderCategories,
+  setCategoryHidden,
+} from "@/app/actions/categories";
 import type { FormState } from "@/app/actions/state";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { Category } from "@/lib/db/queries";
+import { cn } from "@/lib/utils";
 import { CATEGORY_NAME_MAX_LENGTH } from "@/lib/validation";
 import { categoryLabel } from "./category-label";
 
 export function CategoryManager({ categories }: { categories: Category[] }) {
   const t = useTranslations("categories");
-  const system = categories.filter((c) => c.isSystem);
-  const own = categories.filter((c) => !c.isSystem);
+  const byId = new Map(categories.map((c) => [c.id, c]));
+  // The new order shows at once; the server copy replaces it after saving.
+  const [order, setOrder] = useOptimistic(categories.map((c) => c.id));
+  const [, startTransition] = useTransition();
+  const sensors = useSensors(
+    // A click on a button inside a row stays a click: dragging starts after a short move.
+    useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
+    // On touch screens a short press picks a row up, so the page still scrolls.
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+  const name = (id: string | number) => {
+    const c = byId.get(String(id));
+    return c ? categoryLabel(c, t) : "";
+  };
+
+  function onDragEnd({ active, over }: DragEndEvent) {
+    if (!over || active.id === over.id) return;
+    const next = arrayMove(order, order.indexOf(String(active.id)), order.indexOf(String(over.id)));
+    startTransition(async () => {
+      setOrder(next);
+      await reorderCategories(next);
+    });
+  }
 
   return (
-    <div className="flex flex-col gap-10">
-      <section>
-        <h2 className="font-heading text-xl font-semibold">{t("systemTitle")}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">{t("systemHint")}</p>
-        <ul className="mt-4 flex flex-col divide-y rounded-2xl bg-card ring-1 ring-border">
-          {system.map((c) => (
-            <SystemRow key={c.id} category={c} />
-          ))}
-        </ul>
-      </section>
-
-      <section>
-        <h2 className="font-heading text-xl font-semibold">{t("ownTitle")}</h2>
-        <CreateForm />
-        {own.length === 0 ? (
-          <p className="mt-4 text-sm text-muted-foreground">{t("ownEmpty")}</p>
-        ) : (
+    <section>
+      <p className="text-sm text-muted-foreground">{t("orderHint")}</p>
+      <CreateForm />
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={onDragEnd}
+        accessibility={{
+          screenReaderInstructions: { draggable: t("dragInstructions") },
+          announcements: {
+            onDragStart: ({ active }) => t("dragStart", { name: name(active.id) }),
+            onDragOver: ({ active, over }) =>
+              over ? t("dragOver", { name: name(active.id), position: order.indexOf(String(over.id)) + 1 }) : undefined,
+            onDragEnd: ({ active, over }) =>
+              over ? t("dragEnd", { name: name(active.id), position: order.indexOf(String(over.id)) + 1 }) : undefined,
+            onDragCancel: ({ active }) => t("dragCancel", { name: name(active.id) }),
+          },
+        }}
+      >
+        <SortableContext items={order} strategy={verticalListSortingStrategy}>
           <ul className="mt-4 flex flex-col divide-y rounded-2xl bg-card ring-1 ring-border">
-            {own.map((c) => (
-              <OwnRow key={c.id} category={c} />
-            ))}
+            {order.map((id) => {
+              const c = byId.get(id);
+              return c ? <SortableRow key={id} category={c} /> : null;
+            })}
           </ul>
-        )}
-      </section>
-    </div>
+        </SortableContext>
+      </DndContext>
+    </section>
+  );
+}
+
+/** The whole row can be dragged with the mouse or a finger; the keyboard picks it up from the row itself. */
+function SortableRow({ category }: { category: Category }) {
+  const t = useTranslations("categories");
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: category.id,
+  });
+  const { onKeyDown, ...pointerListeners } = listeners ?? {};
+
+  return (
+    <li
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      {...attributes}
+      aria-label={categoryLabel(category, t)}
+      {...pointerListeners}
+      // Space and Enter on a button inside the row press the button, not pick the row up.
+      onKeyDown={(e) => {
+        if (e.target === e.currentTarget) onKeyDown?.(e);
+      }}
+      className={cn(
+        "relative flex cursor-grab touch-manipulation items-center gap-1 bg-card py-1.5 pr-2 pl-1 outline-none select-none first:rounded-t-2xl last:rounded-b-2xl focus-visible:ring-2 focus-visible:ring-ring",
+        isDragging && "z-10 cursor-grabbing rounded-xl shadow-lg ring-1 ring-primary/40",
+      )}
+    >
+      <GripVertical className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+      {category.isSystem ? <SystemRow category={category} /> : <OwnRow category={category} />}
+    </li>
   );
 }
 
@@ -49,11 +131,11 @@ function SystemRow({ category }: { category: Category }) {
   const t = useTranslations("categories");
   const [pending, startTransition] = useTransition();
   return (
-    <li className="flex items-center gap-3 px-4 py-3">
+    <div className="flex flex-1 flex-wrap items-center gap-x-3 gap-y-1 pl-2">
       <span className={category.hidden ? "text-muted-foreground line-through" : undefined}>
         {categoryLabel(category, t)}
       </span>
-      {category.hidden && <span className="text-xs text-muted-foreground">{t("hidden")}</span>}
+      <span className="text-xs text-muted-foreground">{category.hidden ? t("hidden") : t("builtIn")}</span>
       <Button
         type="button"
         variant="ghost"
@@ -64,7 +146,7 @@ function SystemRow({ category }: { category: Category }) {
       >
         {category.hidden ? t("show") : t("hide")}
       </Button>
-    </li>
+    </div>
   );
 }
 
@@ -116,8 +198,14 @@ function OwnRow({ category }: { category: Category }) {
 
   if (editing) {
     return (
-      <li className="px-4 py-3">
-        <form action={action} className="flex gap-2">
+      <div className="flex-1 py-1.5 pl-2">
+        <form
+          action={action}
+          className="flex gap-2"
+          onMouseDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
+        >
           <Input
             name="name"
             required
@@ -134,12 +222,12 @@ function OwnRow({ category }: { category: Category }) {
           </Button>
         </form>
         <ErrorText state={state} />
-      </li>
+      </div>
     );
   }
 
   return (
-    <li className="flex items-center gap-1 px-4 py-3">
+    <div className="flex flex-1 items-center gap-1 pl-2">
       <span className="mr-auto break-all">{category.name}</span>
       <Button type="button" variant="ghost" size="sm" onClick={() => setEditing(true)}>
         {t("rename")}
@@ -154,6 +242,6 @@ function OwnRow({ category }: { category: Category }) {
         cancelLabel={t("cancel")}
         onConfirm={() => deleteCategory(category.id)}
       />
-    </li>
+    </div>
   );
 }

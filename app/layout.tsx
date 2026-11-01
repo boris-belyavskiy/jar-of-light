@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Source_Serif_4 } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
+import { SiteFooter } from "@/components/site-footer";
 import "./globals.css";
 
 // next/font downloads the fonts at build time and serves them from our own
@@ -26,7 +27,10 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang={locale} className={`${inter.variable} ${sourceSerif.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <NextIntlClientProvider>
+          {children}
+          <SiteFooter />
+        </NextIntlClientProvider>
       </body>
     </html>
   );

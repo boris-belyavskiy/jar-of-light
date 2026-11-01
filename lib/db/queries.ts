@@ -1,12 +1,19 @@
 import "server-only";
 import { cache } from "react";
 import { redirect } from "next/navigation";
+import { sortByOrder } from "@/lib/category-order";
 import type { FeedFilter } from "@/lib/feed-filter";
 import { createClient } from "@/lib/supabase/server";
 import { FALLBACK_TIME_ZONE } from "@/lib/time";
 import { isLocale, type Locale } from "@/i18n/config";
 
-export type Profile = { id: string; displayName: string; locale: Locale | null; timezone: string };
+export type Profile = {
+  id: string;
+  displayName: string;
+  locale: Locale | null;
+  timezone: string;
+  categoryOrder: string[];
+};
 
 export type Category = {
   id: string;
@@ -24,11 +31,16 @@ export type Entry = {
   categoryIds: string[];
 };
 
-/** The signed-in user's id; sends signed-out visitors to the landing page. */
-export const requireUserId = cache(async () => {
+/** The signed-in user's id, or null on public pages that also open signed out. */
+export const getUserId = cache(async (): Promise<string | null> => {
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
-  const sub = data?.claims?.sub;
+  return data?.claims?.sub ?? null;
+});
+
+/** The signed-in user's id; sends signed-out visitors to the landing page. */
+export const requireUserId = cache(async () => {
+  const sub = await getUserId();
   if (!sub) redirect("/");
   return sub;
 });
@@ -38,7 +50,7 @@ export const getProfile = cache(async (): Promise<Profile> => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, display_name, locale, timezone")
+    .select("id, display_name, locale, timezone, category_order")
     .eq("id", userId)
     .single();
   if (error) throw new Error(`profile: ${error.code}`);
@@ -47,14 +59,18 @@ export const getProfile = cache(async (): Promise<Profile> => {
     displayName: data.display_name,
     locale: isLocale(data.locale) ? data.locale : null,
     timezone: data.timezone ?? FALLBACK_TIME_ZONE,
+    categoryOrder: data.category_order ?? [],
   };
 });
 
-/** System categories first (in their fixed order), then the user's own by creation time. */
+/**
+ * Categories in the user's own order (lib/category-order); without one, system
+ * categories first in their fixed order, then the user's own by creation time.
+ */
 export const listCategories = cache(async (): Promise<Category[]> => {
   await requireUserId();
   const supabase = await createClient();
-  const [categories, hidden] = await Promise.all([
+  const [categories, hidden, profile] = await Promise.all([
     supabase
       .from("categories")
       .select("id, slug, name, user_id")
@@ -62,17 +78,19 @@ export const listCategories = cache(async (): Promise<Category[]> => {
       .order("sort", { ascending: true })
       .order("created_at", { ascending: true }),
     supabase.from("hidden_categories").select("category_id"),
+    getProfile(),
   ]);
   if (categories.error) throw new Error(`categories: ${categories.error.code}`);
   if (hidden.error) throw new Error(`hidden_categories: ${hidden.error.code}`);
   const hiddenIds = new Set(hidden.data.map((h) => h.category_id));
-  return categories.data.map((c) => ({
+  const list = categories.data.map((c) => ({
     id: c.id,
     slug: c.slug,
     name: c.name,
     isSystem: c.user_id === null,
     hidden: hiddenIds.has(c.id),
   }));
+  return sortByOrder(list, profile.categoryOrder);
 });
 
 const ENTRY_COLUMNS = "id, body, occurred_on, occurred_time, cats:entry_categories(category_id)";

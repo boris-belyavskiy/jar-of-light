@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import type { FormState } from "@/app/actions/state";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -107,7 +108,7 @@ export function EntryForm({
       <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-2">
           <Label htmlFor="occurredOn">{t("date")}</Label>
-          <Input id="occurredOn" name="occurredOn" type="date" required defaultValue={values.occurredOn} />
+          <DatePicker id="occurredOn" name="occurredOn" defaultValue={values.occurredOn} />
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="occurredTime">{t("time")}</Label>
