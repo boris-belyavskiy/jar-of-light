@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { feedHref, isFiltered, parseFeedFilter, toggleCategory } from "@/lib/feed-filter";
+import { feedHref, isFiltered, parseFeedFilter, parseFeedView, safeFeedPath, toggleCategory } from "@/lib/feed-filter";
 
 const A = "00000000-0000-4000-8000-00000000000a";
 const B = "00000000-0000-4000-8000-00000000000b";
@@ -46,5 +46,33 @@ describe("toggleCategory and feedHref", () => {
   it("knows when anything is filtered", () => {
     expect(isFiltered({ categoryIds: [] })).toBe(false);
     expect(isFiltered({ categoryIds: [], to: "2026-10-27" })).toBe(true);
+  });
+});
+
+describe("feed view", () => {
+  it("reads the list, the composer, one entry and editing from the URL", () => {
+    expect(parseFeedView({})).toEqual({ mode: "list" });
+    expect(parseFeedView({ new: "1" })).toEqual({ mode: "new" });
+    expect(parseFeedView({ entry: A })).toEqual({ mode: "view", id: A });
+    expect(parseFeedView({ entry: A, edit: "1" })).toEqual({ mode: "edit", id: A });
+    expect(parseFeedView({ entry: "not-an-id" })).toEqual({ mode: "list" });
+  });
+
+  it("keeps the filter when opening an entry", () => {
+    expect(feedHref({ categoryIds: [A], from: "2026-10-01" }, { mode: "edit", id: B })).toBe(
+      `/app?category=${A}&from=2026-10-01&entry=${B}&edit=1`,
+    );
+    expect(feedHref({ categoryIds: [] }, { mode: "new" })).toBe("/app?new=1");
+  });
+});
+
+describe("safeFeedPath", () => {
+  it("allows only paths inside the feed", () => {
+    expect(safeFeedPath(`/app?entry=${A}`)).toBe(`/app?entry=${A}`);
+    expect(safeFeedPath("/app")).toBe("/app");
+    expect(safeFeedPath("https://evil.example")).toBe("/app");
+    expect(safeFeedPath("//evil.example")).toBe("/app");
+    expect(safeFeedPath("/app/../x")).toBe("/app");
+    expect(safeFeedPath(null)).toBe("/app");
   });
 });

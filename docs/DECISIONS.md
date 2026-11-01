@@ -18,6 +18,7 @@ Architecture Decision Records (ADRs) in one file. Each record captures one signi
 | [0002](#adr-0002) | Free stack for P0–P1: Next.js on Vercel, Supabase Free with keep-alive and own backups | Accepted | 2026-10-27 |
 | [0003](#adr-0003) | App foundations for P1a: no Cache Components, language without a URL prefix, RLS tests on in-memory Postgres | Accepted | 2026-10-27 |
 | [0004](#adr-0004) | UX principles: one experience on web and mobile, one shell with the content always in the same place | Accepted | 2026-10-31 |
+| [0005](#adr-0005) | A fixed frame where only the content column scrolls; entries open in place in the feed, addressed by the URL | Accepted | 2026-11-01 |
 
 ## Candidates
 
@@ -261,6 +262,44 @@ After the first round of feedback on the live app, screens had drifted apart: th
 
 1. Usability tests in the closed beta show phone users miss a bottom tab bar;
 2. A screen needs a full-width layout (for example, the jar visualization).
+
+---
+
+<a id="adr-0005"></a>
+
+## ADR-0005: A fixed frame; entries open in place
+
+- **Status:** Accepted
+- **Date:** 2026-11-01
+- **Deciders:** Boris Belyavskiy (owner), Claude Code (lead developer)
+
+Builds on [ADR-0004](#adr-0004); does not replace it.
+
+### Context
+
+With ADR-0004 live, the page still scrolled as a whole: the title, the composer, the filters and the footer links slid away with the entries. Writing, opening and editing an entry also went to separate pages, so the composer did not feel like the place where writing happens.
+
+### Decision
+
+1. **A fixed frame.** The screen never scrolls as a whole. The header, the page head (title; on the feed also the composer), the side column (feed filters) and the footer links stay in place; only the main column below the head scrolls — entries in the feed, the text on About, Privacy, Settings and Categories. On phones the feed filters fold under their title so the entries keep most of the screen.
+2. **Entries open in place.** The composer expands into the entry card in the main column; tapping an entry opens it there like a note; "Edit" in the entry's "⋯" menu turns the same card into the form. Header, filters and footer stay. Each state has its own address — `/app?new=1`, `/app?entry=<id>`, `/app?entry=<id>&edit=1`, keeping the filter — so the back button, reloads and links work, and the pages render on the server without client-side state.
+3. **Date and time as a pill.** An entry's date and time sit in a pill at the top of the card, styled like the Google sign-in button; while writing, the pill opens a small window with a calendar and the time.
+
+### Options considered
+
+- **A modal dialog over the feed** for new and opened entries — rejected: it covers the filters and the shell, against ADR-0004, and needs its own scroll and focus handling.
+- **Client-only state** for the open entry — rejected: the back button would leave the app instead of closing the entry, and a reload would lose it.
+
+### Consequences
+
+- The old `/app/entry/new` and `/app/entry/[id]` routes only redirect.
+- Server actions return to a path inside the feed (`safeFeedPath`), never to an address from outside.
+- Long content in the side column scrolls on its own.
+
+### Revisit when
+
+1. Beta users on phones find the folded filters hard to discover;
+2. AI suggestions or actions on an entry need more room than the main column gives.
 
 ---
 

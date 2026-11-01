@@ -34,7 +34,6 @@
     "empty": "No lights yet. What good thing happened today?",
     "emptyFiltered": "No entries match this filter.",
     "writeFirst": "Write the first entry",
-    "edit": "Edit",
     "anyOf": "Showing entries with any of the selected categories.",
     "from": "From",
     "to": "To",
@@ -43,11 +42,11 @@
     "composerPrompt": "What bright moment would you like to keep?",
     "filtersTitle": "Set up the filter",
     "categoriesTitle": "Categories",
-    "editCategories": "Order and edit categories"
+    "editCategories": "Order and edit categories",
+    "backToFeed": "Back to the feed",
+    "openEntry": "Open entry"
   },
   "entry": {
-    "newTitle": "A new light",
-    "editTitle": "Edit entry",
     "bodyLabel": "What happened?",
     "bodyPlaceholder": "Who made your day easier today? What small moment do you want to remember?",
     "counter": "{count} / {max}",
@@ -57,7 +56,6 @@
     "save": "Save",
     "saving": "Saving…",
     "cancel": "Cancel",
-    "delete": "Delete entry",
     "deleteTitle": "Delete this entry?",
     "deleteBody": "It will be deleted right away and can't be restored.",
     "deleteConfirm": "Delete",
@@ -70,7 +68,12 @@
       "save": "Couldn't save the entry. Please try again.",
       "categories": "The entry is saved, but its categories weren't. Please try again."
     },
-    "editCategories": "Edit categories"
+    "editCategories": "Edit categories",
+    "changeDateTime": "Change date and time",
+    "done": "Done",
+    "actions": "Entry actions",
+    "deleteShort": "Delete",
+    "edit": "Edit"
   },
   "categories": {
     "title": "Categories",

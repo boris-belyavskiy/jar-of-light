@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUserId } from "@/lib/db/queries";
+import { safeFeedPath } from "@/lib/feed-filter";
 import { createClient } from "@/lib/supabase/server";
 import { entrySchema } from "@/lib/validation";
 import type { FormState } from "./state";
@@ -40,7 +41,7 @@ export async function createEntry(_prev: FormState, formData: FormData): Promise
     if (linkError) return { error: "entry.errors.categories" };
   }
   revalidatePath("/app");
-  redirect("/app");
+  redirect(safeFeedPath(formData.get("returnTo")));
 }
 
 export async function updateEntry(id: string, _prev: FormState, formData: FormData): Promise<FormState> {
@@ -74,14 +75,14 @@ export async function updateEntry(id: string, _prev: FormState, formData: FormDa
     if (e) return { error: "entry.errors.categories" };
   }
   revalidatePath("/app");
-  redirect("/app");
+  redirect(safeFeedPath(formData.get("returnTo")));
 }
 
-export async function deleteEntry(id: string): Promise<void> {
+export async function deleteEntry(id: string, returnTo: string): Promise<void> {
   await requireUserId();
   const supabase = await createClient();
   const { error } = await supabase.from("entries").delete().eq("id", id);
   if (error) throw new Error(`delete entry: ${error.code}`);
   revalidatePath("/app");
-  redirect("/app");
+  redirect(safeFeedPath(returnTo));
 }

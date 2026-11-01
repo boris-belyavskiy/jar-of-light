@@ -423,9 +423,10 @@ Visitor types a self-description → T7 extracts identities with the `search_cat
 |---|---|---|---|
 | `/` | Public | Landing with Google sign-in | P0–P1 |
 | `/privacy` | Public | Short privacy note (PRD DATA-04); privacy-policy link for Google | P1a |
-| `/app` | User | Feed with category filter + "new entry" | P1a |
-| `/app/entry/new`, `/app/entry/[id]` | User | Create, edit, delete an entry; later AI suggestions, actions, publishing | P1a–P4 |
-| `/app/categories` | User | Own categories; hide system ones | P1a |
+| `/about` | Public | What the project is for, with research sources; inside the app when signed in | P1a+ |
+| `/app` | User | Feed with date and category filters. Entries open in place ([ADR-0005](DECISIONS.md#adr-0005)): `?new=1` new entry, `?entry=<id>` one entry, `&edit=1` editing; later AI suggestions, actions, publishing | P1a–P4 |
+| `/app/entry/new`, `/app/entry/[id]` | User | Old addresses; redirect to `/app?new=1` and `/app?entry=<id>&edit=1` | P1a |
+| `/app/categories` | User | Own categories; hide system ones; drag to reorder | P1a |
 | `/app/jar` | User | Open the jar | P1 |
 | `/app/people`, `/app/places` | User | People and places of my life | P1 |
 | `/app/insights` | User | Stats, summaries, on this day, digests | P1–P2 |

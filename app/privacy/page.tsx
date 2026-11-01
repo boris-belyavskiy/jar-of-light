@@ -16,10 +16,15 @@ export default async function PrivacyPage() {
   const sections = (messages.privacy as { sections: Section[] }).sections;
 
   return (
-    <PublicPage>
-      <h1 className="font-heading text-[2rem] leading-tight font-semibold">{t("title")}</h1>
-      <p className="mt-2 text-sm text-muted-foreground">{t("updated")}</p>
-      <p className="mt-6 text-[1.0625rem] leading-relaxed">{t("intro")}</p>
+    <PublicPage
+      head={
+        <>
+          <h1 className="font-heading text-2xl font-semibold">{t("title")}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t("updated")}</p>
+        </>
+      }
+    >
+      <p className="text-[1.0625rem] leading-relaxed">{t("intro")}</p>
       {sections.map((s) => (
         <section key={s.heading} className="mt-8">
           <h2 className="font-heading text-xl font-semibold">{s.heading}</h2>
