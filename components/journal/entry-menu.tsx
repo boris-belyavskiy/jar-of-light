@@ -38,7 +38,7 @@ export function EntryMenu({ id, editHref, afterDelete }: { id: string; editHref:
         <Menu.Portal>
           <Menu.Positioner sideOffset={4} align="end" className="z-50">
             <Menu.Popup className="min-w-40 rounded-xl bg-popover p-1 text-popover-foreground shadow-lg ring-1 ring-foreground/10 outline-none">
-              <Menu.LinkItem render={<Link href={editHref} />} className={ITEM}>
+              <Menu.LinkItem render={<Link href={editHref} scroll={false} />} className={ITEM}>
                 <Pencil className="size-4" aria-hidden="true" />
                 {t("edit")}
               </Menu.LinkItem>

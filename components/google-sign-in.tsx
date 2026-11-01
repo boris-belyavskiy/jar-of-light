@@ -92,7 +92,7 @@ export function GoogleSignIn() {
   if (!env.googleClientId) return <p className="text-sm text-muted-foreground">{t("notConfigured")}</p>;
 
   return (
-    <div className="flex flex-col items-center gap-3">
+    <div className="flex flex-col items-start gap-3">
       <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" onReady={() => setScriptReady(true)} />
       <div ref={buttonRef} className="min-h-11" />
       {failed && (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useOptimistic, useRef, useState, useTransition } from "react";
+import { useActionState, useEffect, useOptimistic, useState, useTransition } from "react";
 import {
   closestCenter,
   DndContext,
@@ -20,25 +20,26 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   createCategory,
   deleteCategory,
   renameCategory,
+  renameSystemCategory,
   reorderCategories,
   setCategoryHidden,
 } from "@/app/actions/categories";
 import type { FormState } from "@/app/actions/state";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import type { Category } from "@/lib/db/queries";
 import { cn } from "@/lib/utils";
-import { CATEGORY_NAME_MAX_LENGTH } from "@/lib/validation";
 import { categoryLabel } from "./category-label";
+import { CategoryNameFields } from "./category-name-fields";
 
 export function CategoryManager({ categories }: { categories: Category[] }) {
   const t = useTranslations("categories");
+  const locale = useLocale();
   const byId = new Map(categories.map((c) => [c.id, c]));
   // The new order shows at once; the server copy replaces it after saving.
   const [order, setOrder] = useOptimistic(categories.map((c) => c.id));
@@ -52,7 +53,7 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
   );
   const name = (id: string | number) => {
     const c = byId.get(String(id));
-    return c ? categoryLabel(c, t) : "";
+    return c ? categoryLabel(c, t, locale) : "";
   };
 
   function onDragEnd({ active, over }: DragEndEvent) {
@@ -100,6 +101,7 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
 /** The whole row can be dragged with the mouse or a finger; the keyboard picks it up from the row itself. */
 function SortableRow({ category }: { category: Category }) {
   const t = useTranslations("categories");
+  const locale = useLocale();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: category.id,
   });
@@ -110,7 +112,7 @@ function SortableRow({ category }: { category: Category }) {
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       {...attributes}
-      aria-label={categoryLabel(category, t)}
+      aria-label={categoryLabel(category, t, locale)}
       {...pointerListeners}
       // Space and Enter on a button inside the row press the button, not pick the row up.
       onKeyDown={(e) => {
@@ -122,30 +124,97 @@ function SortableRow({ category }: { category: Category }) {
       )}
     >
       <GripVertical className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-      {category.isSystem ? <SystemRow category={category} /> : <OwnRow category={category} />}
+      <CategoryRow category={category} />
     </li>
   );
 }
 
-function SystemRow({ category }: { category: Category }) {
+/** One category: its name (and the other language's under it), then rename and hide or delete. */
+function CategoryRow({ category }: { category: Category }) {
   const t = useTranslations("categories");
+  const locale = useLocale();
+  const [editing, setEditing] = useState(false);
   const [pending, startTransition] = useTransition();
+  const rename = category.isSystem ? renameSystemCategory : renameCategory;
+  const [state, action, saving] = useActionState(async (prev: FormState, formData: FormData) => {
+    const result = await rename(category.id, prev, formData);
+    if (result.ok) setEditing(false);
+    return result;
+  }, {});
+
+  if (editing) {
+    // Built-in categories show their own name as a hint; saving both empty brings it back.
+    const builtIn = category.slug ? t(`system.${category.slug}`) : undefined;
+    return (
+      <div className="flex-1 py-1.5 pl-2">
+        <form
+          action={action}
+          className="flex flex-col gap-2 sm:flex-row sm:items-end"
+          onMouseDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
+        >
+          <CategoryNameFields
+            idPrefix={`rename-${category.id}`}
+            defaultRu={category.nameRu ?? ""}
+            defaultEn={category.nameEn ?? ""}
+            placeholderRu={locale === "ru" ? builtIn : undefined}
+            placeholderEn={locale === "en" ? builtIn : undefined}
+            autoFocus
+          />
+          <div className="flex gap-2">
+            <Button type="submit" size="sm" disabled={saving}>
+              {t("save")}
+            </Button>
+            <Button type="button" size="sm" variant="ghost" onClick={() => setEditing(false)}>
+              {t("cancel")}
+            </Button>
+          </div>
+        </form>
+        {category.isSystem && <p className="mt-1 text-xs text-muted-foreground">{t("renameBuiltInHint")}</p>}
+        <ErrorText state={state} />
+      </div>
+    );
+  }
+
+  const name = categoryLabel(category, t, locale);
+  const other = locale === "ru" ? category.nameEn : category.nameRu;
   return (
     <div className="flex flex-1 flex-wrap items-center gap-x-3 gap-y-1 pl-2">
-      <span className={category.hidden ? "text-muted-foreground line-through" : undefined}>
-        {categoryLabel(category, t)}
+      <span className="flex min-w-0 flex-col">
+        <span className={cn("break-words", category.hidden && "text-muted-foreground line-through")}>{name}</span>
+        {other && other !== name && <span className="text-xs text-muted-foreground">{other}</span>}
       </span>
-      <span className="text-xs text-muted-foreground">{category.hidden ? t("hidden") : t("builtIn")}</span>
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        className="ml-auto"
-        disabled={pending}
-        onClick={() => startTransition(() => setCategoryHidden(category.id, !category.hidden))}
-      >
-        {category.hidden ? t("show") : t("hide")}
-      </Button>
+      {category.isSystem && (
+        <span className="text-xs text-muted-foreground">{category.hidden ? t("hidden") : t("builtIn")}</span>
+      )}
+      <div className="ml-auto flex items-center gap-1">
+        <Button type="button" variant="ghost" size="sm" onClick={() => setEditing(true)}>
+          {t("rename")}
+        </Button>
+        {category.isSystem ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            disabled={pending}
+            onClick={() => startTransition(() => setCategoryHidden(category.id, !category.hidden))}
+          >
+            {category.hidden ? t("show") : t("hide")}
+          </Button>
+        ) : (
+          <ConfirmDialog
+            trigger={t("delete")}
+            triggerVariant="ghost"
+            triggerSize="sm"
+            title={t("deleteTitle", { name })}
+            description={t("deleteBody")}
+            confirmLabel={t("deleteConfirm")}
+            cancelLabel={t("cancel")}
+            onConfirm={() => deleteCategory(category.id)}
+          />
+        )}
+      </div>
     </div>
   );
 }
@@ -162,86 +231,24 @@ function ErrorText({ state }: { state: FormState }) {
 function CreateForm() {
   const t = useTranslations("categories");
   const [state, action, pending] = useActionState(createCategory, {});
-  const formRef = useRef<HTMLFormElement>(null);
+  // A new key after each save empties the fields.
+  const [round, setRound] = useState(0);
   useEffect(() => {
-    if (state.ok) formRef.current?.reset();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (state.ok) setRound((r) => r + 1);
   }, [state]);
 
   return (
-    <form ref={formRef} action={action} className="mt-4">
-      <div className="flex gap-2">
-        <Input
-          name="name"
-          required
-          maxLength={CATEGORY_NAME_MAX_LENGTH}
-          placeholder={t("newPlaceholder")}
-          aria-label={t("newPlaceholder")}
-          className="bg-card"
-        />
+    <form action={action} className="mt-4 rounded-2xl bg-card p-3 ring-1 ring-border">
+      <p className="mb-2 text-sm font-medium">{t("newTitle")}</p>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+        <CategoryNameFields key={round} idPrefix="new-category" />
         <Button type="submit" disabled={pending}>
           {t("add")}
         </Button>
       </div>
+      <p className="mt-1 text-xs text-muted-foreground">{t("namesHint")}</p>
       <ErrorText state={state} />
     </form>
-  );
-}
-
-function OwnRow({ category }: { category: Category }) {
-  const t = useTranslations("categories");
-  const [editing, setEditing] = useState(false);
-  const [state, action, pending] = useActionState(async (prev: FormState, formData: FormData) => {
-    const result = await renameCategory(category.id, prev, formData);
-    if (result.ok) setEditing(false);
-    return result;
-  }, {});
-
-  if (editing) {
-    return (
-      <div className="flex-1 py-1.5 pl-2">
-        <form
-          action={action}
-          className="flex gap-2"
-          onMouseDown={(e) => e.stopPropagation()}
-          onTouchStart={(e) => e.stopPropagation()}
-          onKeyDown={(e) => e.stopPropagation()}
-        >
-          <Input
-            name="name"
-            required
-            autoFocus
-            maxLength={CATEGORY_NAME_MAX_LENGTH}
-            defaultValue={category.name ?? ""}
-            aria-label={t("rename")}
-          />
-          <Button type="submit" size="sm" disabled={pending}>
-            {t("save")}
-          </Button>
-          <Button type="button" size="sm" variant="ghost" onClick={() => setEditing(false)}>
-            {t("cancel")}
-          </Button>
-        </form>
-        <ErrorText state={state} />
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-1 items-center gap-1 pl-2">
-      <span className="mr-auto break-all">{category.name}</span>
-      <Button type="button" variant="ghost" size="sm" onClick={() => setEditing(true)}>
-        {t("rename")}
-      </Button>
-      <ConfirmDialog
-        trigger={t("delete")}
-        triggerVariant="ghost"
-        triggerSize="sm"
-        title={t("deleteTitle", { name: category.name ?? "" })}
-        description={t("deleteBody")}
-        confirmLabel={t("deleteConfirm")}
-        cancelLabel={t("cancel")}
-        onConfirm={() => deleteCategory(category.id)}
-      />
-    </div>
   );
 }

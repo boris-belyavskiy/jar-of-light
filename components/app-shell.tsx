@@ -16,7 +16,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
   const t = await getTranslations("nav");
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <div className="flex flex-1 flex-col">
       <SiteHeader logoHref="/app" logoLabel={t("feed")}>
         <NavTabs />
         <LanguageSwitch />
@@ -27,7 +27,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
           </Button>
         </form>
       </SiteHeader>
-      <main className="mx-auto min-h-0 w-full max-w-5xl flex-1 px-4 pt-6">{children}</main>
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4">{children}</main>
       <Link
         href="/app?new=1"
         aria-label={t("newEntry")}

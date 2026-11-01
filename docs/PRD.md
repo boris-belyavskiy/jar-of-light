@@ -153,8 +153,8 @@ PM's feature list (2026-10-19) maps as: F1 → ENT-01 · F2 → ENT-02 · F3 →
 
 ### 7.3 Categories
 
-- **CAT-01** — System categories are on by default. Starter set: **Family · Friends · Work · Study · Health · Chance encounter** (RU: Семья · Друзья · Работа · Учёба · Здоровье · Случайная встреча). System categories can be hidden, but not renamed or deleted. An entry can have **several** categories. *(Must, P1a)*
-- **CAT-02** — Custom categories: create, rename, delete. *(Must, P1a)* Each user's own **order** of all categories (system and custom) in the feed filter and the entry form. *(Must, done 2026-10-31, moved from P1b by the PM)* Color, icon. *(Should, P1b)*
+- **CAT-01** — System categories are on by default. Starter set: **Family · Friends · Work · Study · Health · Chance encounter** (RU: Семья · Друзья · Работа · Учёба · Здоровье · Случайная встреча). System categories can be hidden, but not deleted; since 2026-11-01 (PM) each user can also **rename** them for themselves, in Russian and English, and go back to the built-in name. An entry can have **several** categories. *(Must, P1a)*
+- **CAT-02** — Custom categories: create, rename, delete. *(Must, P1a)* A category has a **Russian and an English name**; one is enough, the app shows the name in the interface language and falls back to the other; text typed in the other alphabet moves to its own field. *(Must, done 2026-11-01)* Each user's own **order** of all categories (system and custom) in the feed filter and the entry form. *(Must, done 2026-10-31, moved from P1b by the PM)* Color, icon. *(Should, P1b)*
   - **AC:** deleting a custom category removes it from entries but never deletes the entries.
 - **CAT-03** — AI suggests 1–3 categories after saving; the user accepts with one tap or edits. AI may propose a **new** category. *(Must, P2)*
   - **AC:** accepted and rejected suggestions are logged (quality metric); a rejected suggestion is not shown again for that entry.

@@ -23,7 +23,7 @@ export async function PublicPage({ head, children }: { head: React.ReactNode; ch
     <PublicShell>
       <PageLayout head={head}>
         {children}
-        <div className="mt-12 flex flex-col items-center gap-3 rounded-2xl bg-card px-4 py-6 text-center ring-1 ring-border">
+        <div className="mt-12 flex flex-col items-start gap-3 rounded-2xl bg-card px-4 py-6 ring-1 ring-border">
           <GoogleSignIn />
           <p className="text-sm text-muted-foreground">{t("signInHint")}</p>
         </div>

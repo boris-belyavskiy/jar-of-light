@@ -80,7 +80,6 @@
     "hide": "Hide",
     "show": "Show",
     "hidden": "Hidden",
-    "newPlaceholder": "New category",
     "add": "Add",
     "rename": "Rename",
     "save": "Save",
@@ -98,19 +97,24 @@
       "chance_encounter": "Chance encounter"
     },
     "errors": {
-      "empty": "Give the category a name.",
+      "empty": "Name the category in at least one language.",
       "tooLong": "Up to 40 characters.",
       "duplicate": "You already have a category with this name.",
       "save": "Couldn't save. Please try again."
     },
     "backToEntry": "Back to the entry",
-    "orderHint": "Drag a category with the mouse (or press and hold on a phone) to change the order — categories appear in this order in the filter and the entry form. Built-in categories can be hidden (entries keep them); your own can be renamed and deleted.",
+    "orderHint": "Drag a category with the mouse (or press and hold on a phone) to change the order — categories appear in this order in the filter and the entry form. Any category can be renamed in Russian and English; built-in ones can be hidden (entries keep them), your own can be deleted.",
     "builtIn": "Built-in",
     "dragInstructions": "To move a category, press Space or Enter, move it with the up and down arrows, then press Space or Enter again. Press Escape to cancel.",
     "dragStart": "Picked up “{name}”.",
     "dragOver": "“{name}” is at position {position}.",
     "dragEnd": "“{name}” dropped at position {position}.",
-    "dragCancel": "Moving “{name}” cancelled."
+    "dragCancel": "Moving “{name}” cancelled.",
+    "nameRu": "In Russian",
+    "nameEn": "In English",
+    "newTitle": "New category",
+    "namesHint": "One name is enough. Text in the other alphabet moves to its own field.",
+    "renameBuiltInHint": "Leave both fields empty to bring back the built-in name."
   },
   "settings": {
     "title": "Settings",

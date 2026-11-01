@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type { FormState } from "@/app/actions/state";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,7 +11,7 @@ import { charCount, ENTRY_MAX_LENGTH } from "@/lib/validation";
 import { categoryLabel } from "./category-label";
 import { DateTimePill } from "./date-time-pill";
 
-type Option = { id: string; slug: string | null; name: string | null };
+type Option = { id: string; slug: string | null; nameRu: string | null; nameEn: string | null };
 type Values = { body: string; occurredOn: string; occurredTime: string; categoryIds: string[] };
 
 // A draft is kept only in this browser tab (sessionStorage) and only while the
@@ -66,6 +66,7 @@ export function EntryForm({
   const t = useTranslations("entry");
   const tc = useTranslations("categories");
   const tAll = useTranslations();
+  const locale = useLocale();
   const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction, pending] = useActionState(action, {});
   const [values, setValues] = useState(initial);
@@ -151,7 +152,7 @@ export function EntryForm({
                 className="peer sr-only"
               />
               <span className="inline-block rounded-full bg-background px-3.5 py-1.5 text-sm ring-1 ring-border transition-colors peer-checked:bg-sky peer-checked:ring-primary peer-focus-visible:ring-2 peer-focus-visible:ring-ring">
-                {categoryLabel(c, tc)}
+                {categoryLabel(c, tc, locale)}
               </span>
             </label>
           ))}

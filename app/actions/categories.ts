@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { isSameSet } from "@/lib/category-order";
 import { listCategories, requireUserId } from "@/lib/db/queries";
 import { createClient } from "@/lib/supabase/server";
-import { categoryNameSchema } from "@/lib/validation";
+import { categoryNamesSchema, systemCategoryNamesSchema } from "@/lib/validation";
 import type { FormState } from "./state";
 
 function errorKey(code: string) {
@@ -15,12 +15,18 @@ function refresh() {
   revalidatePath("/app", "layout");
 }
 
+function readNames(formData: FormData) {
+  return { nameRu: formData.get("nameRu") ?? "", nameEn: formData.get("nameEn") ?? "" };
+}
+
 export async function createCategory(_prev: FormState, formData: FormData): Promise<FormState> {
   const userId = await requireUserId();
-  const parsed = categoryNameSchema.safeParse(formData.get("name") ?? "");
+  const parsed = categoryNamesSchema.safeParse(readNames(formData));
   if (!parsed.success) return { error: parsed.error.issues[0]?.message };
   const supabase = await createClient();
-  const { error } = await supabase.from("categories").insert({ user_id: userId, name: parsed.data });
+  const { error } = await supabase
+    .from("categories")
+    .insert({ user_id: userId, name_ru: parsed.data.nameRu, name_en: parsed.data.nameEn });
   if (error) return { error: errorKey(error.code) };
   refresh();
   return { ok: true };
@@ -28,11 +34,41 @@ export async function createCategory(_prev: FormState, formData: FormData): Prom
 
 export async function renameCategory(id: string, _prev: FormState, formData: FormData): Promise<FormState> {
   await requireUserId();
-  const parsed = categoryNameSchema.safeParse(formData.get("name") ?? "");
+  const parsed = categoryNamesSchema.safeParse(readNames(formData));
   if (!parsed.success) return { error: parsed.error.issues[0]?.message };
   const supabase = await createClient();
-  const { error } = await supabase.from("categories").update({ name: parsed.data }).eq("id", id);
+  const { error } = await supabase
+    .from("categories")
+    .update({ name_ru: parsed.data.nameRu, name_en: parsed.data.nameEn })
+    .eq("id", id);
   if (error) return { error: errorKey(error.code) };
+  refresh();
+  return { ok: true };
+}
+
+/** The user's own names for a built-in category; both empty brings back the built-in name. */
+export async function renameSystemCategory(id: string, _prev: FormState, formData: FormData): Promise<FormState> {
+  await requireUserId();
+  const parsed = systemCategoryNamesSchema.safeParse(readNames(formData));
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message };
+  const { nameRu, nameEn } = parsed.data;
+  const supabase = await createClient();
+  // A fresh builder per request: builders share their URL, so one filter would leak into the next call.
+  const names = () => supabase.from("category_names");
+
+  if (!nameRu && !nameEn) {
+    const { error } = await names().delete().eq("category_id", id);
+    if (error) return { error: errorKey(error.code) };
+  } else {
+    // Update first, insert if there was nothing to update: an upsert would also
+    // try to update the key columns, which users may not change.
+    const updated = await names().update({ name_ru: nameRu, name_en: nameEn }).eq("category_id", id).select("category_id");
+    if (updated.error) return { error: errorKey(updated.error.code) };
+    if (updated.data.length === 0) {
+      const { error } = await names().insert({ category_id: id, name_ru: nameRu, name_en: nameEn });
+      if (error) return { error: errorKey(error.code) };
+    }
+  }
   refresh();
   return { ok: true };
 }

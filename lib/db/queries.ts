@@ -15,10 +15,16 @@ export type Profile = {
   categoryOrder: string[];
 };
 
+/**
+ * A category with its names in Russian and English. For a custom category they
+ * are its own names; for a built-in one, the user's renames (null = the
+ * built-in translation). Show them with `categoryLabel`.
+ */
 export type Category = {
   id: string;
   slug: string | null;
-  name: string | null;
+  nameRu: string | null;
+  nameEn: string | null;
   isSystem: boolean;
   hidden: boolean;
 };
@@ -70,26 +76,33 @@ export const getProfile = cache(async (): Promise<Profile> => {
 export const listCategories = cache(async (): Promise<Category[]> => {
   await requireUserId();
   const supabase = await createClient();
-  const [categories, hidden, profile] = await Promise.all([
+  const [categories, hidden, renamed, profile] = await Promise.all([
     supabase
       .from("categories")
-      .select("id, slug, name, user_id")
+      .select("id, slug, name_ru, name_en, user_id")
       .order("user_id", { ascending: true, nullsFirst: true })
       .order("sort", { ascending: true })
       .order("created_at", { ascending: true }),
     supabase.from("hidden_categories").select("category_id"),
+    supabase.from("category_names").select("category_id, name_ru, name_en"),
     getProfile(),
   ]);
   if (categories.error) throw new Error(`categories: ${categories.error.code}`);
   if (hidden.error) throw new Error(`hidden_categories: ${hidden.error.code}`);
+  if (renamed.error) throw new Error(`category_names: ${renamed.error.code}`);
   const hiddenIds = new Set(hidden.data.map((h) => h.category_id));
-  const list = categories.data.map((c) => ({
-    id: c.id,
-    slug: c.slug,
-    name: c.name,
-    isSystem: c.user_id === null,
-    hidden: hiddenIds.has(c.id),
-  }));
+  const renames = new Map(renamed.data.map((r) => [r.category_id, r]));
+  const list = categories.data.map((c) => {
+    const names = c.user_id === null ? renames.get(c.id) : c;
+    return {
+      id: c.id,
+      slug: c.slug,
+      nameRu: names?.name_ru ?? null,
+      nameEn: names?.name_en ?? null,
+      isSystem: c.user_id === null,
+      hidden: hiddenIds.has(c.id),
+    };
+  });
   return sortByOrder(list, profile.categoryOrder);
 });
 
