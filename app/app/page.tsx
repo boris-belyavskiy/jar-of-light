@@ -9,6 +9,7 @@ import { EntryOverlay } from "@/components/journal/entry-overlay";
 import { FeedFilters, StatsButton } from "@/components/journal/feed-filters";
 import { FilterPanel } from "@/components/journal/filter-panel";
 import { PILL } from "@/components/journal/pill";
+import { StarButton } from "@/components/journal/star-button";
 import { StatsView } from "@/components/journal/stats-view";
 import { JarMark } from "@/components/jar-mark";
 import { PageLayout } from "@/components/page-layout";
@@ -173,7 +174,8 @@ async function EntryList({
             <article className="relative rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border transition-colors hover:ring-primary/40 dark:shadow-none">
               <div className="flex items-center gap-2">
                 <span className={PILL}>{entryDateLabel(entry.occurredOn, entry.occurredTime, locale)}</span>
-                <div className="ml-auto">
+                <div className="ml-auto flex items-center">
+                  <StarButton id={entry.id} starred={entry.starred} />
                   <EntryMenu
                     id={entry.id}
                     editHref={feedHref(filter, { mode: "edit", id: entry.id })}
@@ -256,6 +258,7 @@ async function OpenedEntry({
         <div className="flex items-center gap-2">
           <span className={PILL}>{entryDateLabel(entry.occurredOn, entry.occurredTime, locale)}</span>
           <div className="ml-auto flex items-center">
+            <StarButton id={entry.id} starred={entry.starred} />
             <EntryMenu id={entry.id} editHref={feedHref(filter, { mode: "edit", id: entry.id })} afterDelete={listHref} />
             <Link
               href={listHref}

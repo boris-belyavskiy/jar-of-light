@@ -36,6 +36,7 @@ export type Entry = {
   occurredOn: string;
   occurredTime: string;
   categoryIds: string[];
+  starred: boolean;
 };
 
 /** The signed-in user's id, or null on public pages that also open signed out. */
@@ -107,7 +108,8 @@ export const listCategories = cache(async (): Promise<Category[]> => {
   return sortByOrder(list, profile.categoryOrder);
 });
 
-const ENTRY_COLUMNS = "id, body, occurred_on, occurred_time, cats:entry_categories(category_id)";
+// `stars` holds at most this user's own star: row level security hides anyone else's.
+const ENTRY_COLUMNS = "id, body, occurred_on, occurred_time, cats:entry_categories(category_id), stars(user_id)";
 
 type EntryRow = {
   id: string;
@@ -115,6 +117,7 @@ type EntryRow = {
   occurred_on: string;
   occurred_time: string;
   cats: { category_id: string }[];
+  stars: { user_id: string }[];
 };
 
 function toEntry(row: EntryRow): Entry {
@@ -124,6 +127,7 @@ function toEntry(row: EntryRow): Entry {
     occurredOn: row.occurred_on,
     occurredTime: row.occurred_time.slice(0, 5),
     categoryIds: row.cats.map((c) => c.category_id),
+    starred: row.stars.length > 0,
   };
 }
 

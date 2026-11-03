@@ -212,3 +212,51 @@ describe("account deletion (DATA-02)", () => {
     }
   });
 });
+
+describe("stars", () => {
+  let entryOfA: string;
+
+  beforeAll(async () => {
+    await asUser(db, A, async () => {
+      entryOfA = (
+        await db.query<{ id: string }>(
+          "insert into public.entries (body, occurred_on, occurred_time) values ('A note of Alice', '2026-01-02', '10:00') returning id",
+        )
+      ).rows[0].id;
+    });
+  });
+
+  it("A can star an own entry and sees the star, and the user comes from the session", async () => {
+    await asUser(db, A, async () => {
+      await db.query("insert into public.stars (entry_id) values ($1)", [entryOfA]);
+      const { rows } = await db.query<{ user_id: string }>("select user_id from public.stars");
+      expect(rows).toEqual([{ user_id: A }]);
+    });
+  });
+
+  it("A cannot star B's entry or claim a star in B's name", async () => {
+    await asUser(db, A, async () => {
+      await expect(db.query("insert into public.stars (entry_id) values ($1)", [entryOfB])).rejects.toThrow();
+      await expect(
+        db.query("insert into public.stars (user_id, entry_id) values ($1, $2)", [B, entryOfA]),
+      ).rejects.toThrow();
+    });
+  });
+
+  it("B cannot see or remove A's star", async () => {
+    await asUser(db, B, async () => {
+      expect((await db.query("select * from public.stars")).rows).toEqual([]);
+      await db.query("delete from public.stars where entry_id = $1", [entryOfA]);
+    });
+    await asUser(db, A, async () => {
+      expect((await db.query("select * from public.stars")).rows).toHaveLength(1);
+    });
+  });
+
+  it("the star goes away with its entry", async () => {
+    await asUser(db, A, async () => {
+      await db.query("delete from public.entries where id = $1", [entryOfA]);
+      expect((await db.query("select * from public.stars")).rows).toEqual([]);
+    });
+  });
+});
