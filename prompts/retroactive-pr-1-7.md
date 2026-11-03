@@ -1,6 +1,6 @@
 # Prompt log: PRs #1–#7 (retroactive)
 
-**Recovered on 2026-11-02, after the fact.** These PRs were merged before `PLAN.md` existed and had no prompt logs at the time. The quotes below are copied from the saved Claude Code session logs on my machine, in Russian as written, with an English summary. Long prompts are shortened with […]. Times are UTC.
+**Recovered on 2026-11-02, after the fact.** These PRs were built from the first plan and the PRD, Tech Spec and Roadmap, but had no prompt logs at the time. The quotes below are copied from the saved Claude Code session logs on my machine, in Russian as written, with an English summary. Long prompts are shortened with […]. Times are UTC.
 
 ## PR #1: app skeleton and minimal private journal
 
