@@ -49,7 +49,21 @@
     "categoriesTitle": "Categories",
     "editCategories": "Order and edit categories",
     "backToFeed": "Back to the feed",
+    "statsButton": "Statistics",
+    "statsTitle": "Statistics",
     "openEntry": "Open entry"
+  },
+  "stats": {
+    "title": "Statistics",
+    "periodAll": "All time. Set dates in the filter to choose a period.",
+    "periodRange": "From {from} to {to}",
+    "periodFrom": "From {from}",
+    "periodTo": "Up to {to}",
+    "empty": "No entries for this filter yet.",
+    "total": "Entries",
+    "activeDays": "Days with an entry",
+    "bestMonth": "Best month",
+    "entriesCount": "{count, plural, one {# entry} other {# entries}}"
   },
   "entry": {
     "bodyLabel": "What happened?",

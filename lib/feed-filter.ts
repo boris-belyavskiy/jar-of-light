@@ -11,10 +11,10 @@ export type FeedFilter = { categoryIds: string[]; from?: string; to?: string; so
 /**
  * What the feed column shows (ADR-0005: everything opens in place, inside the
  * same shell): the list, the composer expanded into a new entry, one entry,
- * or one entry being edited. Lives in the URL next to the filter, so the
+ * one entry being edited, or the dashboard. Lives in the URL next to the filter, so the
  * browser's back button and reloads keep it.
  */
-export type FeedView = { mode: "list" } | { mode: "new" } | { mode: "view" | "edit"; id: string };
+export type FeedView = { mode: "list" } | { mode: "new" } | { mode: "stats" } | { mode: "view" | "edit"; id: string };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -52,6 +52,7 @@ export function parseFeedView(params: SearchParams): FeedView {
   const id = all(params.entry)[0];
   if (id && UUID.test(id)) return { mode: all(params.edit)[0] === "1" ? "edit" : "view", id };
   if (all(params.new)[0] === "1") return { mode: "new" };
+  if (all(params.stats)[0] === "1") return { mode: "stats" };
   return { mode: "list" };
 }
 
@@ -63,6 +64,7 @@ export function feedHref(filter: FeedFilter, view: FeedView = { mode: "list" }) 
   if (filter.sort === "oldest") query.set("sort", "oldest");
   if (filter.q) query.set("q", filter.q);
   if (view.mode === "new") query.set("new", "1");
+  if (view.mode === "stats") query.set("stats", "1");
   if (view.mode === "view" || view.mode === "edit") query.set("entry", view.id);
   if (view.mode === "edit") query.set("edit", "1");
   const qs = query.toString();
