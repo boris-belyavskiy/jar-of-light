@@ -33,3 +33,11 @@ Prompts are quoted as written, in Russian (the chat language), each with an Engl
 *Summary: what are these stars? Don't build them until you explain exactly what you will do. Leave it to the final step; we may not build stars for this app at all.*
 
 **Agent response (summary):** marked feature 10 as undecided in the plan, moved the decision to the end and worded the data isolation test so it does not depend on stars.
+
+## Prompt 4: the plan came first
+
+> Первый план лежит в архиве и был сделан мастер-план по основным фичам, это и был первый план. Затем мы сделали 3 документа, чтобы по ним легче было распределять информацию (продуктовую, техническую и т.д.). То, что мы для задания снова сделали единый план, не означает, что план появился после - надо это явно показать.
+
+*Summary: the first plan is the master plan in the archive; then we made three documents to organize the information. Making one plan again for the assignment does not mean the plan came later, and this must be shown explicitly.*
+
+**Agent response (summary):** agreed that it had mixed up "the file `PLAN.md` came later" with "the plan came later". It checked the order in `main` (documents from 2026-10-19, first code on 2026-10-27) and the archived plan, then corrected the opening of `PLAN.md`. Sections 1–7 were not changed.

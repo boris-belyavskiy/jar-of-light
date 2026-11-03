@@ -1,14 +1,17 @@
 # PLAN — Jar of Light
 
-> **Written:** 2026-11-02 · **Owner:** Boris Belyavskiy · **Coding agent:** Claude Code
+> **This document:** 2026-11-02 (the plan itself dates from 2026-10-16, see below) · **Owner:** Boris Belyavskiy · **Coding agent:** Claude Code
 > **Course:** MBA 296 Intro to Coding, Assignment F (Solo app) · **Live app:** [jaroflight.vercel.app](https://jaroflight.vercel.app)
 > This is the short blueprint for the assignment. Full detail lives in the documents linked below.
 
-**Starting point (read this first).** This repository was not empty when this file was written, and the order of events matters:
+**This is not the first plan: in this project the plan came first, then the code.**
 
-- **The plan came before the code, in other documents.** A first written plan dates from 2026-10-16. The first commit (2026-10-19) split it into the [PRD](docs/PRD.md), [Tech Spec](docs/TECH_SPEC.md), [Roadmap](docs/ROADMAP.md) and [Decisions](docs/DECISIONS.md), separate documents built for a product that will keep growing. The first code landed on 2026-10-27.
-- **`PLAN.md` itself came after the code.** PRs #1–#7 (Oct 27 – Nov 1) shipped features 1–7 below, without Issues or prompt logs, and seven early documentation commits went directly to `main`. Changes were tried on a separate dev environment before production, but that is not the Issue → PR trail this assignment asks for.
-- **I am not rewriting that history.** PRs #1–#7 get Issues marked *retroactive* and prompt logs recovered from the agent's session logs. Everything from this pull request forward follows the full loop (Issue → branch → prompt log → PR → merge → deploy), and `main` is now protected so a direct commit is impossible.
+- **2026-10-16: the first plan.** A master plan of the main features, in Russian, kept outside this repository. It already covered Google sign-in, entries, categories with renaming of the built-in ones, search, filters and sorting, and charts.
+- **2026-10-19: the plan moves into `main`.** The [very first commit](https://github.com/boris-belyavskiy/jar-of-light/commit/081f7ad) split it into the [PRD](docs/PRD.md), [Tech Spec](docs/TECH_SPEC.md) and [Roadmap](docs/ROADMAP.md), so that product and technical information each have their own place as the app grows. The PRD header still says it was built from that plan. Everything in `main` until 2026-10-27 is documents, with no code.
+- **2026-10-27: the first code.** PR #1 built the first step of that roadmap, then PRs #2–#7 continued it. Features 1–7 below come from this work.
+- **2026-11-02: this file.** The assignment asks for one `PLAN.md`, so this brings the existing plan back into one document in the assignment's format. It is the same plan in a new form, not a plan written after the fact.
+
+**What the history does not have.** The planning documents reached `main` as seven direct commits, and PRs #1–#7 had no Issues or prompt logs at the time. Changes were tried on a separate dev environment before production. I am not rewriting that history: those PRs now link to Issues marked *retroactive*, with prompts recovered from the agent's session logs. Everything from PR #9 forward follows the full loop (Issue → branch → prompt log → PR → merge → deploy), and `main` is protected so a direct commit is impossible.
 
 ---
 
