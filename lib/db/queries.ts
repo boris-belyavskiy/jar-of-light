@@ -2,7 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { redirect } from "next/navigation";
 import { sortByOrder } from "@/lib/category-order";
-import type { FeedFilter } from "@/lib/feed-filter";
+import { likePattern, type FeedFilter } from "@/lib/feed-filter";
 import { createClient } from "@/lib/supabase/server";
 import { FALLBACK_TIME_ZONE } from "@/lib/time";
 import { isLocale, type Locale } from "@/i18n/config";
@@ -144,6 +144,7 @@ export async function listEntries(filter: FeedFilter): Promise<Entry[]> {
   if (byCategory) query = query.in("f.category_id", filter.categoryIds);
   if (filter.from) query = query.gte("occurred_on", filter.from);
   if (filter.to) query = query.lte("occurred_on", filter.to);
+  if (filter.q) query = query.ilike("body", likePattern(filter.q));
   const { data, error } = await query;
   if (error) throw new Error(`entries: ${error.code}`);
   return (data as unknown as EntryRow[]).map(toEntry);

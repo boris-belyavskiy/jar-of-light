@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { feedHref, isFiltered, parseFeedFilter, parseFeedView, safeFeedPath, toggleCategory } from "@/lib/feed-filter";
+import {
+  feedHref,
+  isFiltered,
+  likePattern,
+  parseFeedFilter,
+  parseFeedView,
+  safeFeedPath,
+  SEARCH_MAX_LENGTH,
+  toggleCategory,
+} from "@/lib/feed-filter";
 
 const A = "00000000-0000-4000-8000-00000000000a";
 const B = "00000000-0000-4000-8000-00000000000b";
@@ -42,6 +51,28 @@ describe("sort", () => {
     expect(feedHref({ categoryIds: [], sort: "newest" })).toBe("/app");
     expect(feedHref({ categoryIds: [], sort: "oldest" })).toBe("/app?sort=oldest");
     expect(feedHref(toggleCategory({ categoryIds: [], sort: "oldest" }, A))).toBe(`/app?category=${A}&sort=oldest`);
+  });
+});
+
+describe("search", () => {
+  it("trims the words, drops an empty search and limits the length", () => {
+    expect(parseFeedFilter({ q: "  кофе с Аней " }).q).toBe("кофе с Аней");
+    expect(parseFeedFilter({ q: "   " }).q).toBeUndefined();
+    expect(parseFeedFilter({ q: "a".repeat(500) }).q).toHaveLength(SEARCH_MAX_LENGTH);
+  });
+
+  it("counts as a filter", () => {
+    expect(isFiltered({ categoryIds: [], q: "кофе" })).toBe(true);
+  });
+
+  it("matches wildcards literally", () => {
+    expect(likePattern("кофе")).toBe("%кофе%");
+    expect(likePattern("100%_a\\b")).toBe("%100\\%\\_a\\\\b%");
+  });
+
+  it("survives saving an entry: a space in the URL is a valid place to come back to", () => {
+    const href = feedHref({ categoryIds: [], q: "кофе с Аней" });
+    expect(safeFeedPath(href)).toBe(href);
   });
 });
 
