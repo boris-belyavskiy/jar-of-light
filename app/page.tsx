@@ -12,11 +12,11 @@ export default async function LandingPage({ searchParams }: PageProps<"/">) {
   return (
     <PublicShell>
       <PageLayout>
-        {/* Left-aligned across the full width. Text outside the cards starts where
-            the cards' bullets start (their px-4), so everything sits on one edge. */}
-        <div className="flex flex-col gap-6">
+        {/* A narrow column in the center (ADR-0009), just wide enough for each point to fit on
+            one line. Text outside the cards starts where the cards' bullets start (their px-4). */}
+        <div className="mx-auto flex w-full max-w-lg flex-col gap-6">
           <div className="flex flex-col items-start gap-3 px-4">
-            <div className="rounded-full bg-sky p-4 text-primary shadow-sm">
+            <div className="self-center rounded-full bg-sky p-4 text-primary shadow-sm">
               <JarMark className="size-12" />
             </div>
             <h1 className="font-heading text-[2rem] leading-tight font-semibold">{tm("title")}</h1>

@@ -22,6 +22,7 @@ Architecture Decision Records (ADRs) in one file. Each record captures one signi
 | [0006](#adr-0006) | Full-width pages, the window's own scrollbar, an opened entry as a window over the feed | Accepted | 2026-11-01 |
 | [0007](#adr-0007) | The dashboard opens in place in the feed's column; stars are private favorites in the category filter | Accepted | 2026-11-02 |
 | [0008](#adr-0008) | One frame for every edge, one baseline, one set of fonts, justified main text | Accepted | 2026-11-02 |
+| [0009](#adr-0009) | The screen before sign-in is a narrow column in the center | Accepted | 2026-11-02 |
 
 ## Candidates
 
@@ -399,6 +400,30 @@ Edges were close but not equal: padding inside the logo's drawing and the sign-o
 ### Revisit when
 
 1. Reading tests show the long lines or the gaps on phones get in the way.
+
+---
+
+<a id="adr-0009"></a>
+
+## ADR-0009: The screen before sign-in is a narrow column in the center
+
+- **Status:** Accepted
+- **Date:** 2026-11-02
+- **Deciders:** Boris Belyavskiy (owner), Claude Code (lead developer)
+
+Replaces point 4 of [ADR-0006](#adr-0006) and is the one exception to the frame in [ADR-0008](#adr-0008): the header and footer stay on the frame, the content does not.
+
+### Context
+
+Across the full width, the screen before sign-in had one short line of text in each very wide card.
+
+### Decision
+
+The content is a centered column of 32rem, wide enough for each point to fit on one line in both languages. The logo on its blue circle is centered. The rest keeps its alignment: main text justified, everything else starting at one left edge. Phones use the full width.
+
+### Revisit when
+
+1. A longer point no longer fits on one line.
 
 ---
 
