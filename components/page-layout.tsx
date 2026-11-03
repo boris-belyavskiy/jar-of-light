@@ -33,7 +33,8 @@ export function PageLayout({
           "md:grid-cols-[14rem_minmax(0,42rem)] md:grid-rows-[auto_1fr] md:gap-x-10 md:[grid-template-areas:'aside_head'_'aside_body']",
       )}
     >
-      <div className="sticky top-14 z-20 bg-background pt-6 pb-4 [grid-area:head]">
+      {/* Wider than the column by 0.5rem each side, so the cards' outline and shadow can't show past it while scrolling. */}
+      <div className="sticky top-14 z-20 -mx-2 bg-background px-2 pt-6 pb-4 [grid-area:head]">
         {head}
         {asideInHead && <div className="mt-4 md:hidden">{asideInHead}</div>}
       </div>
