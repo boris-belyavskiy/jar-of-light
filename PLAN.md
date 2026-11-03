@@ -126,7 +126,7 @@ Sections 1–7 above are the plan as merged in #9. The opening was corrected onc
 | 4. Validation | Shipped | Done | Nothing | |
 | 5. Several categories on one entry | Shipped | Done | Nothing | |
 | 6. Date and time of an entry | Shipped | Done | Nothing | |
-| 7. Editing the built-in categories | Shipped | Done | Nothing | Still my least sure feature, for what it may do to statistics later, not for how hard it was to build |
+| 7. Editing the built-in categories | Changed | Done | **The biggest gap.** This file lists it as live because it was written later, but the plan it was built from said built-in categories "can be hidden, but not renamed" and gave no order or second language. Real use brought renaming, dragging instead of arrows, and names in two languages (#4, #6, #7) | Using the app showed how much detail categories hold; three migrations could have been one |
 | 8. Find things: checkboxes, search, sort | Shipped | Done | Search stayed even though it was first in line to be cut, because it keeps the count of feature PRs safe | Being first to cut is not the same as being cut |
 | 9. Dashboard: stats | Changed | Done | "Days with light this month" became "days with an entry in the period", because I decided the period comes from the dates the user selects | A stat is a product decision: what counts as "the period" changed the test too |
 | 9. Dashboard: chart | Changed | Done | Blue bars instead of gold and HTML instead of SVG, because gold has 1.63:1 contrast on the card; the agent's call and I went along | Measure the colour instead of judging it by eye |
@@ -135,5 +135,6 @@ Sections 1–7 above are the plan as merged in #9. The opening was corrected onc
 | Test: data isolation | Shipped | Done | Nothing | The app has to be broken on purpose to prove the test can fail |
 | Test: dashboard | Changed | Done | Follows the change to the stat above | |
 | *(not planned)* Fixes from the stranger test | Added | Done | A first-time user found lines at the feed's edges and a bulky filter: #44 and this PR | A first-time user saw in minutes what the agent and I had missed for days |
+| *(not planned)* Layout and type after the stranger test | Added | Done | I kept asking for one frame, one set of fonts and justified text, and asked to remove a shake while scrolling: #48, #50, #52, #54, #56, #58 | Small misalignments are visible to the person who uses the app every day |
 
-**Not in the plan, and already working:** a language switch (RU / EN), dragging categories into your own order, your own categories, time zones, account deletion. See the [README](README.md#features).
+**Not in the plan, and already working:** a language switch (EN / RU), dragging categories into your own order, your own categories, time zones, account deletion. See the [README](README.md#features).
