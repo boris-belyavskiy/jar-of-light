@@ -31,6 +31,20 @@ describe("parseFeedFilter", () => {
   });
 });
 
+describe("sort", () => {
+  it("reads oldest first and ignores anything else", () => {
+    expect(parseFeedFilter({ sort: "oldest" }).sort).toBe("oldest");
+    expect(parseFeedFilter({ sort: "random" }).sort).toBeUndefined();
+    expect(parseFeedFilter({}).sort).toBeUndefined();
+  });
+
+  it("keeps the URL clean for the default and survives a category toggle", () => {
+    expect(feedHref({ categoryIds: [], sort: "newest" })).toBe("/app");
+    expect(feedHref({ categoryIds: [], sort: "oldest" })).toBe("/app?sort=oldest");
+    expect(feedHref(toggleCategory({ categoryIds: [], sort: "oldest" }, A))).toBe(`/app?category=${A}&sort=oldest`);
+  });
+});
+
 describe("toggleCategory and feedHref", () => {
   it("adds and removes a category, keeping the dates", () => {
     const start = { categoryIds: [A], from: "2026-10-01" };
