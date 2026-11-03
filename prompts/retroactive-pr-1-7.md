@@ -10,11 +10,17 @@
 
 *Summary: start simple: an account through Google, entries with a date and my own category, visible only in one's own account. Ask me about the technical forks first.*
 
+**Agent response (quoted, 2026-10-27 20:24, question 14 of its list):**
+
+> **14. Управление категориями.** Можно ли переименовывать и скрывать готовые категории и удалять свои? → *Рекомендую: свои — создать, переименовать, удалить; готовые — только скрыть.*
+
+*Summary: "Managing categories. Can built-in categories be renamed and hidden, and own ones deleted? I recommend: own ones: create, rename, delete; built-in ones: hide only."*
+
 **2026-10-27 20:30** (my answers)
 
-> 2. Язык сразу два […] 4. Вход только Google 5. Я бы хотел любой с гугл-аккаунтом […] 8. […] лимит давай 4000 символов 9. Дата и время давай 10. Редактирование и удаление да 11. Фильтр по категории сразу 12. Категорий можно несколько 13. Категории давай на старте: семья, друзья, работа, учеба, здоровье, случайная встреча […]
+> 2. Язык сразу два […] 4. Вход только Google 5. Я бы хотел любой с гугл-аккаунтом […] 8. […] лимит давай 4000 символов 9. Дата и время давай 10. Редактирование и удаление да 11. Фильтр по категории сразу 12. Категорий можно несколько 13. Категории давай на старте: семья, друзья, работа, учеба, здоровье, случайная встреча 14. По управлению согласен […]
 
-*Summary: two languages, Google only and open to anyone, a 4,000-character limit, date and time, edit and delete, a category filter, several categories per entry, six starter categories.*
+*Summary: two languages, Google only and open to anyone, a 4,000-character limit, date and time, edit and delete, a category filter, several categories per entry, six starter categories, and "on management, agreed" for question 14.*
 
 **2026-10-28 01:07**
 
@@ -53,6 +59,12 @@
 > План по доработке Jar of Light: 1. Возможность кастомизировать порядок категорий, которые отображаются 2. Сделать выбор категорий как вертикальное меню сбоку слева 3. Фильтр дат сделать слева над фильтром категорий […] 6. Там, где сейчас категории, должна быть полоска, ткнув на которую, начнется создание новой записи (как feed в ленте новостей facebook) 7. Раздел пусть называется не «ваша банка» а «ваши огоньки» 8. Должен быть короткий раздел «о проекте» […]
 
 *Summary: custom category order, categories as a left-side menu, the date filter above them, a composer bar as in the Facebook feed, rename the section to "Your lights", a short About page.*
+
+**Agent response (quoted, 2026-10-31 23:29):**
+
+> **Свой порядок категорий.** На странице «Категории» теперь один общий список со стрелками ↑/↓.
+
+*Summary: "Your own order of categories. The Categories page now has one common list with up and down arrows."*
 
 **2026-10-31 23:45**
 
