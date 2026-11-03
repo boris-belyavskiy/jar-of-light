@@ -1,7 +1,8 @@
 import { getTranslations } from "next-intl/server";
-import { EntriesByDateChart } from "@/components/journal/stats-charts";
+import { EntriesByCategoryChart, EntriesByDateChart } from "@/components/journal/stats-charts";
 import { monthLabel } from "@/components/journal/month-label";
-import { entriesByDate, summaryStats, type StatEntry } from "@/lib/dashboard-stats";
+import { entriesByCategory, entriesByDate, summaryStats, type StatEntry } from "@/lib/dashboard-stats";
+import type { Category } from "@/lib/db/queries";
 import type { FeedFilter } from "@/lib/feed-filter";
 import { displayDate } from "@/lib/time";
 
@@ -9,10 +10,14 @@ import { displayDate } from "@/lib/time";
 export async function StatsView({
   entries,
   filter,
+  categories,
+  label,
   locale,
 }: {
   entries: StatEntry[];
   filter: FeedFilter;
+  categories: Category[];
+  label: (c: Category) => string;
   locale: string;
 }) {
   const t = await getTranslations("stats");
@@ -51,6 +56,7 @@ export async function StatsView({
         )}
       </dl>
       <EntriesByDateChart series={entriesByDate(entries, filter)} locale={locale} />
+      <EntriesByCategoryChart counts={entriesByCategory(entries)} categories={categories} label={label} />
     </section>
   );
 }

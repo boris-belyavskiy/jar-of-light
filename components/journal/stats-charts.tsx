@@ -1,7 +1,8 @@
 import { getTranslations } from "next-intl/server";
 import { monthLabel } from "@/components/journal/month-label";
 import { cn } from "@/lib/utils";
-import type { DateSeries } from "@/lib/dashboard-stats";
+import type { CategoryCount, DateSeries } from "@/lib/dashboard-stats";
+import type { Category } from "@/lib/db/queries";
 import { displayDate } from "@/lib/time";
 
 const CARD = "rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border dark:shadow-none";
@@ -73,6 +74,46 @@ export async function EntriesByDateChart({ series, locale }: { series: DateSerie
             ))}
         </tbody>
       </table>
+    </figure>
+  );
+}
+
+/** How the entries spread across categories: one labelled bar per category. */
+export async function EntriesByCategoryChart({
+  counts,
+  categories,
+  label,
+}: {
+  counts: CategoryCount[];
+  categories: Category[];
+  label: (c: Category) => string;
+}) {
+  const t = await getTranslations("stats");
+  const byId = new Map(categories.map((c) => [c.id, c]));
+  const rows = counts.flatMap(({ categoryId, count }) => {
+    if (categoryId === null) return [{ key: "none", name: t("noCategory"), count }];
+    const category = byId.get(categoryId);
+    return category ? [{ key: categoryId, name: label(category), count }] : [];
+  });
+  const max = Math.max(...rows.map((r) => r.count));
+
+  return (
+    <figure className={CARD}>
+      <figcaption className="font-heading font-semibold">{t("byCategoryTitle")}</figcaption>
+      <dl className="mt-4 flex flex-col gap-3">
+        {rows.map((row) => (
+          <div key={row.key}>
+            <div className="flex items-baseline justify-between gap-3 text-sm">
+              <dt className="min-w-0 break-words">{row.name}</dt>
+              <dd className="shrink-0 font-medium tabular-nums">{row.count}</dd>
+            </div>
+            <div aria-hidden="true" className="mt-1 h-2 rounded-full bg-muted">
+              <div className="h-full rounded-full bg-primary" style={{ width: `${(row.count / max) * 100}%` }} />
+            </div>
+          </div>
+        ))}
+      </dl>
+      <p className="mt-4 text-xs text-muted-foreground">{t("doubleCountNote")}</p>
     </figure>
   );
 }

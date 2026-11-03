@@ -102,7 +102,13 @@ export default async function FeedPage({ searchParams }: PageProps<"/app">) {
       {view.mode === "new" ? (
         <NewEntry filter={filter} categories={categories} />
       ) : stats ? (
-        <StatsView entries={await listStatEntries(filter)} filter={filter} locale={locale} />
+        <StatsView
+          entries={await listStatEntries(filter)}
+          filter={filter}
+          categories={categories}
+          label={label}
+          locale={locale}
+        />
       ) : (
         <>
           <EntryList filter={filter} label={label} categories={categories} locale={locale} />
