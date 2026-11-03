@@ -14,8 +14,8 @@ export async function SiteHeader({
 }) {
   const tm = await getTranslations("meta");
   return (
-    <header className="sticky top-0 z-30 shrink-0 border-b bg-background">
-      <div className="mx-auto flex h-14 w-full max-w-5xl items-center gap-2 px-4">
+    <header className="sticky top-0 z-30 h-14 shrink-0 border-b bg-background">
+      <div className="mx-auto flex h-full w-full max-w-5xl items-center gap-2 px-4">
         <Link href={logoHref} aria-label={logoLabel} className="mr-auto flex items-center gap-2 text-primary">
           <JarMark className="size-7" />
           <span className="hidden font-heading text-lg font-semibold text-foreground lg:inline">{tm("title")}</span>
