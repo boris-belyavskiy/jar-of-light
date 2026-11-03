@@ -419,7 +419,7 @@ Across the full width, the screen before sign-in had one short line of text in e
 
 ### Decision
 
-The content is a centered column of 32rem, wide enough for each point to fit on one line in both languages. The logo on its blue circle is centered. The rest keeps its alignment: main text justified, everything else starting at one left edge. Phones use the full width.
+The content is a centered column of 32rem, wide enough for each point to fit on one line in both languages. Everything in it is centered: the logo on its blue circle, the title, the sign-in button, the hint and the points. The one exception is the main text, which stays justified. Phones use the full width.
 
 ### Revisit when
 
