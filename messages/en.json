@@ -29,7 +29,7 @@
   },
   "feed": {
     "title": "Your lights",
-    "all": "All",
+    "clearCategories": "Clear",
     "filterLabel": "Filter by category",
     "empty": "No lights yet. What good thing happened today?",
     "emptyFiltered": "No entries match this filter.",
