@@ -475,7 +475,7 @@ Visitor types a self-description → T7 extracts identities with the `search_cat
 | Headings, entry titles, cards | **Source Serif 4** | Warm, bookish, diary feel |
 | UI and body text | **Inter** | Highly legible on phones |
 
-Both are open-source (SIL OFL), support Cyrillic and Latin, and are self-hosted via `next/font` (no requests to Google at runtime). Scale: 14 / 16 / 17 (entry text) / 20 / 24 / 32 px; entry text line-height 1.6.
+Main text is one style everywhere: the `reading` class, Source Serif 4 at 17 px, justified ([ADR-0008](DECISIONS.md#adr-0008)). Both are open-source (SIL OFL), support Cyrillic and Latin, and are self-hosted via `next/font` (no requests to Google at runtime). Scale: 14 / 16 / 17 (entry text) / 20 / 24 / 32 px; entry text line-height 1.6.
 
 ### 9.4 Shape, space, elevation
 

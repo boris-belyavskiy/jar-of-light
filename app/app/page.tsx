@@ -182,7 +182,7 @@ async function EntryList({
                   />
                 </div>
               </div>
-              <p className="mt-3 line-clamp-6 font-serif text-[1.0625rem] leading-[1.6] whitespace-pre-wrap break-words">
+              <p className="reading mt-3 line-clamp-6 whitespace-pre-wrap">
                 {entry.body}
               </p>
               <EntryCategories entry={entry} byId={byId} label={label} />
@@ -269,7 +269,7 @@ async function OpenedEntry({
             </Link>
           </div>
         </div>
-        <p className="mt-4 font-serif text-[1.125rem] leading-[1.65] whitespace-pre-wrap break-words">{entry.body}</p>
+        <p className="reading mt-4 whitespace-pre-wrap">{entry.body}</p>
         <EntryCategories entry={entry} byId={byId} label={label} />
       </article>
     </EntryOverlay>

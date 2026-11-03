@@ -114,6 +114,18 @@
   }
 }
 
+/* The main text of the app, one look everywhere: entries, About, Privacy (ADR-0008). */
+@layer components {
+  .reading {
+    font-family: var(--font-serif);
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    text-align: justify;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
