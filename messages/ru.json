@@ -63,7 +63,12 @@
     "total": "Записей",
     "activeDays": "Дней с записями",
     "bestMonth": "Лучший месяц",
-    "entriesCount": "{count, plural, one {# запись} few {# записи} many {# записей} other {# записи}}"
+    "entriesCount": "{count, plural, one {# запись} few {# записи} many {# записей} other {# записи}}",
+    "byDateTitle": "Записи по датам",
+    "byMonthTitle": "Записи по месяцам",
+    "dateColumn": "Дата",
+    "countColumn": "Записей",
+    "chartMax": "Больше всего в одном столбце: {count}"
   },
   "entry": {
     "bodyLabel": "Что произошло?",
