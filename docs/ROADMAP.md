@@ -85,6 +85,7 @@ Two tracks run in parallel: building the journal, and talking to users. Intervie
 
 Requirements: ACC-01 (email), ACC-02, ACC-03, ENT-01 (addressee, brightness, local draft), ENT-02, ENT-03, ENT-04 (full), CAT-02 (color, icon, order), HAB-01…04, CUM-01…02, DATA-01.
 
+- [x] Category filter with tick boxes, search, sort, favorites, statistics by date and category ([ADR-0007](DECISIONS.md#adr-0007)) *(2026-11-02, for the MBA 296 solo app)*
 - [ ] Optional email sign-in (needs an own domain + Resend), onboarding
 - [ ] Guided entries; "to whom", brightness; grouping by day, more filters and search
 - [ ] People and places of my life (autocomplete from earlier entries)

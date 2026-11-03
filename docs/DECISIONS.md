@@ -20,6 +20,7 @@ Architecture Decision Records (ADRs) in one file. Each record captures one signi
 | [0004](#adr-0004) | UX principles: one experience on web and mobile, one shell with the content always in the same place | Accepted | 2026-10-31 |
 | [0005](#adr-0005) | A fixed frame where only the content column scrolls; entries open in place in the feed, addressed by the URL | Accepted | 2026-11-01 |
 | [0006](#adr-0006) | Full-width pages, the window's own scrollbar, an opened entry as a window over the feed | Accepted | 2026-11-01 |
+| [0007](#adr-0007) | The dashboard opens in place in the feed's column; stars are private favorites in the category filter | Accepted | 2026-11-02 |
 
 ## Candidates
 
@@ -334,6 +335,37 @@ ADR-0005 scrolled an inner column, so its scrollbar sat next to the text and app
 
 1. Reading tests show full-width text on About is hard to read on large monitors;
 2. The header or footer height changes.
+
+---
+
+<a id="adr-0007"></a>
+
+## ADR-0007: The dashboard opens in place; stars are favorites in the filter
+
+- **Status:** Accepted
+- **Date:** 2026-11-02
+- **Deciders:** Boris Belyavskiy (owner), Claude Code (lead developer)
+
+### Context
+
+The solo app assignment for MBA 296 requires stars and a dashboard. Neither was in the P1b plan in this form, and the PRD has no stars at all.
+
+### Decision
+
+1. **The dashboard opens in place,** in the feed's column at `/app?stats=1`, as ADR-0005 asks. The filters stay on the left and apply to it. The period is whatever dates the user set in the filter.
+2. **A "Statistics" button is always visible** under the filters; only the list of categories gives way when space runs out, and it scrolls on its own.
+3. **Stars are private favorites:** one `stars` junction table, a star beside the "⋯" menu, and a "Favorites" row in the category filter. Favorites combined with categories means "both".
+4. **The chart by category double-counts on purpose.** An entry with several categories counts in each, and the page says so.
+
+### Consequences
+
+- The feed reads `stars`, so this migration had to reach production before the code.
+- Search words and other filters travel in the URL, so they can reach Vercel's request logs. To revisit before the public beta.
+
+### Revisit when
+
+1. Brightness (ENT-01) arrives and overlaps with stars;
+2. Statistics by category lose meaning because users rename built-in categories far from their original sense.
 
 ---
 
