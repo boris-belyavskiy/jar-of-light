@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { entriesByDate, type StatEntry } from "@/lib/dashboard-stats";
+import { entriesByCategory, entriesByDate, type StatEntry } from "@/lib/dashboard-stats";
 
 const on = (...dates: string[]): StatEntry[] => dates.map((occurredOn) => ({ occurredOn, categoryIds: [] }));
 
@@ -45,5 +45,28 @@ describe("entriesByDate", () => {
 
   it("has nothing to show without entries", () => {
     expect(entriesByDate([], { from: "2026-10-01" }).points).toEqual([]);
+  });
+});
+
+describe("entriesByCategory", () => {
+  const entry = (...categoryIds: string[]): StatEntry => ({ occurredOn: "2026-10-01", categoryIds });
+
+  it("counts an entry in each of its categories, most frequent first", () => {
+    expect(entriesByCategory([entry("family", "work"), entry("family"), entry("friends", "family")])).toEqual([
+      { categoryId: "family", count: 3 },
+      { categoryId: "work", count: 1 },
+      { categoryId: "friends", count: 1 },
+    ]);
+  });
+
+  it("puts entries without a category last, however many there are", () => {
+    expect(entriesByCategory([entry(), entry(), entry(), entry("work")])).toEqual([
+      { categoryId: "work", count: 1 },
+      { categoryId: null, count: 3 },
+    ]);
+  });
+
+  it("has nothing to show without entries", () => {
+    expect(entriesByCategory([])).toEqual([]);
   });
 });

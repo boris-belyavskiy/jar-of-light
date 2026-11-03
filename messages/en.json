@@ -68,7 +68,10 @@
     "byMonthTitle": "Entries by month",
     "dateColumn": "Date",
     "countColumn": "Entries",
-    "chartMax": "Most in one bar: {count}"
+    "chartMax": "Most in one bar: {count}",
+    "byCategoryTitle": "Entries by category",
+    "noCategory": "No category",
+    "doubleCountNote": "Note: an entry with several categories counts in each of them, so these numbers can add up to more than the number of entries."
   },
   "entry": {
     "bodyLabel": "What happened?",

@@ -89,3 +89,25 @@ export function entriesByDate(entries: StatEntry[], period: { from?: string; to?
     points: monthsBetween(first, last).map((key) => ({ key, count: counts.get(key) ?? 0 })),
   };
 }
+
+export type CategoryCount = { categoryId: string | null; count: number };
+
+/**
+ * Entries per category, most frequent first; `null` is entries without a
+ * category, always last. An entry with several categories counts in each of
+ * them, so the counts can add up to more than the number of entries.
+ */
+export function entriesByCategory(entries: StatEntry[]): CategoryCount[] {
+  const counts = new Map<string | null, number>();
+  for (const { categoryIds } of entries) {
+    for (const id of categoryIds.length > 0 ? categoryIds : [null]) {
+      counts.set(id, (counts.get(id) ?? 0) + 1);
+    }
+  }
+  const none = counts.get(null);
+  counts.delete(null);
+  const sorted: CategoryCount[] = [...counts]
+    .map(([categoryId, count]) => ({ categoryId, count }))
+    .sort((a, b) => b.count - a.count);
+  return none ? [...sorted, { categoryId: null, count: none }] : sorted;
+}
