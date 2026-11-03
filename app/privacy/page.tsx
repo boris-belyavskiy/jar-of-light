@@ -24,11 +24,11 @@ export default async function PrivacyPage() {
         </>
       }
     >
-      <p className="text-[1.0625rem] leading-relaxed">{t("intro")}</p>
+      <p className="reading">{t("intro")}</p>
       {sections.map((s) => (
         <section key={s.heading} className="mt-8">
           <h2 className="font-heading text-xl font-semibold">{s.heading}</h2>
-          <p className="mt-2 leading-relaxed text-muted-foreground">{s.body}</p>
+          <p className="reading mt-2">{s.body}</p>
         </section>
       ))}
     </PublicPage>

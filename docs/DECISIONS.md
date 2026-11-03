@@ -21,6 +21,7 @@ Architecture Decision Records (ADRs) in one file. Each record captures one signi
 | [0005](#adr-0005) | A fixed frame where only the content column scrolls; entries open in place in the feed, addressed by the URL | Accepted | 2026-11-01 |
 | [0006](#adr-0006) | Full-width pages, the window's own scrollbar, an opened entry as a window over the feed | Accepted | 2026-11-01 |
 | [0007](#adr-0007) | The dashboard opens in place in the feed's column; stars are private favorites in the category filter | Accepted | 2026-11-02 |
+| [0008](#adr-0008) | One frame for every edge, one baseline, one set of fonts, justified main text | Accepted | 2026-11-02 |
 
 ## Candidates
 
@@ -366,6 +367,38 @@ The solo app assignment for MBA 296 requires stars and a dashboard. Neither was 
 
 1. Brightness (ENT-01) arrives and overlaps with stars;
 2. Statistics by category lose meaning because users rename built-in categories far from their original sense.
+
+---
+
+<a id="adr-0008"></a>
+
+## ADR-0008: One frame for every edge, one set of fonts
+
+- **Status:** Accepted
+- **Date:** 2026-11-02
+- **Deciders:** Boris Belyavskiy (owner), Claude Code (lead developer)
+
+Refines [ADR-0004](#adr-0004) and [ADR-0006](#adr-0006): the feed is no longer a narrower reading column.
+
+### Context
+
+Edges were close but not equal: padding inside the logo's drawing and the sign-out button, and a 42rem limit on the feed, put them a few pixels apart. Text came in several sizes and fonts for the same job.
+
+### Decision
+
+1. **One frame.** The visible left edge of the logo, the filters and the footer share one line. The visible right edge of "Sign out" and of every entry and card shares another. Measure visible edges, not the boxes around them.
+2. **One baseline.** A page title and the first line of the side column share a baseline.
+3. **Three kinds of text:** titles in Source Serif 4 (24 px for a page, 20 px for a section); main text in Source Serif 4, 17 px, justified, with the `reading` class; controls in Inter, 12 px in the filter (`SMALL_BUTTON` and friends in `feed-filters.tsx`).
+4. **Justified main text:** entries, About and Privacy. Titles, labels, buttons and short lists stay left-aligned.
+
+### Consequences
+
+- Lines are long on wide screens, by the owner's choice.
+- Justified text can show wide gaps on phones; `hyphens: auto` softens this where the browser has a dictionary for the interface language.
+
+### Revisit when
+
+1. Reading tests show the long lines or the gaps on phones get in the way.
 
 ---
 

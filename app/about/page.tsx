@@ -42,15 +42,15 @@ export default async function AboutPage() {
       }
     >
       <p className="font-heading text-xl font-semibold">{t("headline")}</p>
-      <p className="mt-3 text-[1.0625rem] leading-relaxed">{t("intro")}</p>
-      <p className="mt-4 leading-relaxed text-muted-foreground">{t("story")}</p>
+      <p className="reading mt-3">{t("intro")}</p>
+      <p className="reading mt-4">{t("story")}</p>
 
       <section className="mt-8">
         <h2 className="font-heading text-xl font-semibold">{t("whyTitle")}</h2>
-        <p className="mt-2 leading-relaxed text-muted-foreground">{t.rich("why", { ref })}</p>
+        <p className="reading mt-2">{t.rich("why", { ref })}</p>
       </section>
 
-      <p className="mt-6 leading-relaxed text-muted-foreground">{t("outro")}</p>
+      <p className="reading mt-6">{t("outro")}</p>
 
       <section className="mt-10 border-t pt-6">
         <h2 className="text-sm font-semibold">{t("sourcesTitle")}</h2>

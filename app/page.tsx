@@ -20,7 +20,7 @@ export default async function LandingPage({ searchParams }: PageProps<"/">) {
               <JarMark className="size-12" />
             </div>
             <h1 className="font-heading text-[2rem] leading-tight font-semibold">{tm("title")}</h1>
-            <p className="text-[1.0625rem] text-muted-foreground">{t("lead")}</p>
+            <p className="reading">{t("lead")}</p>
           </div>
 
           {deleted && (

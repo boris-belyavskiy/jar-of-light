@@ -7,7 +7,7 @@ Guidance for Claude Code working in this repository.
 - [docs/PRD.md](docs/PRD.md) — what we build and why; requirement IDs (ACC-01, ENT-01, …); open questions in §11.
 - [docs/TECH_SPEC.md](docs/TECH_SPEC.md) — stack, data model, privacy, routes, visual design.
 - [docs/ROADMAP.md](docs/ROADMAP.md) — phases; **P0 and P1a are done (2026-10-28); next is P1b** (rest of the journal without AI + customer research).
-- [docs/DECISIONS.md](docs/DECISIONS.md) — all architecture decisions (ADRs) in one append-only file: ADR-0001 (no own servers), ADR-0002 (free stack, keep-alive, backups), ADR-0003 (app foundations: no Cache Components, language without URL prefix, RLS tests on PGlite), ADR-0004 (UX: same features on web and mobile, one shell — every page uses `PageLayout` inside the app or public shell). A new decision is a new record at the end; never rewrite an accepted one.
+- [docs/DECISIONS.md](docs/DECISIONS.md) — all architecture decisions (ADRs) in one append-only file: ADR-0001 (no own servers), ADR-0002 (free stack, keep-alive, backups), ADR-0003 (app foundations: no Cache Components, language without URL prefix, RLS tests on PGlite), ADR-0004 (UX: same features on web and mobile, one shell — every page uses `PageLayout` inside the app or public shell). ADR-0008 (one frame for every edge, one baseline, one set of fonts, justified main text: measure visible edges in the browser before calling a layout done). A new decision is a new record at the end; never rewrite an accepted one.
 
 These documents are the source of truth. If a decision changes, update the document (or add a record to `docs/DECISIONS.md`) in the same pull request.
 
