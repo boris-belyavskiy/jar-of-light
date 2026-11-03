@@ -233,7 +233,7 @@ function FilterItem({
       role="checkbox"
       aria-checked={active}
       className={cn(
-        "flex items-center gap-2 rounded-md px-1 py-1 text-xs transition-colors hover:bg-sky focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-inset",
+        "flex items-center gap-2 rounded-md py-1 pr-1 text-xs transition-colors hover:bg-sky focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-inset",
         active && "font-medium",
         strong && "font-bold",
       )}

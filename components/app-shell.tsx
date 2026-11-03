@@ -21,7 +21,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
         <NavTabs />
         <LanguageSwitch />
         <form action={signOut}>
-          <Button type="submit" variant="ghost" size="sm" aria-label={t("signOut")} className="text-muted-foreground">
+          <Button type="submit" variant="ghost" size="sm" aria-label={t("signOut")} className="-mr-[11px] text-muted-foreground">
             <LogOut aria-hidden="true" />
             <span className="hidden md:inline">{t("signOut")}</span>
           </Button>
