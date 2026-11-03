@@ -5,9 +5,11 @@ import { cn } from "@/lib/utils";
  * title, the feed's composer) sticks under the header and the side column
  * sticks beside it, so only the body moves.
  *
- * Widths: without a side column the page uses the full width of the frame —
- * from the logo on the left to sign-out on the right. With one (the feed), the
- * side column starts at that same left edge and the body is a reading column.
+ * Widths (ADR-0008): every page uses the full width of the frame, from the left
+ * edge of the jar in the logo to the right edge of the words "Sign out". With a
+ * side column (the feed), it starts at that same left edge and the body runs to
+ * that same right edge. The first line of the side column shares its baseline
+ * with the page title.
  *
  * Phones have no room for a side column, so `asideInHead` is shown inside the
  * sticky head instead (the feed passes its filters there, folded).
@@ -30,7 +32,7 @@ export function PageLayout({
       className={cn(
         "grid [grid-template-areas:'head'_'body']",
         aside &&
-          "md:grid-cols-[14rem_minmax(0,42rem)] md:grid-rows-[auto_1fr] md:gap-x-10 md:[grid-template-areas:'aside_head'_'aside_body']",
+          "md:grid-cols-[14rem_minmax(0,1fr)] md:grid-rows-[auto_1fr] md:gap-x-10 md:[grid-template-areas:'aside_head'_'aside_body']",
       )}
     >
       {/* Wider than the column by 0.5rem each side, so the cards' outline and shadow can't show past it while scrolling. */}
@@ -41,7 +43,7 @@ export function PageLayout({
       {aside && (
         <aside
           aria-label={asideLabel}
-          className="sticky top-14 hidden max-h-[calc(100dvh-6.5rem)] self-start overflow-y-auto pt-6 pb-6 [grid-area:aside] md:flex md:flex-col"
+          className="sticky top-14 hidden max-h-[calc(100dvh-6.5rem)] self-start overflow-y-auto pt-[40.5px] pb-6 [grid-area:aside] md:flex md:flex-col"
         >
           {aside}
         </aside>
