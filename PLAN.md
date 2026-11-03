@@ -111,3 +111,28 @@ Borrowing from: **Day One** (a text-first journal feed), the calm, warm interfac
 **Open decision:** stars (feature 10). The assignment requires them as a spine feature and requires a `stars` table in `schema.md`, so leaving them out costs part of the grade. I decide at the end, and either way the result goes into Plan vs. Reality.
 
 **Other risks:** a new table is applied to production by hand in the Supabase SQL editor, so a `stars` migration, if any, must land right before its PR merges ([supabase/README.md](supabase/README.md)). The deadline is two days away; if time runs short, working small features beat ambitious ones.
+
+---
+
+## Plan vs. Reality
+
+Sections 1–7 above are the plan as merged in #9. The opening was corrected once, in #20, because it wrongly read as if the plan came after the code.
+
+| Planned feature | Shipped / Changed / Cut | Status | What changed and why | Learning |
+|---|---|---|---|---|
+| 1. Sign up and login | Shipped | Done | Nothing | Google-only sign-in means a live demo sign-up needs a second Google account |
+| 2. Data model | Shipped | Done | Nothing | |
+| 3. Create / read / update / delete | Shipped | Done | Nothing | |
+| 4. Validation | Shipped | Done | Nothing | |
+| 5. Several categories on one entry | Shipped | Done | Nothing | |
+| 6. Date and time of an entry | Shipped | Done | Nothing | |
+| 7. Editing the built-in categories | Shipped | Done | Nothing | Still my least sure feature, for what it may do to statistics later, not for how hard it was to build |
+| 8. Find things: checkboxes, search, sort | Shipped | Done | Search stayed even though it was first in line to be cut, because it keeps the count of feature PRs safe | Being first to cut is not the same as being cut |
+| 9. Dashboard: stats | Changed | Done | "Days with light this month" became "days with an entry in the period", because I decided the period comes from the dates the user selects | A stat is a product decision: what counts as "the period" changed the test too |
+| 9. Dashboard: chart | Changed | Done | Blue bars instead of gold and HTML instead of SVG, because gold has 1.63:1 contrast on the card; the agent's call and I went along | Measure the colour instead of judging it by eye |
+| 10. Stars | Changed | Done | Marked undecided, then built as "Favorites" in the category filter with the star beside the "⋯" menu; I stopped the agent until it explained what stars would do | A required feature fits better once it has a name and a place that belong to the product |
+| *(not planned)* Chart by category | Added | Done | I added it while building; an entry with several categories counts in each, and the page says so | Double counting is fine when it is stated |
+| Test: data isolation | Shipped | Done | Nothing | The app has to be broken on purpose to prove the test can fail |
+| Test: dashboard | Changed | Done | Follows the change to the stat above | |
+
+**Not in the plan, and already working:** a language switch (RU / EN), dragging categories into your own order, your own categories, time zones, account deletion. See the [README](README.md#features).
