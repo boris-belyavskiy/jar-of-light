@@ -23,6 +23,7 @@ Architecture Decision Records (ADRs) in one file. Each record captures one signi
 | [0007](#adr-0007) | The dashboard opens in place in the feed's column; stars are private favorites in the category filter | Accepted | 2026-11-02 |
 | [0008](#adr-0008) | One frame for every edge, one baseline, one set of fonts, justified main text | Accepted | 2026-11-02 |
 | [0009](#adr-0009) | The screen before sign-in is a narrow column in the center | Accepted | 2026-11-02 |
+| [0010](#adr-0010) | English comes first wherever both languages are listed; points before sign-in are left-aligned | Accepted | 2026-11-02 |
 
 ## Candidates
 
@@ -424,6 +425,28 @@ The content is a centered column of 32rem, wide enough for each point to fit on 
 ### Revisit when
 
 1. A longer point no longer fits on one line.
+
+---
+
+<a id="adr-0010"></a>
+
+## ADR-0010: English comes first; points before sign-in are left-aligned
+
+- **Status:** Accepted
+- **Date:** 2026-11-02
+- **Deciders:** Boris Belyavskiy (owner), Claude Code (lead developer)
+
+Refines [ADR-0009](#adr-0009).
+
+### Decision
+
+1. **English comes first wherever both languages are listed:** the language switch, Settings, the category name fields and the copy.
+2. **The points on the screen before sign-in are left-aligned inside their cards.** The cards stay where they are, in the centered column.
+
+### Consequences
+
+- English also stays the fallback language, as before; a Russian-language browser still opens the app in Russian.
+- When renaming a category, the cursor now starts in the English field. Cyrillic typed there still moves to the Russian field.
 
 ---
 

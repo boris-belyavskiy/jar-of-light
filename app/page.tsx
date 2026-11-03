@@ -13,7 +13,7 @@ export default async function LandingPage({ searchParams }: PageProps<"/">) {
     <PublicShell>
       <PageLayout>
         {/* A narrow column in the center (ADR-0009), just wide enough for each point to fit on
-            one line. Everything in it is centered except the main text, which is justified. */}
+            one line. It is centered, except the main text (justified) and the points (left-aligned). */}
         <div className="mx-auto flex w-full max-w-lg flex-col gap-6">
           <div className="flex flex-col items-center gap-3 px-4">
             <div className="rounded-full bg-sky p-4 text-primary shadow-sm">
@@ -37,9 +37,9 @@ export default async function LandingPage({ searchParams }: PageProps<"/">) {
 
           <ul className="flex flex-col gap-2 text-sm">
             {(["quick", "private", "languages"] as const).map((key) => (
-              <li key={key} className="flex items-start justify-center gap-3 rounded-xl bg-card px-4 py-3">
+              <li key={key} className="flex items-start gap-3 rounded-xl bg-card px-4 py-3">
                 <span aria-hidden="true" className="mt-1.5 size-2 shrink-0 rounded-full bg-light" />
-                <span className="min-w-0 text-center">{t(`points.${key}`)}</span>
+                {t(`points.${key}`)}
               </li>
             ))}
           </ul>
