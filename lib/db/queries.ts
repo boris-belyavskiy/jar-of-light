@@ -2,6 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { redirect } from "next/navigation";
 import { sortByOrder } from "@/lib/category-order";
+import type { StatEntry } from "@/lib/dashboard-stats";
 import { likePattern, type FeedFilter } from "@/lib/feed-filter";
 import { createClient } from "@/lib/supabase/server";
 import { FALLBACK_TIME_ZONE } from "@/lib/time";
@@ -148,6 +149,39 @@ export async function listEntries(filter: FeedFilter): Promise<Entry[]> {
   const { data, error } = await query;
   if (error) throw new Error(`entries: ${error.code}`);
   return (data as unknown as EntryRow[]).map(toEntry);
+}
+
+const STATS_PAGE = 1000;
+
+/** What the dashboard counts: every entry the filter selects, not only the feed's newest 200. */
+export async function listStatEntries(filter: FeedFilter): Promise<StatEntry[]> {
+  await requireUserId();
+  const supabase = await createClient();
+  const byCategory = filter.categoryIds.length > 0;
+  const columns = byCategory
+    ? "occurred_on, cats:entry_categories(category_id), f:entry_categories!inner(category_id)"
+    : "occurred_on, cats:entry_categories(category_id)";
+  const entries: StatEntry[] = [];
+  // PostgREST returns at most 1,000 rows at a time, so read page by page.
+  for (let start = 0; ; start += STATS_PAGE) {
+    let query = supabase
+      .from("entries")
+      .select(columns)
+      .order("occurred_on", { ascending: true })
+      .order("id", { ascending: true })
+      .range(start, start + STATS_PAGE - 1);
+    if (byCategory) query = query.in("f.category_id", filter.categoryIds);
+    if (filter.from) query = query.gte("occurred_on", filter.from);
+    if (filter.to) query = query.lte("occurred_on", filter.to);
+    if (filter.q) query = query.ilike("body", likePattern(filter.q));
+    const { data, error } = await query;
+    if (error) throw new Error(`stats: ${error.code}`);
+    const rows = data as unknown as Pick<EntryRow, "occurred_on" | "cats">[];
+    for (const row of rows) {
+      entries.push({ occurredOn: row.occurred_on, categoryIds: row.cats.map((c) => c.category_id) });
+    }
+    if (rows.length < STATS_PAGE) return entries;
+  }
 }
 
 export async function getEntry(id: string): Promise<Entry | null> {

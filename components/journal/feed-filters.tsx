@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Check } from "lucide-react";
+import { ChartColumn, Check } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { buttonVariants, Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -19,13 +19,17 @@ export async function FeedFilters({
   filter,
   items,
   label,
+  stats,
 }: {
   prefix: string;
   filter: FeedFilter;
   items: Category[];
   label: (c: Category) => string;
+  stats: boolean;
 }) {
   const t = await getTranslations("feed");
+  // Changing a filter keeps the user where they are: on the dashboard, or on the list.
+  const view = stats ? ({ mode: "stats" } as const) : undefined;
   const canReset = Boolean(filter.from || filter.to || filter.q);
   const hasCategories = filter.categoryIds.length > 0;
 
@@ -37,6 +41,7 @@ export async function FeedFilters({
           <input key={id} type="hidden" name="category" value={id} />
         ))}
         {filter.sort === "oldest" && <input type="hidden" name="sort" value="oldest" />}
+        {stats && <input type="hidden" name="stats" value="1" />}
         <div className="col-span-2 flex flex-col gap-1.5 md:col-span-1">
           <Label htmlFor={`${prefix}q`} className="text-xs text-muted-foreground">
             {t("searchLabel")}
@@ -68,7 +73,7 @@ export async function FeedFilters({
           </Button>
           {canReset && (
             <Link
-              href={feedHref({ ...filter, from: undefined, to: undefined, q: undefined })}
+              href={feedHref({ ...filter, from: undefined, to: undefined, q: undefined }, view)}
               className={buttonVariants({ variant: "ghost" })}
             >
               {t("resetSearchAndDates")}
@@ -78,8 +83,8 @@ export async function FeedFilters({
       </form>
 
       <div role="group" aria-label={t("sortLabel")} className="mt-3 grid shrink-0 grid-cols-2 gap-1 rounded-lg bg-muted p-1">
-        <SortOption href={feedHref({ ...filter, sort: undefined })} active={filter.sort !== "oldest"} label={t("newestFirst")} />
-        <SortOption href={feedHref({ ...filter, sort: "oldest" })} active={filter.sort === "oldest"} label={t("oldestFirst")} />
+        <SortOption href={feedHref({ ...filter, sort: undefined }, view)} active={filter.sort !== "oldest"} label={t("newestFirst")} />
+        <SortOption href={feedHref({ ...filter, sort: "oldest" }, view)} active={filter.sort === "oldest"} label={t("oldestFirst")} />
       </div>
 
       <nav aria-label={t("filterLabel")} className="mt-5 flex min-h-0 flex-col">
@@ -87,7 +92,7 @@ export async function FeedFilters({
           <p className="text-xs text-muted-foreground">{t("categoriesTitle")}</p>
           {hasCategories ? (
             <Link
-              href={feedHref({ ...filter, categoryIds: [] })}
+              href={feedHref({ ...filter, categoryIds: [] }, view)}
               className="text-xs text-primary underline-offset-4 hover:underline"
             >
               {t("clearCategories")}
@@ -101,7 +106,7 @@ export async function FeedFilters({
           {items.map((c) => (
             <li key={c.id}>
               <FilterItem
-                href={feedHref(toggleCategory(filter, c.id))}
+                href={feedHref(toggleCategory(filter, c.id), view)}
                 active={filter.categoryIds.includes(c.id)}
                 label={label(c)}
               />
@@ -117,6 +122,20 @@ export async function FeedFilters({
         </Link>
       </nav>
     </>
+  );
+}
+
+/** Opens the dashboard, or goes back to the entries. Always on screen, under the filters. */
+export async function StatsButton({ filter, stats, className }: { filter: FeedFilter; stats: boolean; className?: string }) {
+  const t = await getTranslations("feed");
+  return (
+    <Link
+      href={feedHref(filter, stats ? undefined : { mode: "stats" })}
+      className={cn(buttonVariants({ variant: stats ? "secondary" : "outline" }), className)}
+    >
+      <ChartColumn aria-hidden="true" />
+      {stats ? t("backToFeed") : t("statsButton")}
+    </Link>
   );
 }
 

@@ -6,13 +6,22 @@ import { categoryLabel } from "@/components/journal/category-label";
 import { EntryForm } from "@/components/journal/entry-form";
 import { EntryMenu } from "@/components/journal/entry-menu";
 import { EntryOverlay } from "@/components/journal/entry-overlay";
-import { FeedFilters } from "@/components/journal/feed-filters";
+import { FeedFilters, StatsButton } from "@/components/journal/feed-filters";
 import { FilterPanel } from "@/components/journal/filter-panel";
 import { PILL } from "@/components/journal/pill";
+import { StatsView } from "@/components/journal/stats-view";
 import { JarMark } from "@/components/jar-mark";
 import { PageLayout } from "@/components/page-layout";
 import { buttonVariants } from "@/components/ui/button";
-import { getEntry, getProfile, listCategories, listEntries, type Category, type Entry } from "@/lib/db/queries";
+import {
+  getEntry,
+  getProfile,
+  listCategories,
+  listEntries,
+  listStatEntries,
+  type Category,
+  type Entry,
+} from "@/lib/db/queries";
 import {
   feedHref,
   isFiltered,
@@ -34,6 +43,7 @@ export default async function FeedPage({ searchParams }: PageProps<"/app">) {
   const filter = parseFeedFilter(params);
   const view = parseFeedView(params);
   const filtered = isFiltered(filter);
+  const stats = view.mode === "stats";
 
   const [categories, t, tc, locale] = await Promise.all([
     listCategories(),
@@ -46,7 +56,7 @@ export default async function FeedPage({ searchParams }: PageProps<"/app">) {
 
   const head = (
     <>
-      <h1 className="font-heading text-2xl font-semibold">{t("title")}</h1>
+      <h1 className="font-heading text-2xl font-semibold">{stats ? t("statsTitle") : t("title")}</h1>
       {/* While writing, the composer has expanded into the card below. */}
       {view.mode !== "new" && (
         <Link
@@ -64,7 +74,7 @@ export default async function FeedPage({ searchParams }: PageProps<"/app">) {
     </>
   );
 
-  const filters = (prefix: string) => <FeedFilters prefix={prefix} filter={filter} items={items} label={label} />;
+  const filters = (prefix: string) => <FeedFilters prefix={prefix} filter={filter} items={items} label={label} stats={stats} />;
 
   return (
     <PageLayout
@@ -73,17 +83,26 @@ export default async function FeedPage({ searchParams }: PageProps<"/app">) {
         <>
           <h2 className="shrink-0 text-sm font-semibold">{t("filtersTitle")}</h2>
           {filters("side-")}
+          {/* Stays on screen: only the category list above it gives way when space runs out. */}
+          <StatsButton filter={filter} stats={stats} className="sticky bottom-0 mt-3 w-full shrink-0" />
         </>
       }
       asideInHead={
-        <FilterPanel title={t("filtersTitle")} active={filtered}>
-          {filters("head-")}
-        </FilterPanel>
+        <div className="flex items-start gap-3">
+          <div className="min-w-0 flex-1">
+            <FilterPanel title={t("filtersTitle")} active={filtered}>
+              {filters("head-")}
+            </FilterPanel>
+          </div>
+          <StatsButton filter={filter} stats={stats} className="shrink-0" />
+        </div>
       }
       asideLabel={t("filtersTitle")}
     >
       {view.mode === "new" ? (
         <NewEntry filter={filter} categories={categories} />
+      ) : stats ? (
+        <StatsView entries={await listStatEntries(filter)} filter={filter} locale={locale} />
       ) : (
         <>
           <EntryList filter={filter} label={label} categories={categories} locale={locale} />

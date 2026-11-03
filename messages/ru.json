@@ -49,7 +49,21 @@
     "categoriesTitle": "Категории",
     "editCategories": "Порядок и список категорий",
     "backToFeed": "Вернуться к ленте",
+    "statsButton": "Статистика",
+    "statsTitle": "Статистика",
     "openEntry": "Открыть запись"
+  },
+  "stats": {
+    "title": "Статистика",
+    "periodAll": "За всё время. Чтобы выбрать период, укажите даты в фильтре.",
+    "periodRange": "С {from} по {to}",
+    "periodFrom": "С {from}",
+    "periodTo": "По {to}",
+    "empty": "Под этот фильтр записей пока нет.",
+    "total": "Записей",
+    "activeDays": "Дней с записями",
+    "bestMonth": "Лучший месяц",
+    "entriesCount": "{count, plural, one {# запись} few {# записи} many {# записей} other {# записи}}"
   },
   "entry": {
     "bodyLabel": "Что произошло?",

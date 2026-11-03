@@ -54,6 +54,15 @@ describe("sort", () => {
   });
 });
 
+describe("the dashboard view", () => {
+  it("reads and writes the view next to the filter", () => {
+    expect(parseFeedView({ stats: "1" })).toEqual({ mode: "stats" });
+    expect(feedHref({ categoryIds: [A], from: "2026-10-01" }, { mode: "stats" })).toBe(
+      `/app?category=${A}&from=2026-10-01&stats=1`,
+    );
+  });
+});
+
 describe("search", () => {
   it("trims the words, drops an empty search and limits the length", () => {
     expect(parseFeedFilter({ q: "  кофе с Аней " }).q).toBe("кофе с Аней");
