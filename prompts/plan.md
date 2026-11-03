@@ -25,3 +25,11 @@ Prompts are quoted as written, in Russian (the chat language), each with an Engl
 *Summary: note that the PRD, Tech Spec and other documents came in the first commit; my pitch and one entry a day; my own features are ones we already have; add Moomin as inspiration; my least sure feature; add a statistics section under the category filter.*
 
 **Agent response (summary):** replaced its three proposed features with mine. "Editing entries" is already part of the required CRUD, so it cannot also count as my own feature, which leaves exactly three. It also kept three summary stats next to my one chart, because the assignment requires 2–3 summary stats.
+
+## Prompt 3: stop on stars
+
+> так, что за звезды? давай не будем делать звезды, пока ты не объяснишь, что конкретно ты с ними собираешься сделать. Можешь это оставить на финальный шаг. Возможно, мы не будем делать звезд конкретно для этого приложения
+
+*Summary: what are these stars? Don't build them until you explain exactly what you will do. Leave it to the final step; we may not build stars for this app at all.*
+
+**Agent response (summary):** marked feature 10 as undecided in the plan, moved the decision to the end and worded the data isolation test so it does not depend on stars.

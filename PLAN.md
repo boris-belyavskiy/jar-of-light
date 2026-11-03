@@ -33,9 +33,9 @@ Numbered in build order. An *entry* (a "light") is the main item: text of 1–4,
 | 7 | Mine | **Editing the built-in categories.** As a user, I want to rename or hide the built-in categories and order all of them myself, so that the list speaks my language. | Live (PR #4, #6) |
 | 8 | Spine | **Find things.** As a user, I want to tick several categories with a checkbox beside each one and clear them with one "Clear" button next to the "Categories" title, search my entries by text, and sort them newest or oldest first, so that I can find one moment fast. If the categories don't fit on the screen, they scroll inside their own list. *(Three PRs: category checkboxes, search, sort.)* | Date and category filters live; the rest to build |
 | 9 | Spine | **Dashboard.** As a user, I want a "Statistics" button under the category filter, always visible, that shows a bar chart of the number of entries by date and three summary stats (total lights, days with light this month, best month), for the entries my filter selects, so that I can see what my life already holds. *(Two PRs: stats, chart.)* | To build |
-| 10 | Spine | **Stars.** As a user, I want to star an entry from the feed and open a "Starred" view, so that I can return to my brightest moments. *(Two PRs: stars, starred view.)* | To build; last because it needs a new table on production |
+| 10 | Spine | **Stars.** As a user, I want to star an entry from the feed and open a "Starred" view, so that I can return to my brightest moments. *(Two PRs: stars, starred view.)* | **Undecided.** The spine requires it, but I am not sure it belongs in this product. I decide last, and nothing is built until then |
 
-Plus two PRs for the required tests. That makes 9 PRs through the full loop after this one (7 feature PRs and 2 test PRs), on top of the 7 retroactive ones.
+Plus two PRs for the required tests. Without stars that makes 7 PRs through the full loop after this one (5 feature PRs and 2 test PRs), on top of the 7 retroactive ones; with stars, 9.
 
 ## 3. Database
 
@@ -50,7 +50,7 @@ Postgres on Supabase. `auth.users` is the users table, managed by Supabase; `pro
 | `entry_categories` | `entry_id`, `category_id` (uuid) | both | Junction: `entries` many-to-many `categories` |
 | `hidden_categories` | `user_id`, `category_id` (uuid) | both | Junction: which built-in categories a user hid |
 | `category_names` | `user_id`, `category_id` (uuid), `name_ru`, `name_en` (text) | both | A user's own names for built-in categories |
-| **`stars`** (new) | `user_id`, `entry_id` (uuid), `created_at` (timestamp) | both | Junction: `auth.users` many-to-many `entries`. One table for everyone |
+| **`stars`** (only if feature 10 is built) | `user_id`, `entry_id` (uuid), `created_at` (timestamp) | both | Junction: `auth.users` many-to-many `entries`. One table for everyone |
 
 ```mermaid
 erDiagram
@@ -67,11 +67,13 @@ erDiagram
   ENTRIES ||--o{ STARS : "starred in"
 ```
 
+`STARS` in the diagram exists only if feature 10 is built. Until then the database stays as it is, with no new tables.
+
 ## 4. Tests
 
 Both run in Vitest and in CI on every pull request.
 
-1. **Data isolation.** Given user A has an entry and has starred it, when user B signs in and reads entries and stars, then B gets zero rows and A still gets both. *(Runs the real migrations and RLS policies on an in-memory Postgres, PGlite.)*
+1. **Data isolation.** Given user A has an entry, when user B signs in and reads entries, then B gets zero rows and A still gets the entry. If stars are built, the same applies to A's star. *(Runs the real migrations and RLS policies on an in-memory Postgres, PGlite.)*
 2. **Dashboard.** Given a user with 5 entries, 3 in October 2026 on 2 different days and 2 in November 2026 on 2 different days, when the stats are computed for 15 November 2026, then total lights = 5, days with light this month = 2, and best month = October 2026.
 
 ## 5. Technologies
@@ -103,4 +105,6 @@ Borrowing from: **Day One** (a text-first journal feed), the calm, warm interfac
 
 **Cut first:** text search. The spine asks for search *or* filter, plus sort, and the filters are already live.
 
-**Other risks:** a new table is applied to production by hand in the Supabase SQL editor, so the `stars` migration must land right before its PR merges ([supabase/README.md](supabase/README.md)). The deadline is two days away; if time runs short, working small features beat ambitious ones.
+**Open decision:** stars (feature 10). The assignment requires them as a spine feature and requires a `stars` table in `schema.md`, so leaving them out costs part of the grade. I decide at the end, and either way the result goes into Plan vs. Reality.
+
+**Other risks:** a new table is applied to production by hand in the Supabase SQL editor, so a `stars` migration, if any, must land right before its PR merges ([supabase/README.md](supabase/README.md)). The deadline is two days away; if time runs short, working small features beat ambitious ones.
