@@ -138,7 +138,13 @@ export async function listEntries(filter: FeedFilter): Promise<Entry[]> {
   const byCategory = filter.categoryIds.length > 0;
   const ascending = filter.sort === "oldest";
   // The second, inner-joined embed only filters; `cats` still lists every category of the entry.
-  const columns = byCategory ? `${ENTRY_COLUMNS}, f:entry_categories!inner(category_id)` : ENTRY_COLUMNS;
+  const columns = [
+    ENTRY_COLUMNS,
+    byCategory && "f:entry_categories!inner(category_id)",
+    filter.starred && "s:stars!inner(user_id)",
+  ]
+    .filter(Boolean)
+    .join(", ");
   let query = supabase
     .from("entries")
     .select(columns)
@@ -162,9 +168,13 @@ export async function listStatEntries(filter: FeedFilter): Promise<StatEntry[]> 
   await requireUserId();
   const supabase = await createClient();
   const byCategory = filter.categoryIds.length > 0;
-  const columns = byCategory
-    ? "occurred_on, cats:entry_categories(category_id), f:entry_categories!inner(category_id)"
-    : "occurred_on, cats:entry_categories(category_id)";
+  const columns = [
+    "occurred_on, cats:entry_categories(category_id)",
+    byCategory && "f:entry_categories!inner(category_id)",
+    filter.starred && "s:stars!inner(user_id)",
+  ]
+    .filter(Boolean)
+    .join(", ");
   const entries: StatEntry[] = [];
   // PostgREST returns at most 1,000 rows at a time, so read page by page.
   for (let start = 0; ; start += STATS_PAGE) {

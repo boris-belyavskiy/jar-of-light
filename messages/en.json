@@ -30,6 +30,8 @@
   "feed": {
     "title": "Your lights",
     "clearCategories": "Clear",
+    "favorites": "Favorites",
+    "favoritesAndCategories": "Only favorites with the selected categories.",
     "filterLabel": "Filter by category",
     "empty": "No lights yet. What good thing happened today?",
     "emptyFiltered": "No entries match this filter.",
