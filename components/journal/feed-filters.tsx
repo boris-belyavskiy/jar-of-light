@@ -3,10 +3,11 @@ import { Check } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { buttonVariants, Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import type { Category } from "@/lib/db/queries";
-import { feedHref, toggleCategory, type FeedFilter } from "@/lib/feed-filter";
+import { feedHref, SEARCH_MAX_LENGTH, toggleCategory, type FeedFilter } from "@/lib/feed-filter";
 
 /**
  * The feed filters. Rendered twice — in the side column and, on phones, folded
@@ -25,7 +26,7 @@ export async function FeedFilters({
   label: (c: Category) => string;
 }) {
   const t = await getTranslations("feed");
-  const hasDates = Boolean(filter.from || filter.to);
+  const canReset = Boolean(filter.from || filter.to || filter.q);
   const hasCategories = filter.categoryIds.length > 0;
 
   return (
@@ -36,6 +37,19 @@ export async function FeedFilters({
           <input key={id} type="hidden" name="category" value={id} />
         ))}
         {filter.sort === "oldest" && <input type="hidden" name="sort" value="oldest" />}
+        <div className="col-span-2 flex flex-col gap-1.5 md:col-span-1">
+          <Label htmlFor={`${prefix}q`} className="text-xs text-muted-foreground">
+            {t("searchLabel")}
+          </Label>
+          <Input
+            id={`${prefix}q`}
+            type="search"
+            name="q"
+            defaultValue={filter.q}
+            maxLength={SEARCH_MAX_LENGTH}
+            placeholder={t("searchPlaceholder")}
+          />
+        </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor={`${prefix}from`} className="text-xs text-muted-foreground">
             {t("from")}
@@ -52,9 +66,12 @@ export async function FeedFilters({
           <Button type="submit" variant="outline" className="flex-1 md:flex-none">
             {t("applyDates")}
           </Button>
-          {hasDates && (
-            <Link href={feedHref({ ...filter, from: undefined, to: undefined })} className={buttonVariants({ variant: "ghost" })}>
-              {t("resetDates")}
+          {canReset && (
+            <Link
+              href={feedHref({ ...filter, from: undefined, to: undefined, q: undefined })}
+              className={buttonVariants({ variant: "ghost" })}
+            >
+              {t("resetSearchAndDates")}
             </Link>
           )}
         </div>
