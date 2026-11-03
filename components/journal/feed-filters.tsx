@@ -35,6 +35,7 @@ export async function FeedFilters({
         {filter.categoryIds.map((id) => (
           <input key={id} type="hidden" name="category" value={id} />
         ))}
+        {filter.sort === "oldest" && <input type="hidden" name="sort" value="oldest" />}
         <div className="flex flex-col gap-1.5">
           <Label htmlFor={`${prefix}from`} className="text-xs text-muted-foreground">
             {t("from")}
@@ -52,12 +53,17 @@ export async function FeedFilters({
             {t("applyDates")}
           </Button>
           {hasDates && (
-            <Link href={feedHref({ categoryIds: filter.categoryIds })} className={buttonVariants({ variant: "ghost" })}>
+            <Link href={feedHref({ ...filter, from: undefined, to: undefined })} className={buttonVariants({ variant: "ghost" })}>
               {t("resetDates")}
             </Link>
           )}
         </div>
       </form>
+
+      <div role="group" aria-label={t("sortLabel")} className="mt-3 grid shrink-0 grid-cols-2 gap-1 rounded-lg bg-muted p-1">
+        <SortOption href={feedHref({ ...filter, sort: undefined })} active={filter.sort !== "oldest"} label={t("newestFirst")} />
+        <SortOption href={feedHref({ ...filter, sort: "oldest" })} active={filter.sort === "oldest"} label={t("oldestFirst")} />
+      </div>
 
       <nav aria-label={t("filterLabel")} className="mt-5 flex min-h-0 flex-col">
         <div className="mb-2 flex shrink-0 items-center justify-between gap-2">
@@ -94,6 +100,21 @@ export async function FeedFilters({
         </Link>
       </nav>
     </>
+  );
+}
+
+function SortOption({ href, active, label }: { href: string; active: boolean; label: string }) {
+  return (
+    <Link
+      href={href}
+      aria-current={active ? "true" : undefined}
+      className={cn(
+        "rounded-md px-1 py-1 text-center text-xs transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
+        active ? "bg-card font-medium shadow-sm" : "text-muted-foreground hover:text-foreground",
+      )}
+    >
+      {label}
+    </Link>
   );
 }
 

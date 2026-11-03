@@ -2,8 +2,10 @@
  * The feed filter lives in the URL, e.g. /app?category=<id>&category=<id>&from=2026-10-01&to=2026-10-27,
  * so it survives a reload and works without JavaScript. Several categories mean
  * "an entry with any of them"; dates are inclusive and compare the entry's local date.
+ * `sort` orders the feed by the entry's date and time; newest first is the default.
  */
-export type FeedFilter = { categoryIds: string[]; from?: string; to?: string };
+export type FeedSort = "newest" | "oldest";
+export type FeedFilter = { categoryIds: string[]; from?: string; to?: string; sort?: FeedSort };
 
 /**
  * What the feed column shows (ADR-0005: everything opens in place, inside the
@@ -34,7 +36,7 @@ export function parseFeedFilter(params: SearchParams): FeedFilter {
   let to = date(params.to);
   // A reversed range is almost always a slip: show what the user meant.
   if (from && to && from > to) [from, to] = [to, from];
-  return { categoryIds, from, to };
+  return { categoryIds, from, to, ...(all(params.sort)[0] === "oldest" && { sort: "oldest" as const }) };
 }
 
 export function parseFeedView(params: SearchParams): FeedView {
@@ -49,6 +51,7 @@ export function feedHref(filter: FeedFilter, view: FeedView = { mode: "list" }) 
   for (const id of filter.categoryIds) query.append("category", id);
   if (filter.from) query.set("from", filter.from);
   if (filter.to) query.set("to", filter.to);
+  if (filter.sort === "oldest") query.set("sort", "oldest");
   if (view.mode === "new") query.set("new", "1");
   if (view.mode === "view" || view.mode === "edit") query.set("entry", view.id);
   if (view.mode === "edit") query.set("edit", "1");

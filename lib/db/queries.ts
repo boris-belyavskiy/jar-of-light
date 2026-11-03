@@ -126,19 +126,20 @@ function toEntry(row: EntryRow): Entry {
   };
 }
 
-/** Feed: newest first by the entry's own date and time (ENT-04), filtered as in lib/feed-filter. */
+/** Feed: by the entry's own date and time, newest first unless asked otherwise (ENT-04), filtered as in lib/feed-filter. */
 export async function listEntries(filter: FeedFilter): Promise<Entry[]> {
   await requireUserId();
   const supabase = await createClient();
   const byCategory = filter.categoryIds.length > 0;
+  const ascending = filter.sort === "oldest";
   // The second, inner-joined embed only filters; `cats` still lists every category of the entry.
   const columns = byCategory ? `${ENTRY_COLUMNS}, f:entry_categories!inner(category_id)` : ENTRY_COLUMNS;
   let query = supabase
     .from("entries")
     .select(columns)
-    .order("occurred_on", { ascending: false })
-    .order("occurred_time", { ascending: false })
-    .order("created_at", { ascending: false })
+    .order("occurred_on", { ascending })
+    .order("occurred_time", { ascending })
+    .order("created_at", { ascending })
     .limit(200);
   if (byCategory) query = query.in("f.category_id", filter.categoryIds);
   if (filter.from) query = query.gte("occurred_on", filter.from);
