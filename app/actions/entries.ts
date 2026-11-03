@@ -78,6 +78,18 @@ export async function updateEntry(id: string, _prev: FormState, formData: FormDa
   redirect(safeFeedPath(formData.get("returnTo")));
 }
 
+/** Stars or unstars an entry; the database lets this happen only for the user's own entries. */
+export async function setStar(entryId: string, starred: boolean): Promise<void> {
+  await requireUserId();
+  const supabase = await createClient();
+  const { error } = starred
+    ? await supabase.from("stars").insert({ entry_id: entryId })
+    : await supabase.from("stars").delete().eq("entry_id", entryId);
+  // Already starred (say, in another tab) is what the user wanted.
+  if (error && error.code !== "23505") throw new Error(`star: ${error.code}`);
+  revalidatePath("/app");
+}
+
 export async function deleteEntry(id: string, returnTo: string): Promise<void> {
   await requireUserId();
   const supabase = await createClient();

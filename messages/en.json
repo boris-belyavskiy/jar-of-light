@@ -74,6 +74,8 @@
     "doubleCountNote": "Note: an entry with several categories counts in each of them, so these numbers can add up to more than the number of entries."
   },
   "entry": {
+    "addStar": "Add to favorites",
+    "removeStar": "Remove from favorites",
     "bodyLabel": "What happened?",
     "bodyPlaceholder": "Who made your day easier today? What small moment do you want to remember?",
     "counter": "{count} / {max}",
