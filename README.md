@@ -18,7 +18,7 @@ This is the first step of a longer product (see the [Roadmap](docs/ROADMAP.md)):
 
 - **Sign up and login** with any Google account, no passwords; each user sees only their own data
 - **Entries:** add, read in a window with its own link, edit, delete after an "are you sure?" dialog
-- **Validation:** friendly messages for a blank or too-long entry, in Russian and English
+- **Validation:** friendly messages for a blank or too-long entry, in English and Russian
 - **Favorites:** star an entry beside its "⋯" menu; a "Favorites" row in the filter shows the starred ones
 - **Find things:** filter by categories (tick boxes, one "Clear" button) and dates, search by text, sort newest or oldest first
 - **Statistics:** for the entries the filter selects, the number of entries, days with an entry, the best month, a chart by date and a chart by category
@@ -31,7 +31,7 @@ This is the first step of a longer product (see the [Roadmap](docs/ROADMAP.md)):
 
 **Also working**
 
-- **Language switch:** the whole interface in Russian or English, always in the header
+- **Language switch:** the whole interface in English or Russian, always in the header
 - **Dragging categories** into your own order, with the left mouse button or by touch
 - **Your own categories:** create, rename, delete, with a name in one language or both
 - **Time zones:** "now" follows your time zone, and the list shows UTC offsets
@@ -44,7 +44,7 @@ This is the first step of a longer product (see the [Roadmap](docs/ROADMAP.md)):
 | Piece | Choice |
 |---|---|
 | Coding agent | Claude Code |
-| App | Next.js, TypeScript, Tailwind CSS, shadcn/ui, `next-intl` (RU / EN), Zod |
+| App | Next.js, TypeScript, Tailwind CSS, shadcn/ui, `next-intl` (EN / RU), Zod |
 | Database and sign-in | Supabase (Postgres with Row Level Security), Google Identity Services |
 | Hosting | Vercel, deploying from `main` |
 | Tests and CI | Vitest, PGlite (real Postgres in memory), GitHub Actions |

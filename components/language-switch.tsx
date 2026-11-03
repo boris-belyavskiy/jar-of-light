@@ -3,7 +3,7 @@ import { setLocale } from "@/app/actions/account";
 import { locales } from "@/i18n/config";
 import { cn } from "@/lib/utils";
 
-/** RU | EN toggle; works without JavaScript because it is a plain form. */
+/** EN | RU toggle; works without JavaScript because it is a plain form. */
 export async function LanguageSwitch({ className }: { className?: string }) {
   const [current, t] = await Promise.all([getLocale(), getTranslations("languages")]);
   return (

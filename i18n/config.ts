@@ -1,4 +1,4 @@
-export const locales = ["ru", "en"] as const;
+export const locales = ["en", "ru"] as const;
 export type Locale = (typeof locales)[number];
 export const defaultLocale: Locale = "en";
 /** Remembers the interface language; the profile is the source of truth once signed in. */

@@ -70,8 +70,8 @@ export function CategoryNameFields({
 
   return (
     <div className="flex flex-1 flex-col gap-2 sm:flex-row">
-      {field("ru", placeholderRu, Boolean(autoFocus))}
-      {field("en", placeholderEn, false)}
+      {field("en", placeholderEn, Boolean(autoFocus))}
+      {field("ru", placeholderRu, false)}
     </div>
   );
 }
