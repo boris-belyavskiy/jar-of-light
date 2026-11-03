@@ -48,7 +48,7 @@
     "newestFirst": "Newest first",
     "oldestFirst": "Oldest first",
     "composerPrompt": "What bright moment would you like to keep?",
-    "filtersTitle": "Set up the filter",
+    "filtersTitle": "Filters",
     "categoriesTitle": "Categories",
     "editCategories": "Order and edit categories",
     "backToFeed": "Back to the feed",
@@ -213,7 +213,7 @@
     "back": "Back"
   },
   "datePicker": {
-    "placeholder": "MM-DD-YYYY",
+    "placeholder": "mm-dd-yyyy",
     "clear": "Clear"
   },
   "about": {

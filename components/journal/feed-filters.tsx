@@ -9,11 +9,14 @@ import { cn } from "@/lib/utils";
 import type { Category } from "@/lib/db/queries";
 import { feedHref, SEARCH_MAX_LENGTH, toggleCategory, type FeedFilter } from "@/lib/feed-filter";
 
-const SECTION = "mt-4 border-t border-border pt-4";
-const SECTION_TITLE = "text-xs font-semibold text-muted-foreground";
+const SECTION = "mt-3 border-t border-border pt-3";
+const SECTION_TITLE = "text-xs font-bold text-foreground";
+// Every button in the filter is the size of the sort options; phones get a bigger tap target.
+const SMALL_BUTTON = "h-6 rounded-md px-1 text-xs max-md:h-8 [&_svg:not([class*='size-'])]:size-3.5";
+const DATE_FIELD = "h-7 gap-1 px-1.5 text-xs whitespace-nowrap md:text-xs [&_svg]:size-3.5";
 
 /**
- * The feed filters, in three parts: search by words, dates, categories. Rendered
+ * The feed filters, in four parts: search by words, dates, favorites, categories. Rendered
  * twice — in the side column and, on phones, folded in the head — so ids get a
  * prefix. In the side column only the list of categories scrolls: everything
  * else keeps its place.
@@ -36,13 +39,13 @@ export async function FeedFilters({
   const view = stats ? ({ mode: "stats" } as const) : undefined;
   const hasSearch = Boolean(filter.q);
   const hasDates = Boolean(filter.from || filter.to);
-  const hasSelection = filter.categoryIds.length > 0 || Boolean(filter.starred);
+  const hasCategories = filter.categoryIds.length > 0;
 
   return (
     <>
       {/* Plain GET forms: each carries the rest of the filter along in hidden fields. The key
           resets a form's fields when its filter is cleared, which a soft navigation would not. */}
-      <form key={`q-${filter.q ?? ""}`} action="/app" className="mt-3 flex shrink-0 flex-col gap-1.5">
+      <form key={`q-${filter.q ?? ""}`} action="/app" className="mt-3 flex shrink-0 flex-col gap-1.5 md:mt-0">
         <KeptFields filter={filter} stats={stats} omit="search" />
         <Label htmlFor={`${prefix}q`} className={SECTION_TITLE}>
           {t("searchTitle")}
@@ -54,6 +57,7 @@ export async function FeedFilters({
           defaultValue={filter.q}
           maxLength={SEARCH_MAX_LENGTH}
           placeholder={t("searchPlaceholder")}
+          className="md:h-7 md:px-2 md:text-xs"
         />
         <FormButtons
           apply={t("searchApply")}
@@ -62,22 +66,26 @@ export async function FeedFilters({
         />
       </form>
 
-      <section className={cn(SECTION, "shrink-0")}>
+      <section className={cn(SECTION, "flex shrink-0 flex-col gap-1.5")}>
+        <p className={SECTION_TITLE}>{t("datesTitle")}</p>
+        <div role="group" aria-label={t("sortLabel")} className="grid grid-cols-2 gap-1 rounded-lg bg-muted p-1">
+          <SortOption href={feedHref({ ...filter, sort: undefined }, view)} active={filter.sort !== "oldest"} label={t("newestFirst")} />
+          <SortOption href={feedHref({ ...filter, sort: "oldest" }, view)} active={filter.sort === "oldest"} label={t("oldestFirst")} />
+        </div>
         <form key={`dates-${filter.from ?? ""}-${filter.to ?? ""}`} action="/app" className="flex flex-col gap-1.5">
           <KeptFields filter={filter} stats={stats} omit="dates" />
-          <p className={SECTION_TITLE}>{t("datesTitle")}</p>
           <div className="grid grid-cols-2 gap-2">
             <div className="flex min-w-0 flex-col gap-1">
               <Label htmlFor={`${prefix}from`} className="text-xs text-muted-foreground">
                 {t("from")}
               </Label>
-              <DatePicker id={`${prefix}from`} name="from" defaultValue={filter.from} clearable className="gap-1 px-2 text-sm md:text-sm" />
+              <DatePicker id={`${prefix}from`} name="from" defaultValue={filter.from} clearable className={DATE_FIELD} />
             </div>
             <div className="flex min-w-0 flex-col gap-1">
               <Label htmlFor={`${prefix}to`} className="text-xs text-muted-foreground">
                 {t("to")}
               </Label>
-              <DatePicker id={`${prefix}to`} name="to" defaultValue={filter.to} clearable className="gap-1 px-2 text-sm md:text-sm" />
+              <DatePicker id={`${prefix}to`} name="to" defaultValue={filter.to} clearable className={DATE_FIELD} />
             </div>
           </div>
           <FormButtons
@@ -86,18 +94,24 @@ export async function FeedFilters({
             clearHref={hasDates ? feedHref({ ...filter, from: undefined, to: undefined }, view) : undefined}
           />
         </form>
-        <div role="group" aria-label={t("sortLabel")} className="mt-3 grid grid-cols-2 gap-1 rounded-lg bg-muted p-1">
-          <SortOption href={feedHref({ ...filter, sort: undefined }, view)} active={filter.sort !== "oldest"} label={t("newestFirst")} />
-          <SortOption href={feedHref({ ...filter, sort: "oldest" }, view)} active={filter.sort === "oldest"} label={t("oldestFirst")} />
-        </div>
+      </section>
+
+      <section className={cn(SECTION, "shrink-0")}>
+        <FilterItem
+          href={feedHref({ ...filter, starred: filter.starred ? undefined : true }, view)}
+          active={Boolean(filter.starred)}
+          label={t("favorites")}
+          strong
+          icon={<Star className={cn("size-3.5", filter.starred && "fill-light stroke-foreground/50")} aria-hidden="true" />}
+        />
       </section>
 
       <nav aria-label={t("filterLabel")} className={cn(SECTION, "flex min-h-0 flex-col")}>
         <div className="mb-2 flex shrink-0 items-center justify-between gap-2">
           <p className={SECTION_TITLE}>{t("categoriesTitle")}</p>
-          {hasSelection ? (
+          {hasCategories ? (
             <Link
-              href={feedHref({ ...filter, categoryIds: [], starred: undefined }, view)}
+              href={feedHref({ ...filter, categoryIds: [] }, view)}
               className="text-xs text-primary underline-offset-4 hover:underline"
             >
               {t("clear")}
@@ -108,14 +122,6 @@ export async function FeedFilters({
         </div>
         {/* The list scrolls on its own when the categories don't fit. */}
         <ul className="flex min-h-24 flex-col gap-0.5 overflow-y-auto [scrollbar-width:thin] max-md:max-h-48">
-          <li>
-            <FilterItem
-              href={feedHref({ ...filter, starred: filter.starred ? undefined : true }, view)}
-              active={Boolean(filter.starred)}
-              label={t("favorites")}
-              icon={<Star className={cn("size-4", filter.starred && "fill-light stroke-foreground/50")} aria-hidden="true" />}
-            />
-          </li>
           {items.map((c) => (
             <li key={c.id}>
               <FilterItem
@@ -127,12 +133,12 @@ export async function FeedFilters({
           ))}
         </ul>
         {filter.categoryIds.length > 1 && <p className="mt-2 shrink-0 text-xs text-muted-foreground">{t("anyOf")}</p>}
-        {filter.starred && filter.categoryIds.length > 0 && (
+        {filter.starred && hasCategories && (
           <p className="mt-2 shrink-0 text-xs text-muted-foreground">{t("favoritesAndCategories")}</p>
         )}
         <Link
           href="/app/categories"
-          className="mt-3 inline-block shrink-0 text-sm text-primary underline-offset-4 hover:underline"
+          className="mt-2 inline-block shrink-0 text-xs text-primary underline-offset-4 hover:underline"
         >
           {t("editCategories")}
         </Link>
@@ -162,15 +168,15 @@ function KeptFields({ filter, stats, omit }: { filter: FeedFilter; stats: boolea
 function FormButtons({ apply, clear, clearHref }: { apply: string; clear: string; clearHref?: string }) {
   return (
     <div className="mt-1 grid grid-cols-2 gap-2">
-      <Button type="submit" variant="outline">
+      <Button type="submit" variant="outline" className={SMALL_BUTTON}>
         {apply}
       </Button>
       {clearHref ? (
-        <Link href={clearHref} className={buttonVariants({ variant: "ghost" })}>
+        <Link href={clearHref} className={cn(buttonVariants({ variant: "ghost" }), SMALL_BUTTON)}>
           {clear}
         </Link>
       ) : (
-        <Button type="button" variant="ghost" disabled>
+        <Button type="button" variant="ghost" disabled className={SMALL_BUTTON}>
           {clear}
         </Button>
       )}
@@ -184,7 +190,7 @@ export async function StatsButton({ filter, stats, className }: { filter: FeedFi
   return (
     <Link
       href={feedHref(filter, stats ? undefined : { mode: "stats" })}
-      className={cn(buttonVariants({ variant: stats ? "secondary" : "outline" }), className)}
+      className={cn(buttonVariants({ variant: stats ? "secondary" : "outline" }), SMALL_BUTTON, className)}
     >
       <ChartColumn aria-hidden="true" />
       {stats ? t("backToFeed") : t("statsButton")}
@@ -198,7 +204,7 @@ function SortOption({ href, active, label }: { href: string; active: boolean; la
       href={href}
       aria-current={active ? "true" : undefined}
       className={cn(
-        "rounded-md px-1 py-1 text-center text-xs transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
+        "flex h-6 items-center justify-center rounded-md px-1 text-xs transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none max-md:h-8",
         active ? "bg-card font-medium shadow-sm" : "text-muted-foreground hover:text-foreground",
       )}
     >
@@ -208,25 +214,38 @@ function SortOption({ href, active, label }: { href: string; active: boolean; la
 }
 
 /** One row of the filter: a tick box and a name. The whole row is the tap target; several can be on at once. */
-function FilterItem({ href, active, label, icon }: { href: string; active: boolean; label: string; icon?: React.ReactNode }) {
+function FilterItem({
+  href,
+  active,
+  label,
+  icon,
+  strong,
+}: {
+  href: string;
+  active: boolean;
+  label: string;
+  icon?: React.ReactNode;
+  strong?: boolean;
+}) {
   return (
     <Link
       href={href}
       role="checkbox"
       aria-checked={active}
       className={cn(
-        "flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-sky focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-inset",
+        "flex items-center gap-2 rounded-md px-1 py-1 text-xs transition-colors hover:bg-sky focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-inset",
         active && "font-medium",
+        strong && "font-bold",
       )}
     >
       <span
         aria-hidden="true"
         className={cn(
-          "flex size-4 shrink-0 items-center justify-center rounded border",
+          "flex size-3.5 shrink-0 items-center justify-center rounded-[3px] border",
           active ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/50 bg-card",
         )}
       >
-        {active && <Check className="size-3" strokeWidth={3} />}
+        {active && <Check className="size-2.5" strokeWidth={3.5} />}
       </span>
       <span className="min-w-0 flex-1 break-words">{label}</span>
       {icon}

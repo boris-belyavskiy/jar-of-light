@@ -82,7 +82,6 @@ export default async function FeedPage({ searchParams }: PageProps<"/app">) {
       head={head}
       aside={
         <>
-          <h2 className="shrink-0 text-sm font-semibold">{t("filtersTitle")}</h2>
           {filters("side-")}
           {/* Stays on screen: only the category list above it gives way when space runs out. */}
           <StatsButton filter={filter} stats={stats} className="sticky bottom-0 mt-3 w-full shrink-0" />
