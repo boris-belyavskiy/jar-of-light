@@ -63,7 +63,12 @@
     "total": "Entries",
     "activeDays": "Days with an entry",
     "bestMonth": "Best month",
-    "entriesCount": "{count, plural, one {# entry} other {# entries}}"
+    "entriesCount": "{count, plural, one {# entry} other {# entries}}",
+    "byDateTitle": "Entries by date",
+    "byMonthTitle": "Entries by month",
+    "dateColumn": "Date",
+    "countColumn": "Entries",
+    "chartMax": "Most in one bar: {count}"
   },
   "entry": {
     "bodyLabel": "What happened?",

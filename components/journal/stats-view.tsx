@@ -1,13 +1,9 @@
 import { getTranslations } from "next-intl/server";
-import { summaryStats, type StatEntry } from "@/lib/dashboard-stats";
+import { EntriesByDateChart } from "@/components/journal/stats-charts";
+import { monthLabel } from "@/components/journal/month-label";
+import { entriesByDate, summaryStats, type StatEntry } from "@/lib/dashboard-stats";
 import type { FeedFilter } from "@/lib/feed-filter";
 import { displayDate } from "@/lib/time";
-
-export function monthLabel(month: string, locale: string) {
-  return new Intl.DateTimeFormat(locale, { month: "long", year: "numeric", timeZone: "UTC" }).format(
-    new Date(`${month}-01T00:00:00Z`),
-  );
-}
 
 /** The dashboard: what the entries selected by the filter add up to, in the feed's column. */
 export async function StatsView({
@@ -54,6 +50,7 @@ export async function StatsView({
           />
         )}
       </dl>
+      <EntriesByDateChart series={entriesByDate(entries, filter)} locale={locale} />
     </section>
   );
 }
