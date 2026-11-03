@@ -134,5 +134,6 @@ Sections 1–7 above are the plan as merged in #9. The opening was corrected onc
 | *(not planned)* Chart by category | Added | Done | I added it while building; an entry with several categories counts in each, and the page says so | Double counting is fine when it is stated |
 | Test: data isolation | Shipped | Done | Nothing | The app has to be broken on purpose to prove the test can fail |
 | Test: dashboard | Changed | Done | Follows the change to the stat above | |
+| *(not planned)* Fixes from the stranger test | Added | Done | A first-time user found lines at the feed's edges and a bulky filter: #44 and this PR | A first-time user saw in minutes what the agent and I had missed for days |
 
 **Not in the plan, and already working:** a language switch (RU / EN), dragging categories into your own order, your own categories, time zones, account deletion. See the [README](README.md#features).
