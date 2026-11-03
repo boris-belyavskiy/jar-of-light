@@ -10,4 +10,4 @@ The prompt is quoted as written, in Russian (the chat language), with an English
 
 **Agent response (summary):** found the cause in the screenshot. The sticky head that entries scroll under was exactly as wide as the column, but each entry card has an outline and a shadow that reach 1–2 pixels outside it, so their edges stayed visible past the head on both sides. It widened the head's background by 0.5rem on each side without moving its content.
 
-This bug has been there since the head became sticky in PR #5. I and the agent both missed it, and a first-time user saw it within minutes.
+This bug has been there since the head became sticky in PR #6. I and the agent both missed it, and a first-time user saw it within minutes.
