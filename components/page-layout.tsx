@@ -40,7 +40,7 @@ export function PageLayout({
       {aside && (
         <aside
           aria-label={asideLabel}
-          className="sticky top-14 hidden max-h-[calc(100dvh-6.5rem)] self-start overflow-y-auto pt-6 pb-6 [grid-area:aside] md:block"
+          className="sticky top-14 hidden max-h-[calc(100dvh-6.5rem)] self-start overflow-y-auto pt-6 pb-6 [grid-area:aside] md:flex md:flex-col"
         >
           {aside}
         </aside>
