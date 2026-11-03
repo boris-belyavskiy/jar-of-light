@@ -63,6 +63,19 @@ describe("the dashboard view", () => {
   });
 });
 
+describe("favorites", () => {
+  it("reads and writes the choice, and counts as a filter", () => {
+    expect(parseFeedFilter({ starred: "1" }).starred).toBe(true);
+    expect(parseFeedFilter({}).starred).toBeUndefined();
+    expect(feedHref({ categoryIds: [], starred: true })).toBe("/app?starred=1");
+    expect(isFiltered({ categoryIds: [], starred: true })).toBe(true);
+  });
+
+  it("survives a category toggle", () => {
+    expect(feedHref(toggleCategory({ categoryIds: [], starred: true }, A))).toBe(`/app?category=${A}&starred=1`);
+  });
+});
+
 describe("search", () => {
   it("trims the words, drops an empty search and limits the length", () => {
     expect(parseFeedFilter({ q: "  кофе с Аней " }).q).toBe("кофе с Аней");

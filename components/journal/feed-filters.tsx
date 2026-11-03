@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChartColumn, Check } from "lucide-react";
+import { ChartColumn, Check, Star } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { buttonVariants, Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -31,7 +31,7 @@ export async function FeedFilters({
   // Changing a filter keeps the user where they are: on the dashboard, or on the list.
   const view = stats ? ({ mode: "stats" } as const) : undefined;
   const canReset = Boolean(filter.from || filter.to || filter.q);
-  const hasCategories = filter.categoryIds.length > 0;
+  const hasSelection = filter.categoryIds.length > 0 || Boolean(filter.starred);
 
   return (
     <>
@@ -42,6 +42,7 @@ export async function FeedFilters({
         ))}
         {filter.sort === "oldest" && <input type="hidden" name="sort" value="oldest" />}
         {stats && <input type="hidden" name="stats" value="1" />}
+        {filter.starred && <input type="hidden" name="starred" value="1" />}
         <div className="col-span-2 flex flex-col gap-1.5 md:col-span-1">
           <Label htmlFor={`${prefix}q`} className="text-xs text-muted-foreground">
             {t("searchLabel")}
@@ -90,9 +91,9 @@ export async function FeedFilters({
       <nav aria-label={t("filterLabel")} className="mt-5 flex min-h-0 flex-col">
         <div className="mb-2 flex shrink-0 items-center justify-between gap-2">
           <p className="text-xs text-muted-foreground">{t("categoriesTitle")}</p>
-          {hasCategories ? (
+          {hasSelection ? (
             <Link
-              href={feedHref({ ...filter, categoryIds: [] }, view)}
+              href={feedHref({ ...filter, categoryIds: [], starred: undefined }, view)}
               className="text-xs text-primary underline-offset-4 hover:underline"
             >
               {t("clearCategories")}
@@ -103,6 +104,14 @@ export async function FeedFilters({
         </div>
         {/* The list scrolls on its own when the categories don't fit. */}
         <ul className="flex min-h-24 flex-col gap-0.5 overflow-y-auto [scrollbar-width:thin] max-md:max-h-48">
+          <li>
+            <FilterItem
+              href={feedHref({ ...filter, starred: filter.starred ? undefined : true }, view)}
+              active={Boolean(filter.starred)}
+              label={t("favorites")}
+              icon={<Star className={cn("size-4", filter.starred && "fill-light stroke-foreground/50")} aria-hidden="true" />}
+            />
+          </li>
           {items.map((c) => (
             <li key={c.id}>
               <FilterItem
@@ -114,6 +123,9 @@ export async function FeedFilters({
           ))}
         </ul>
         {filter.categoryIds.length > 1 && <p className="mt-2 shrink-0 text-xs text-muted-foreground">{t("anyOf")}</p>}
+        {filter.starred && filter.categoryIds.length > 0 && (
+          <p className="mt-2 shrink-0 text-xs text-muted-foreground">{t("favoritesAndCategories")}</p>
+        )}
         <Link
           href="/app/categories"
           className="mt-3 inline-block shrink-0 text-sm text-primary underline-offset-4 hover:underline"
@@ -155,7 +167,7 @@ function SortOption({ href, active, label }: { href: string; active: boolean; la
 }
 
 /** One row of the filter: a tick box and a name. The whole row is the tap target; several can be on at once. */
-function FilterItem({ href, active, label }: { href: string; active: boolean; label: string }) {
+function FilterItem({ href, active, label, icon }: { href: string; active: boolean; label: string; icon?: React.ReactNode }) {
   return (
     <Link
       href={href}
@@ -176,6 +188,7 @@ function FilterItem({ href, active, label }: { href: string; active: boolean; la
         {active && <Check className="size-3" strokeWidth={3} />}
       </span>
       <span className="min-w-0 flex-1 break-words">{label}</span>
+      {icon}
     </Link>
   );
 }
