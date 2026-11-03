@@ -30,7 +30,7 @@ export function PageLayout({
       className={cn(
         "grid [grid-template-areas:'head'_'body']",
         aside &&
-          "md:grid-cols-[14rem_minmax(0,42rem)] md:grid-rows-[auto_1fr] md:gap-x-10 md:[grid-template-areas:'aside_head'_'aside_body']",
+          "md:grid-cols-[16rem_minmax(0,42rem)] md:grid-rows-[auto_1fr] md:gap-x-10 md:[grid-template-areas:'aside_head'_'aside_body']",
       )}
     >
       {/* Wider than the column by 0.5rem each side, so the cards' outline and shadow can't show past it while scrolling. */}
