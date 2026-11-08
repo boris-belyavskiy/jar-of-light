@@ -20,9 +20,13 @@ These documents are the source of truth. If a decision changes, update the docum
 - Commands: `npm run dev`, `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`. Environment variables: copy `.env.example` to `.env.local`.
 - Next.js 16 has breaking changes against older docs (`proxy.ts` instead of `middleware.ts`, typed `PageProps`/`LayoutProps`): read `node_modules/next/dist/docs/` before using an unfamiliar API.
 
-## Next work (decided 2026-11-08, not built yet)
+## Next work (decided 2026-11-08)
 
-Start with **Horizon 1, step 1** in [docs/ROADMAP.md](docs/ROADMAP.md#horizon-1--end-to-end-encryption). Read [ADR-0011](docs/DECISIONS.md#adr-0011) and [Tech Spec §5.6](docs/TECH_SPEC.md#56-end-to-end-encryption) first. One step, one pull request; horizons do not run in parallel, because only encryption can lose data and it must ship alone. Erasing plaintext is its own pull request, first on Boris's account. Do not rewrite `/privacy` until the move is finished: the current note stays true until then. Tech Spec §6 and §7.1 already describe AI and entry saving for encrypted accounts, while [schema.md](schema.md) describes what the database holds today.
+**Horizon 1, step 1 is live** (PR #64, 2026-11-08): the database has `user_keys`, the ciphertext columns and `profiles.encrypted_at`; the app reads both formats and shows ciphertext as locked; a Content Security Policy is built per request in `proxy.ts` (`lib/csp.ts`). Nothing is encrypted yet. Start with **Horizon 1, step 2** in [docs/ROADMAP.md](docs/ROADMAP.md#horizon-1--end-to-end-encryption). It adds `'wasm-unsafe-eval'` to the policy for Argon2id, and nothing more. Present the plan for step 2 to Boris before building.
+
+**Release order for any change with a migration: apply the migration to prod first, then merge.** Step 1 was merged before its migration reached prod, and for a few minutes the new code read columns that did not exist yet. Migrations are applied by Boris in the Supabase SQL editor (the agent's database tool is refused for this); give him the file, the project ref and a check query. `npm run dev` creates an untracked `AGENTS.md`: never commit it.
+
+Before that, the original instructions for the whole horizon: Read [ADR-0011](docs/DECISIONS.md#adr-0011) and [Tech Spec §5.6](docs/TECH_SPEC.md#56-end-to-end-encryption) first. One step, one pull request; horizons do not run in parallel, because only encryption can lose data and it must ship alone. Erasing plaintext is its own pull request, first on Boris's account. Do not rewrite `/privacy` until the move is finished: the current note stays true until then. Tech Spec §6 and §7.1 already describe AI and entry saving for encrypted accounts, while [schema.md](schema.md) describes what the database holds today.
 
 ## People and language
 
