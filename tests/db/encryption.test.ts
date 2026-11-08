@@ -191,3 +191,48 @@ describe("categories hold plaintext or ciphertext names", () => {
     ).rejects.toThrow(/check constraint/);
   });
 });
+
+describe("the device chooses the id of a new row", () => {
+  const ENTRY_ID = "33333333-3333-4333-8333-333333333333";
+  const CATEGORY_ID = "44444444-4444-4444-8444-444444444444";
+
+  it("accepts an entry and an own category with an id made on the device", async () => {
+    await asUser(db, B, async () => {
+      await db.query(
+        "insert into public.entries (id, body_enc, occurred_on, occurred_time) values ($1, 'djEuY2lwaGVy', '2026-01-02', '10:00')",
+        [ENTRY_ID],
+      );
+      await db.query("insert into public.categories (id, user_id, name_en_enc) values ($1, $2, 'djEubmFtZQ==')", [CATEGORY_ID, B]);
+    });
+    const rows = await asUser(db, B, () => db.query<{ id: string }>("select id from public.entries where id = $1", [ENTRY_ID]));
+    expect(rows.rows).toHaveLength(1);
+  });
+
+  it("cannot reuse an id, so nobody overwrites an existing row", async () => {
+    await expect(
+      asUser(db, B, () =>
+        db.query("insert into public.entries (id, body_enc, occurred_on, occurred_time) values ($1, 'djEuYQ', '2026-01-03', '10:00')", [ENTRY_ID]),
+      ),
+    ).rejects.toThrow(/duplicate key/);
+    // Another user trying to take B's id fails too, and learns nothing but that it is taken.
+    await expect(
+      asUser(db, "00000000-0000-4000-8000-0000000000d1", () =>
+        db.query("insert into public.entries (id, body_enc, occurred_on, occurred_time) values ($1, 'djEuYQ', '2026-01-03', '10:00')", [ENTRY_ID]),
+      ),
+    ).rejects.toThrow(/duplicate key|row-level security/);
+  });
+
+  it("an id still cannot be changed afterwards", async () => {
+    await expect(
+      asUser(db, B, () => db.query("update public.entries set id = gen_random_uuid() where id = $1", [ENTRY_ID])),
+    ).rejects.toThrow(/permission denied/);
+  });
+
+  it("an id cannot give a built-in category to a user", async () => {
+    await expect(
+      asUser(db, B, () =>
+        db.query("insert into public.categories (id, user_id, slug) values (gen_random_uuid(), $1, 'extra')", [B]),
+      ),
+    ).rejects.toThrow(/permission denied|check constraint/);
+  });
+});

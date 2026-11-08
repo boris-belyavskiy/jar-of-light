@@ -31,15 +31,18 @@ import {
 } from "@/app/actions/categories";
 import type { FormState } from "@/app/actions/state";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { useCategoryLabeler, useCategoryNames, useOwnCategoryNames } from "@/components/encryption/category-names";
+import { useKeys } from "@/components/encryption/key-provider";
+import { WriteGate } from "@/components/encryption/write-gate";
 import { Button } from "@/components/ui/button";
+import { sealCategoryNames, writeMode } from "@/lib/crypto/forms";
 import type { Category } from "@/lib/db/queries";
 import { cn } from "@/lib/utils";
-import { categoryLabel } from "./category-label";
 import { CategoryNameFields } from "./category-name-fields";
 
 export function CategoryManager({ categories }: { categories: Category[] }) {
   const t = useTranslations("categories");
-  const locale = useLocale();
+  const labelOf = useCategoryLabeler();
   const byId = new Map(categories.map((c) => [c.id, c]));
   // The new order shows at once; the server copy replaces it after saving.
   const [order, setOrder] = useOptimistic(categories.map((c) => c.id));
@@ -53,7 +56,7 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
   );
   const name = (id: string | number) => {
     const c = byId.get(String(id));
-    return c ? categoryLabel(c, t, locale) : "";
+    return c ? labelOf(c) : "";
   };
 
   function onDragEnd({ active, over }: DragEndEvent) {
@@ -100,8 +103,7 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
 
 /** The whole row can be dragged with the mouse or a finger; the keyboard picks it up from the row itself. */
 function SortableRow({ category }: { category: Category }) {
-  const t = useTranslations("categories");
-  const locale = useLocale();
+  const labelOf = useCategoryLabeler();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: category.id,
   });
@@ -112,7 +114,7 @@ function SortableRow({ category }: { category: Category }) {
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       {...attributes}
-      aria-label={categoryLabel(category, t, locale)}
+      aria-label={labelOf(category)}
       {...pointerListeners}
       // Space and Enter on a button inside the row press the button, not pick the row up.
       onKeyDown={(e) => {
@@ -133,11 +135,32 @@ function SortableRow({ category }: { category: Category }) {
 function CategoryRow({ category }: { category: Category }) {
   const t = useTranslations("categories");
   const locale = useLocale();
+  const labelOf = useCategoryLabeler();
+  const names = useCategoryNames(category);
+  const others = useOwnCategoryNames().filter((o) => o.id !== category.id);
+  const { status, needsSetup, encrypt } = useKeys();
+  const mode = writeMode(status, needsSetup);
   const [editing, setEditing] = useState(false);
   const [pending, startTransition] = useTransition();
   const rename = category.isSystem ? renameSystemCategory : renameCategory;
   const [state, action, saving] = useActionState(async (prev: FormState, formData: FormData) => {
-    const result = await rename(category.id, prev, formData);
+    let toSend = formData;
+    if (mode === "encrypted") {
+      // Checked and encrypted here, because the server cannot read the names; only ciphertext is sent.
+      const sealed = await sealCategoryNames(encrypt, {
+        table: category.isSystem ? "category_names" : "categories",
+        categoryId: category.id,
+        names: { ru: String(formData.get("nameRu") ?? ""), en: String(formData.get("nameEn") ?? "") },
+        others: category.isSystem ? undefined : others,
+      });
+      if (!sealed.ok) return { error: sealed.error };
+      toSend = new FormData();
+      if (sealed.ru) toSend.set("nameRuCipher", sealed.ru);
+      if (sealed.en) toSend.set("nameEnCipher", sealed.en);
+    } else if (mode !== "plain") {
+      return { error: "encryption.errors.generic" };
+    }
+    const result = await rename(category.id, prev, toSend);
     if (result.ok) setEditing(false);
     return result;
   }, {});
@@ -146,7 +169,13 @@ function CategoryRow({ category }: { category: Category }) {
     // Built-in categories show their own name as a hint; saving both empty brings it back.
     const builtIn = category.slug ? t(`system.${category.slug}`) : undefined;
     return (
-      <div className="flex-1 py-1.5 pl-2">
+      <div
+        className="flex-1 py-1.5 pl-2"
+        onMouseDown={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
+      >
+        <WriteGate onCancel={() => setEditing(false)}>
         <form
           action={action}
           className="flex flex-col gap-2 sm:flex-row sm:items-end"
@@ -156,8 +185,8 @@ function CategoryRow({ category }: { category: Category }) {
         >
           <CategoryNameFields
             idPrefix={`rename-${category.id}`}
-            defaultRu={category.nameRu ?? ""}
-            defaultEn={category.nameEn ?? ""}
+            defaultRu={names.ru ?? ""}
+            defaultEn={names.en ?? ""}
             placeholderRu={locale === "ru" ? builtIn : undefined}
             placeholderEn={locale === "en" ? builtIn : undefined}
             autoFocus
@@ -173,12 +202,13 @@ function CategoryRow({ category }: { category: Category }) {
         </form>
         {category.isSystem && <p className="mt-1 text-xs text-muted-foreground">{t("renameBuiltInHint")}</p>}
         <ErrorText state={state} />
+        </WriteGate>
       </div>
     );
   }
 
-  const name = categoryLabel(category, t, locale);
-  const other = locale === "ru" ? category.nameEn : category.nameRu;
+  const name = labelOf(category);
+  const other = locale === "ru" ? names.en : names.ru;
   return (
     <div className="flex flex-1 flex-wrap items-center gap-x-3 gap-y-1 pl-2">
       <span className="flex min-w-0 flex-col">
@@ -230,7 +260,29 @@ function ErrorText({ state }: { state: FormState }) {
 
 function CreateForm() {
   const t = useTranslations("categories");
-  const [state, action, pending] = useActionState(createCategory, {});
+  const others = useOwnCategoryNames();
+  const { status, needsSetup, encrypt } = useKeys();
+  const mode = writeMode(status, needsSetup);
+  const [state, action, pending] = useActionState(async (prev: FormState, formData: FormData): Promise<FormState> => {
+    if (mode === "encrypted") {
+      // The id is made here, before encrypting, because the ciphertext is bound to it (ADR-0011).
+      const id = crypto.randomUUID();
+      const sealed = await sealCategoryNames(encrypt, {
+        table: "categories",
+        categoryId: id,
+        names: { ru: String(formData.get("nameRu") ?? ""), en: String(formData.get("nameEn") ?? "") },
+        others,
+      });
+      if (!sealed.ok) return { error: sealed.error };
+      const toSend = new FormData();
+      toSend.set("categoryId", id);
+      if (sealed.ru) toSend.set("nameRuCipher", sealed.ru);
+      if (sealed.en) toSend.set("nameEnCipher", sealed.en);
+      return createCategory(prev, toSend);
+    }
+    if (mode !== "plain") return { error: "encryption.errors.generic" };
+    return createCategory(prev, formData);
+  }, {});
   // A new key after each save empties the fields.
   const [round, setRound] = useState(0);
   useEffect(() => {
@@ -239,7 +291,9 @@ function CreateForm() {
   }, [state]);
 
   return (
-    <form action={action} className="mt-4 rounded-2xl bg-card p-3 ring-1 ring-border">
+    <div className="mt-4">
+      <WriteGate>
+        <form action={action} className="rounded-2xl bg-card p-3 ring-1 ring-border">
       <p className="mb-2 text-sm font-medium">{t("newTitle")}</p>
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
         <CategoryNameFields key={round} idPrefix="new-category" />
@@ -249,6 +303,8 @@ function CreateForm() {
       </div>
       <p className="mt-1 text-xs text-muted-foreground">{t("namesHint")}</p>
       <ErrorText state={state} />
-    </form>
+        </form>
+      </WriteGate>
+    </div>
   );
 }

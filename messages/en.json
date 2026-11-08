@@ -55,7 +55,8 @@
     "statsButton": "Statistics",
     "statsTitle": "Statistics",
     "openEntry": "Open entry",
-    "locked": "Locked. This device does not have your key yet."
+    "locked": "Locked. This device does not have your key yet.",
+    "cannotRead": "This entry could not be decrypted."
   },
   "stats": {
     "title": "Statistics",
@@ -193,7 +194,8 @@
       "tooShort": "Use at least 8 characters.",
       "exists": "Encryption is already set up on another device. Reload the page and unlock instead.",
       "save": "Couldn't save your keys. Nothing was changed. Please try again.",
-      "generic": "Something went wrong on this device. Please try again."
+      "generic": "Something went wrong on this device. Please try again.",
+      "plaintext": "This account is encrypted, so readable text is not accepted. Reload the page and try again."
     },
     "recovery": {
       "explain": "This is your recovery code. If you forget your diary password, it is the only way back. It is shown once.",
@@ -218,10 +220,10 @@
       "back": "Back"
     },
     "header": {
-      "locked": "Diary locked on this device. Unlock",
-      "unlocked": "Diary unlocked on this device",
-      "unlockedTitle": "Your diary is unlocked",
-      "unlockedBody": "This device has your key. Lock it to be asked for the password again.",
+      "locked": "Encryption is on. Enter your diary password",
+      "unlocked": "Encryption is on, this device is unlocked",
+      "unlockedTitle": "Encryption is on",
+      "unlockedBody": "This device has your key, so your entries are readable here. Lock it to be asked for the password again.",
       "lockNow": "Lock this device",
       "settings": "Encryption settings"
     },
@@ -229,7 +231,7 @@
       "intro": "Encrypt your diary on this device, so that only you can read it, not even the person who runs this app.",
       "pointOperator": "You choose a diary password. It never leaves your device.",
       "pointLoss": "You get a recovery code. If you lose both the password and the code, encrypted entries can't be read by anyone, ever.",
-      "pointRollout": "This is the first part of the rollout: turning it on now creates your keys. Your entries are encrypted in the next updates, and existing entries are moved later, with a safety check.",
+      "pointRollout": "Entries and category names you write from now on are encrypted on your device. What you wrote before stays as it is for now and is moved in a later update, with a safety check.",
       "start": "Turn on encryption",
       "passwordExplain": "Choose a diary password. You'll enter it once on each device. It is separate from signing in with Google.",
       "password": "Diary password",
@@ -262,6 +264,14 @@
     "remember": {
       "label": "Remember on this device",
       "hint": "You won't be asked for the password here again, even after signing out. Uncheck it on a shared computer."
+    },
+    "write": {
+      "wait": "Checking this device…",
+      "lockedTitle": "Unlock to write",
+      "lockedBody": "Your diary is encrypted, and this device doesn't have your key yet. Enter your diary password, then continue.",
+      "setupTitle": "Turn on encryption first",
+      "setupBody": "New diaries are encrypted from the first entry. Choose a diary password and save a recovery code, then write.",
+      "cancel": "Cancel"
     }
   },
   "languages": {

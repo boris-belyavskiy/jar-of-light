@@ -6,6 +6,9 @@ import {
   changePassword as changePasswordCrypto,
   createKeys,
   CryptoError,
+  decryptField as decryptFieldCrypto,
+  encryptField as encryptFieldCrypto,
+  type FieldContext,
   replaceRecoveryCode,
   resetPasswordWithCode,
   unlockWithPassword as unlockWithPasswordCrypto,
@@ -41,8 +44,17 @@ export class KeyStoreError extends Error {
 export type PreparedSetup = Awaited<ReturnType<typeof createKeys>>;
 export type PreparedRecoveryCode = Awaited<ReturnType<typeof replaceRecoveryCode>>;
 
+/** Where an encrypted value lives, without the user: the provider adds that. */
+export type FieldPlace = Omit<FieldContext, "userId">;
+
 type KeysContext = {
   status: KeyStatus;
+  /** True for an account with no keys and no entries: it sets up encryption before writing its first entry. */
+  needsSetup: boolean;
+  /** Encrypts a value for this user, or throws when the device has no key. */
+  encrypt(place: FieldPlace, text: string): Promise<string>;
+  /** Decrypts a value of this user, or throws when the device has no key or the value was changed. */
+  decrypt(place: FieldPlace, sealed: string): Promise<string>;
   /** For later steps: the key that encrypts and decrypts content. Null unless unlocked. */
   dataKey: CryptoKey | null;
   /** Whether this device keeps the key between visits (and through sign-out), or only while the tab is open. */
@@ -77,11 +89,14 @@ export function KeyProvider({
   userId,
   record: initialRecord,
   persist,
+  newAccount = false,
   children,
 }: {
   userId: string;
   record: KeyRecord | null;
   persist: PersistKeys;
+  /** The account has no entries yet; with no keys it must set up encryption first. */
+  newAccount?: boolean;
   children: ReactNode;
 }) {
   const [record, setRecord] = useState(initialRecord);
@@ -127,8 +142,19 @@ export function KeyProvider({
   const value = useMemo<KeysContext>(
     () => ({
       status,
+      needsSetup: newAccount && record === null,
       dataKey,
       remembered,
+
+      async encrypt(place, text) {
+        if (!dataKey) throw new CryptoError("decrypt_failed");
+        return encryptFieldCrypto(dataKey, text, { userId, ...place });
+      },
+
+      async decrypt(place, sealed) {
+        if (!dataKey) throw new CryptoError("decrypt_failed");
+        return decryptFieldCrypto(dataKey, sealed, { userId, ...place });
+      },
 
       async prepareSetup(password) {
         const kdfParams = await calibrateKdf();
@@ -191,7 +217,7 @@ export function KeyProvider({
         setRemembered(false);
       },
     }),
-    [status, dataKey, remembered, record, userId, persist, adopt],
+    [status, newAccount, dataKey, remembered, record, userId, persist, adopt],
   );
 
   return <Context.Provider value={value}>{children}</Context.Provider>;

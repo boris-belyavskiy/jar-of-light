@@ -2,41 +2,66 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireUserId } from "@/lib/db/queries";
+import { getKeyRecord, requireUserId } from "@/lib/db/queries";
 import { safeFeedPath } from "@/lib/feed-filter";
 import { createClient } from "@/lib/supabase/server";
-import { entrySchema } from "@/lib/validation";
+import { encryptedEntrySchema, entrySchema } from "@/lib/validation";
 import type { FormState } from "./state";
 
 // Never log entry text: errors carry only codes.
+//
+// An account with encryption keys saves ciphertext made on the device and the
+// server refuses plaintext from it (ADR-0011): an old tab, a script or a bug
+// must not put readable text next to keys that promise otherwise. An account
+// without keys saves plaintext as before, until it opts in.
 
-async function validate(formData: FormData) {
-  const parsed = entrySchema.safeParse({
-    body: formData.get("body") ?? "",
+type Saved =
+  | { kind: "plain"; body: string; occurredOn: string; occurredTime: string; categoryIds: string[] }
+  | { kind: "encrypted"; id: string; bodyCipher: string; occurredOn: string; occurredTime: string; categoryIds: string[] };
+
+async function validate(formData: FormData): Promise<{ data: Saved } | { error: string }> {
+  const encrypted = (await getKeyRecord()) !== null;
+  const meta = {
     occurredOn: formData.get("occurredOn") ?? "",
     occurredTime: formData.get("occurredTime") ?? "",
     categoryIds: formData.getAll("categoryIds"),
-  });
-  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "entry.errors.save" } as const;
-  return { data: parsed.data } as const;
+  };
+
+  if (encrypted) {
+    if (formData.has("body")) return { error: "encryption.errors.plaintext" };
+    const parsed = encryptedEntrySchema.safeParse({
+      ...meta,
+      entryId: formData.get("entryId"),
+      bodyCipher: formData.get("bodyCipher"),
+    });
+    if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "entry.errors.save" };
+    const { entryId, ...rest } = parsed.data;
+    return { data: { kind: "encrypted", id: entryId, ...rest } };
+  }
+
+  // No keys here, so ciphertext is not expected: it would mean a client that thinks the account is encrypted.
+  if (formData.has("bodyCipher")) return { error: "encryption.errors.generic" };
+  const parsed = entrySchema.safeParse({ ...meta, body: formData.get("body") ?? "" });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "entry.errors.save" };
+  return { data: { kind: "plain", ...parsed.data } };
 }
 
 export async function createEntry(_prev: FormState, formData: FormData): Promise<FormState> {
   const userId = await requireUserId();
   const result = await validate(formData);
   if ("error" in result) return { error: result.error };
-  const { body, occurredOn, occurredTime, categoryIds } = result.data;
+  const saved = result.data;
 
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("entries")
-    .insert({ user_id: userId, body, occurred_on: occurredOn, occurred_time: occurredTime })
-    .select("id")
-    .single();
+  const when = { occurred_on: saved.occurredOn, occurred_time: saved.occurredTime };
+  const { data, error } =
+    saved.kind === "encrypted"
+      ? await supabase.from("entries").insert({ id: saved.id, user_id: userId, body_enc: saved.bodyCipher, ...when }).select("id").single()
+      : await supabase.from("entries").insert({ user_id: userId, body: saved.body, ...when }).select("id").single();
   if (error) return { error: "entry.errors.save" };
 
-  if (categoryIds.length > 0) {
-    const links = categoryIds.map((category_id) => ({ entry_id: data.id, category_id }));
+  if (saved.categoryIds.length > 0) {
+    const links = saved.categoryIds.map((category_id) => ({ entry_id: data.id, category_id }));
     const { error: linkError } = await supabase.from("entry_categories").insert(links);
     if (linkError) return { error: "entry.errors.categories" };
   }
@@ -48,12 +73,20 @@ export async function updateEntry(id: string, _prev: FormState, formData: FormDa
   await requireUserId();
   const result = await validate(formData);
   if ("error" in result) return { error: result.error };
-  const { body, occurredOn, occurredTime, categoryIds } = result.data;
+  const saved = result.data;
+  // The ciphertext is bound to the row it was made for.
+  if (saved.kind === "encrypted" && saved.id !== id) return { error: "encryption.errors.generic" };
 
   const supabase = await createClient();
+  // Editing an old plaintext entry on an encrypted account stores the text as
+  // ciphertext and erases the readable copy, so no stale plaintext is left behind.
+  const change =
+    saved.kind === "encrypted"
+      ? { body_enc: saved.bodyCipher, body: null, occurred_on: saved.occurredOn, occurred_time: saved.occurredTime }
+      : { body: saved.body, occurred_on: saved.occurredOn, occurred_time: saved.occurredTime };
   const { data: updated, error } = await supabase
     .from("entries")
-    .update({ body, occurred_on: occurredOn, occurred_time: occurredTime })
+    .update(change)
     .eq("id", id)
     .select("id, cats:entry_categories(category_id)")
     .maybeSingle();
@@ -61,7 +94,7 @@ export async function updateEntry(id: string, _prev: FormState, formData: FormDa
   if (!updated) return { error: "entry.notFound" };
 
   const current = new Set(updated.cats.map((c) => c.category_id));
-  const wanted = new Set(categoryIds);
+  const wanted = new Set(saved.categoryIds);
   const toRemove = [...current].filter((c) => !wanted.has(c));
   const toAdd = [...wanted].filter((c) => !current.has(c));
   if (toRemove.length > 0) {

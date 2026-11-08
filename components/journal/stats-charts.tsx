@@ -86,7 +86,7 @@ export async function EntriesByCategoryChart({
 }: {
   counts: CategoryCount[];
   categories: Category[];
-  label: (c: Category) => string;
+  label: (c: Category) => React.ReactNode;
 }) {
   const t = await getTranslations("stats");
   const byId = new Map(categories.map((c) => [c.id, c]));

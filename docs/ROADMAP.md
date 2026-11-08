@@ -106,9 +106,9 @@ Each step is its own pull request, and each leaves the app working. Horizon 2 st
 - [x] Change of diary password; a forgotten password reset with the recovery code; a new recovery code
 
 *2c. Writing and reading encrypted content*
-- [ ] New entries and category names are written encrypted when the account has a key; decryption in the feed, entry window, filters, entry form, categories page; local drafts encrypted
-- [ ] New accounts go through setup before their first entry
-- [ ] The header icon: a shield with a check when the device has the key, a lock when it does not ([ADR-0014](DECISIONS.md#adr-0014))
+- [x] New entries and own category names, and renames of built-in ones, are written encrypted when the account has a key, and the server refuses plaintext from such an account; decryption in the feed, entry window, filters, statistics, entry form and categories page; a locked device asks for the password before writing; drafts of encrypted accounts stay in memory only. Migration `20261110000000_client_row_ids.sql` lets the device choose a new row's id
+- [x] New accounts go through setup before their first entry or category (enforced on the device; the server enforces only "an account with keys never saves plaintext")
+- [x] The header icon: a shield with a check when the device has the key, a lock when it does not ([ADR-0014](DECISIONS.md#adr-0014))
 
 *2d. Search and statistics on the device*
 - [ ] Search words stay on the device, never in the address; statistics with a text query
