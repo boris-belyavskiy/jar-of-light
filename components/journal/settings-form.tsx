@@ -1,9 +1,10 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { deleteAccount, updateProfile } from "@/app/actions/account";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { useKeys } from "@/components/encryption/key-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,13 +18,17 @@ const selectClass =
 export function SettingsForm({
   profile,
   timeZones,
+  encryption,
 }: {
   profile: Profile;
   timeZones: { value: string; label: string }[];
+  /** The Encryption section, between the profile and the danger zone. */
+  encryption: ReactNode;
 }) {
   const t = useTranslations("settings");
   const tl = useTranslations("languages");
   const tAll = useTranslations();
+  const { wipeDevice } = useKeys();
   const [state, action, pending] = useActionState(updateProfile, {});
   const [timezone, setTimezone] = useState(profile.timezone);
   const [browserZone, setBrowserZone] = useState<string | null>(null);
@@ -98,6 +103,8 @@ export function SettingsForm({
         </form>
       </section>
 
+      {encryption}
+
       <section className="rounded-2xl p-4 ring-1 ring-destructive/40">
         <h2 className="font-heading text-xl font-semibold">{t("dangerTitle")}</h2>
         <p className="mt-2 text-sm text-muted-foreground">{t("dangerBody")}</p>
@@ -109,6 +116,7 @@ export function SettingsForm({
             confirmLabel={t("deleteConfirm")}
             cancelLabel={t("cancel")}
             onConfirm={async () => {
+              await wipeDevice(); // the account and its keys go; so does this device's copy
               const result = await deleteAccount();
               if (result?.error) setDeleteError(result.error);
             }}

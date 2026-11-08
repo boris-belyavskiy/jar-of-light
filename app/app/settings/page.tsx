@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { EncryptionSettings } from "@/components/encryption/encryption-settings";
 import { PageLayout } from "@/components/page-layout";
 import { SettingsForm } from "@/components/journal/settings-form";
 import { getProfile } from "@/lib/db/queries";
@@ -16,7 +17,7 @@ export default async function SettingsPage() {
 
   return (
     <PageLayout head={<h1 className="font-heading text-2xl font-semibold">{t("title")}</h1>}>
-      <SettingsForm profile={profile} timeZones={timeZoneOptions(timeZones)} />
+      <SettingsForm profile={profile} timeZones={timeZoneOptions(timeZones)} encryption={<EncryptionSettings />} />
     </PageLayout>
   );
 }

@@ -2,6 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { redirect } from "next/navigation";
 import { sortByOrder } from "@/lib/category-order";
+import type { KeyRecord } from "@/lib/crypto";
 import type { StatEntry } from "@/lib/dashboard-stats";
 import { likePattern, type FeedFilter } from "@/lib/feed-filter";
 import { createClient } from "@/lib/supabase/server";
@@ -79,6 +80,30 @@ export const getProfile = cache(async (): Promise<Profile> => {
     locale: isLocale(data.locale) ? data.locale : null,
     timezone: data.timezone ?? FALLBACK_TIME_ZONE,
     categoryOrder: data.category_order ?? [],
+  };
+});
+
+/**
+ * The user's wrapped encryption keys, or null when encryption is off for this
+ * account (ADR-0011). Safe to send to the browser: they open only with the
+ * diary password or the recovery code, which the server never sees.
+ */
+export const getKeyRecord = cache(async (): Promise<KeyRecord | null> => {
+  const userId = await requireUserId();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("user_keys")
+    .select("key_version, kdf_salt, kdf_params, wrapped_key_password, wrapped_key_recovery")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (error) throw new Error(`user_keys: ${error.code}`);
+  if (!data) return null;
+  return {
+    keyVersion: data.key_version,
+    kdfSalt: data.kdf_salt,
+    kdfParams: data.kdf_params as KeyRecord["kdfParams"],
+    wrappedKeyPassword: data.wrapped_key_password,
+    wrappedKeyRecovery: data.wrapped_key_recovery,
   };
 });
 

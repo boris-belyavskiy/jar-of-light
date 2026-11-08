@@ -174,6 +174,91 @@
       "delete": "Couldn't delete the account. Please try again."
     }
   },
+  "encryption": {
+    "title": "Encryption",
+    "working": "Working…",
+    "cancel": "Cancel",
+    "passwordHint": "At least {min} characters. A phrase of four or more words is easier to remember and harder to guess than a short mix of symbols.",
+    "newPassword": "New diary password",
+    "confirmPassword": "Type it again",
+    "strength": {
+      "weak": "Weak. Add more words or characters: a phrase of four or more words works well.",
+      "fair": "Fair. A longer phrase would be stronger.",
+      "strong": "Strong."
+    },
+    "errors": {
+      "mismatch": "The two passwords are different.",
+      "wrongPassword": "That password doesn't match.",
+      "wrongCode": "That recovery code doesn't match.",
+      "tooShort": "Use at least 8 characters.",
+      "exists": "Encryption is already set up on another device. Reload the page and unlock instead.",
+      "save": "Couldn't save your keys. Nothing was changed. Please try again.",
+      "generic": "Something went wrong on this device. Please try again."
+    },
+    "recovery": {
+      "explain": "This is your recovery code. If you forget your diary password, it is the only way back. It is shown once.",
+      "copy": "Copy",
+      "copied": "Copied",
+      "download": "Download as a file",
+      "warning": "Keep it somewhere safe and apart from this device, such as a password manager or a printed sheet. Anyone who has it can unlock your diary.",
+      "typeBack": "Type the code back to confirm you saved it",
+      "mismatch": "This doesn't match the code above.",
+      "confirm": "I saved it, finish",
+      "fileText": "Jar of Light: recovery code\n\n{code}\n\nKeep this file somewhere safe, away from this device. With this code or your diary password you can read your diary. Without both, nobody can."
+    },
+    "unlock": {
+      "title": "Unlock your diary",
+      "description": "This device doesn't have your key yet. Enter your diary password.",
+      "password": "Diary password",
+      "submit": "Unlock",
+      "forgot": "Forgot your password?",
+      "resetExplain": "Enter your recovery code and choose a new diary password.",
+      "recoveryCode": "Recovery code",
+      "reset": "Set new password and unlock",
+      "back": "Back"
+    },
+    "header": {
+      "locked": "Diary locked on this device. Unlock",
+      "unlocked": "Diary unlocked on this device",
+      "unlockedTitle": "Your diary is unlocked",
+      "unlockedBody": "This device holds your key until you sign out or lock it.",
+      "lockNow": "Lock this device",
+      "settings": "Encryption settings"
+    },
+    "turnOn": {
+      "intro": "Encrypt your diary on this device, so that only you can read it, not even the person who runs this app.",
+      "pointOperator": "You choose a diary password. It never leaves your device.",
+      "pointLoss": "You get a recovery code. If you lose both the password and the code, encrypted entries can't be read by anyone, ever.",
+      "pointRollout": "This is the first part of the rollout: turning it on now creates your keys. Your entries are encrypted in the next updates, and existing entries are moved later, with a safety check.",
+      "start": "Turn on encryption",
+      "passwordExplain": "Choose a diary password. You'll enter it once on each device. It is separate from signing in with Google.",
+      "password": "Diary password",
+      "next": "Continue",
+      "preparing": "Preparing your key… a few seconds",
+      "done": "Encryption is on. This device is unlocked."
+    },
+    "status": {
+      "locked": "Encryption is on. This device is locked: enter your diary password to use your key here.",
+      "unlocked": "Encryption is on. This device is unlocked.",
+      "lockHint": "Signing out also removes the key from this device."
+    },
+    "change": {
+      "open": "Change diary password",
+      "title": "Change diary password",
+      "current": "Current diary password",
+      "submit": "Change password",
+      "done": "Diary password changed. Your entries were not touched."
+    },
+    "newCode": {
+      "open": "Get a new recovery code",
+      "hint": "The old code stops working once you confirm the new one.",
+      "title": "New recovery code",
+      "oldStillWorks": "Your old code keeps working until you confirm this one.",
+      "password": "Enter your diary password to continue",
+      "next": "Continue",
+      "done": "New recovery code saved. The old one no longer works."
+    }
+  },
   "languages": {
     "ru": "Русский",
     "en": "English"
