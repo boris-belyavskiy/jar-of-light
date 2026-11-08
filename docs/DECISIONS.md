@@ -24,6 +24,8 @@ Architecture Decision Records (ADRs) in one file. Each record captures one signi
 | [0008](#adr-0008) | One frame for every edge, one baseline, one set of fonts, justified main text | Accepted | 2026-11-02 |
 | [0009](#adr-0009) | The screen before sign-in is a narrow column in the center | Accepted | 2026-11-02 |
 | [0010](#adr-0010) | English comes first wherever both languages are listed; points before sign-in are left-aligned | Accepted | 2026-11-02 |
+| [0011](#adr-0011) | Journal content is encrypted on the user's device; the operator sees profiles and activity, not what people write | Accepted, not built yet | 2026-11-08 |
+| [0012](#adr-0012) | An own domain, and email and password alongside Google on one account | Accepted, not built yet | 2026-11-08 |
 
 ## Candidates
 
@@ -447,6 +449,160 @@ Refines [ADR-0009](#adr-0009).
 
 - English also stays the fallback language, as before; a Russian-language browser still opens the app in Russian.
 - When renaming a category, the cursor now starts in the English field. Cyrillic typed there still moves to the Russian field.
+
+---
+
+<a id="adr-0011"></a>
+
+## ADR-0011: Journal content is encrypted on the user's device
+
+- **Status:** Accepted, not built yet (Horizon 1 in the [Roadmap](ROADMAP.md#horizon-1--end-to-end-encryption))
+- **Date:** 2026-11-08
+- **Deciders:** Boris Belyavskiy (owner), Claude Code (lead developer)
+
+Reverses the "no end-to-end encryption" line of PRD §9 and [Tech Spec §5.5](TECH_SPEC.md#55-data-protection). Design details: [Tech Spec §5.6](TECH_SPEC.md#56-end-to-end-encryption).
+
+### Context
+
+Row Level Security separates users from each other. It does not limit the operator: the owner of the Supabase project has the `postgres` role and the secret key, and holds the private key of the backups. So today the promise is "the operator does not read entries", not "cannot".
+
+The owner wants the second promise: what users write must be unavailable to the owner, while profiles and activity stay visible.
+
+The moment is cheap. On 2026-11-08 production holds 5 accounts and 7 entries, and every new user adds data that would have to be moved later.
+
+### Decision
+
+1. **Content is encrypted on the device before it leaves, and the key never reaches the server.** Each user has one random data key.
+2. **A diary password and a recovery code protect that key.** The diary password is separate from any sign-in password, because a sign-in password is sent to Supabase and Google users have none. The app asks for it once per device, not at every visit. Short PINs are not allowed: the wrapped key is in the database, so a weak secret could be guessed offline.
+3. **The operator still sees profiles and activity:** email, display name, language, time zone, sign-up and sign-in dates, when entries were created and changed, how many there are.
+4. **Encrypted:** entry text and everything else the user writes, including the names of own categories and renames of built-in ones. Entry date and time, links to categories and stars stay open, so filters keep working simply.
+5. **Default rule for new columns:** any field written by the user or describing their life is encrypted unless a later record says otherwise.
+6. **AI works by consent, only while the app is open.** The device decrypts the text and sends it to our server function, which calls the model and stores nothing. The result is encrypted on the device before saving. AI is off by default. Nothing runs in the background on entry text.
+7. **Publishing stays possible.** Posting to the public page or creating a thank-you card is a deliberate disclosure by the author; that copy is stored readable, as designed.
+8. **Existing users move on the device, with a safety check before anything is erased** ([Tech Spec §5.6](TECH_SPEC.md#56-end-to-end-encryption)). The setup screen is required at the next sign-in, so the app has no permanent mixed mode. Accounts that never come back keep their data as it is; nothing is deleted.
+9. **Built in small pull requests, and before the second horizon** ([ADR-0012](#adr-0012)). Encryption is the only one of the two projects that can lose data, so it ships alone. Erasing plaintext is its own pull request, first on the owner's account.
+
+### Options considered
+
+| Option | Pros | Cons |
+|---|---|---|
+| **1. Encrypted on the device** *(chosen)* | The only option where the operator technically cannot read content; leaks of the database and backups expose no text | Lost password and code mean lost entries; no background AI; search and summaries move to the device; the largest amount of work |
+| 2. Encrypted on the server, key in Vercel | Protects against a look in the dashboard and against database leaks; AI and search keep working; little work | The operator can still read, by deliberately using the key |
+| 3. Encryption inside the database (`pgcrypto`, Vault) | Very little work | The key is available to the same owner, so the goal is not met |
+| 4. Keep RLS and the promise not to read | No work | The goal is not met |
+
+### Consequences
+
+**Positive**
+
+- "We cannot read your entries" becomes true for encrypted accounts, once the old backups expire.
+- New accounts are encrypted from their first entry.
+- Backups stop holding readable text.
+
+**Negative and how we handle it**
+
+- *Losing both the password and the code loses the entries for good.* Setup says so plainly and requires typing the code back.
+- *The operator ships the web code,* so a malicious release could steal keys. The honest promise is "cannot read without deliberately changing the code, and the code is public". Cross-site scripting would have the same effect, so a Content Security Policy is required before the feature ships; the app has none today.
+- *Text passes through our server and the model provider during an AI request.* The privacy note must say so.
+- *Metadata stays visible,* and ciphertext size hints at text length. The privacy note must say so.
+- *Plaintext stays in old backups for up to 30 days after the move.* This is also the safety net; the promise is complete only after that.
+
+**Effects on other decisions**
+
+| Area | Effect |
+|---|---|
+| Search, filter `q`, statistics with `q` (ENT-04) | Move to the device, which must load all of a user's ciphertext; the feed's 200-row limit no longer bounds search |
+| Validation (ENT-01, CAT-02) | Length rules run on the device; the database can only bound ciphertext size |
+| Server rendering | Server components still fetch rows; client components decrypt them, with a locked state when the device has no key |
+| Guided entries, people, places (ENT-02, CUM-02) | Labels are encrypted; autocomplete and "top people and places" run on the device |
+| Open the jar, brightness (CUM-01) | Brightness is encrypted under the default rule; the weighted draw runs on the device |
+| Local drafts (ENT-01, ACC-02) | Kept encrypted on the device once a key exists |
+| Export (DATA-01) | Runs on the device |
+| Account deletion (DATA-02) | Unchanged; the key row goes with the cascade |
+| Parsing, T1 (AI-01) | Started by the app when saving, not by `after()`; failed runs retry when the app is next open, not by `pg_cron` |
+| Summaries and digest, T6 (CUM-03, CUM-04) | Aggregates are computed on the device; the digest is prepared when the app opens; email can say only that it is ready; the Batch API discount is lost |
+| Crisis signal (AI-04) | Works only with AI on, which is now off by default. Open question Q21 |
+| Thank-you cards, public posts (P3, P4) | Readable by design after the author's action; drafts and notes stay encrypted |
+| Analytics (§12) | Properties derived from content (`has_people`, `has_place`, `length_bucket`) are dropped |
+| Errors (Sentry) | Must never receive keys or decrypted text |
+| Backups | `user_keys` is added to `COUNTS_SQL`; without it a restored database cannot be decrypted |
+| [ADR-0002](#adr-0002), [ADR-0003](#adr-0003) | RLS and its tests stay and extend to the new table; encryption adds to them |
+| [ADR-0004](#adr-0004) | Setup and unlock screens are the same on web and mobile, inside the shell |
+
+### Revisit when
+
+1. Unlocking with a passkey works on most users' devices: it could replace or join the diary password;
+2. Users ask for background AI: it needs a separate consent and giving the server that user's key, so effectively a second architecture;
+3. Store apps come back on the table: a bundled client would also stop code being swapped by an ordinary deployment;
+4. Lockouts become a common support problem.
+
+---
+
+<a id="adr-0012"></a>
+
+## ADR-0012: An own domain, and email and password alongside Google
+
+- **Status:** Accepted, not built yet (Horizon 2 in the [Roadmap](ROADMAP.md#horizon-2--own-domain-and-email-and-password))
+- **Date:** 2026-11-08
+- **Deciders:** Boris Belyavskiy (owner), Claude Code (lead developer)
+
+Allows one exception to the $0 rule of [ADR-0002](#adr-0002) and PRD Q4: the yearly cost of a domain. Everything else in that record stands. Changes PRD Q17. Comes after [ADR-0011](#adr-0011).
+
+### Context
+
+Sign-in is Google only. The owner wants people to sign in with any email and a password, with Google still available, and without existing users losing anything. On 2026-11-08 production has 5 accounts, all through Google, all with a confirmed email, none with a password.
+
+Passwords need email: to prove the address belongs to the person and to reset a forgotten password. Supabase's built-in sender delivers only to the project's team, 2 messages an hour. Receiving servers check that a sender may use an address, through DNS records of the domain, and the DNS of `jaroflight.vercel.app` belongs to Vercel.
+
+### Decision
+
+1. **Buy an own domain and move the site to it.** Email goes through **Resend**, connected to Supabase as custom SMTP.
+2. **Email and password join Google on the same account.** Data belongs to `user_id`, not to a way of signing in, so a new way of signing in touches no data.
+3. **One sign-up flow for everyone: email and password, then a 6-digit code from the email.** If the email is new, the code confirms a new account. If it already has an account, the code proves ownership and the password is added to that account, so the person can then use both Google and the password. The screens and responses are identical, so the form does not reveal who is registered.
+4. **No password is ever attached without that code.** Otherwise anyone could type another person's email with their own password and take over the account.
+5. **The password stays in the form on screen until the code is confirmed,** and is not saved anywhere meanwhile.
+6. **A forgotten sign-in password never affects the diary.** The diary key is independent of sign-in. The UI names them differently: "sign-in password" and "diary password".
+
+### Options considered
+
+| Option | Pros | Cons |
+|---|---|---|
+| **1. Own domain + Resend** *(chosen)* | Letters come from the product's address; the domain also becomes the site's address | About $10–15 a year and a payment card; DNS setup |
+| 2. A separate Gmail with an app password | $0, no card, no domain, 500 messages a day | A `@gmail.com` sender; Google does not recommend app passwords |
+| 3. Sign-up refuses an existing email | Simple | A person has to find another path to add a password |
+| 4. Attach the password with no confirmation | One step less | Account takeover |
+| 5. Turn email confirmation off | No email service needed | No password reset; anyone can claim someone else's address |
+| 6. One-time codes instead of passwords (earlier PRD plan) | No passwords to remember | The owner asked for a login and password; it needs the same domain and email service |
+
+### Consequences
+
+**Positive**
+
+- People without Google can use the app; existing users keep their accounts and can add a password.
+- Sign-in works on preview deployments, which Google sign-in does not.
+- The domain also opens reminder emails, and shows the site's own name in Google's dialog.
+
+**Negative and how we handle it**
+
+- *Moving the site after encryption means every device asks for the diary password once,* because browser storage belongs to one web address. Users are warned first and reminded of their recovery code, and the old address redirects to the new one. Moving the site before encryption would avoid this, since moving it does not depend on encryption code; the owner chose to keep the domain after encryption.
+- *Signing up with a different email creates a new empty account.* Supabase cannot tell it is the same person, and accounts encrypted with different keys are hard to merge later. A clear line above the form sends existing users to Google or to email change in Settings.
+- *Leaked-password checking needs Supabase Pro,* so we rely on a minimum length of 8.
+- *Supabase's `signUp` on an existing address returns a disguised success and sends nothing.* So the server decides first whether the email exists, through a function reachable only with the secret key.
+- *The move needs configuration in several places:* Vercel domain and redirect, Google allowed origins and consent screen, Supabase Site URL and redirect URLs. Sessions are per address, so people sign in again once.
+
+### To confirm on the dev project before building on it
+
+1. Google sign-in still reaches the same account after the user changes their email.
+2. The full flow for a Google-only account: code, password added, both ways of signing in work.
+3. Whether Supabase rate limits per IP affect sign-ups, since the requests come from our server.
+4. Whether changing the domain on Google's consent screen triggers Google verification.
+
+Facts from provider documentation were checked on 2026-11-08; recheck before relying on them.
+
+### Revisit when
+
+1. Email volume nears Resend's free limits (100 a day, 3,000 a month);
+2. Sign-up abuse appears: add a CAPTCHA, which Supabase supports.
 
 ---
 

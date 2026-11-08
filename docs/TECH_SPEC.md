@@ -1,6 +1,6 @@
 # Tech Spec — Jar of Light
 
-> **Status:** Draft v0.3 · **Updated:** 2026-10-28 · **Owner:** Boris Belyavskiy (PM) · **Tech lead / reviewer:** Claude
+> **Status:** Draft v0.3 · **Updated:** 2026-11-08 · **Owner:** Boris Belyavskiy (PM) · **Tech lead / reviewer:** Claude
 > **Related:** [PRD](PRD.md) · [Roadmap](ROADMAP.md) · [Decisions](DECISIONS.md)
 > Requirement IDs (ENT-01, PUB-03, …) refer to the [PRD](PRD.md#7-requirements). Phases P0–P5 refer to the [Roadmap](ROADMAP.md).
 
@@ -26,7 +26,7 @@
 ## 1. Scope and principles
 
 1. **No self-hosted servers** ([ADR-0001](DECISIONS.md#adr-0001)). Managed hosting, managed Postgres, LLM via API.
-2. **Privacy by design.** Entries are private by default; Row Level Security on every user table; entry text never reaches logs, analytics or error tracking.
+2. **Privacy by design.** Entries are private by default; Row Level Security on every user table; entry text never reaches logs, analytics or error tracking. From Horizon 1, content is encrypted on the user's device (§5.6, [ADR-0011](DECISIONS.md#adr-0011)).
 3. **AI behind an abstraction.** Product code calls tasks (`parseEntry`, `draftAction`, …), never a vendor SDK directly. The model can be swapped per task.
 4. **Works without AI.** Every core flow has a manual path (PRD principle 7). AI features ship behind flags.
 5. **Boring, portable tech.** Standard Postgres, TypeScript, open formats for export. Lock-in only where it buys a lot of speed.
@@ -43,10 +43,10 @@
 | Client | Mobile-first web app on **Next.js** (App Router), TypeScript, Tailwind CSS, shadcn/ui; **PWA** features (install, offline draft, push) in P1b | One codebase, a link to share, no app stores, web push works | Telegram Mini App, Expo / React Native |
 | Server | Next.js Server Actions + Route Handlers on **Vercel** (Hobby); functions in **Cleveland (`cle1`)**, next to the database | Zero DevOps, free start, a preview deployment for every PR | Render, Fly.io, Netlify |
 | Database, auth, storage | **Supabase Free**: Postgres, Row Level Security, Auth, `pg_cron`, `pg_trgm`; region **US East (Ohio)**, close to the PM and the first users (decided 2026-10-27); daily keep-alive and own nightly backups (§3.1, [ADR-0002](DECISIONS.md#adr-0002)) | Relational data and aggregates, RLS built in, portable Postgres | Neon + Better Auth, Cloudflare D1, Firebase (all compared in ADR-0002) |
-| Sign-in | **Google only** (P1a): Google Identity Services button → ID token → Supabase `signInWithIdToken` | Google's dialog names our site instead of `*.supabase.co`; no passwords to store | Supabase OAuth redirect flow; email one-time codes in P1b (need a domain) |
+| Sign-in | **Google only** (P1a): Google Identity Services button → ID token → Supabase `signInWithIdToken` | Google's dialog names our site instead of `*.supabase.co`; no passwords to store. **Email and password join it in Horizon 2** (§7.1b, [ADR-0012](DECISIONS.md#adr-0012)) | Supabase OAuth redirect flow; email one-time codes |
 | LLM | **Anthropic API** (`@anthropic-ai/sdk`) behind `lib/ai/provider.ts` | Quality on RU and EN, structured outputs, prompt caching, Batch API | Open-weight models via hosted inference (ADR-0001) |
-| Background jobs | `after()` in Next.js for entry parsing; **Supabase `pg_cron`** for frequent schedules (reminders, retries); Vercel Cron for daily jobs; **GitHub Actions** for keep-alive and backups (§3.1) | Vercel Hobby cron runs at most once a day, so frequent jobs live in Postgres | Inngest, Trigger.dev |
-| Email | Resend (+ React Email), also as SMTP for Supabase Auth; from P1b | Simple API; Supabase's built-in email is for testing only | Postmark |
+| Background jobs | **Supabase `pg_cron`** for frequent schedules (reminders); no job reads entry text ([ADR-0011](DECISIONS.md#adr-0011)); Vercel Cron for daily jobs; **GitHub Actions** for keep-alive and backups (§3.1) | Vercel Hobby cron runs at most once a day, so frequent jobs live in Postgres | Inngest, Trigger.dev |
+| Email | Resend (+ React Email), also as SMTP for Supabase Auth; from Horizon 2 | Simple API; Supabase's built-in email is for testing only | Postmark |
 | Push | Web Push (VAPID, `web-push`) | Standard and free | OneSignal |
 | i18n | `next-intl`, RU + EN from day one | Portfolio in EN, first users in RU | — |
 | Analytics | PostHog (cloud region chosen in P1b): events, funnels, retention, feature flags | Everything a PM needs in one place | Amplitude |
@@ -103,11 +103,11 @@ Secrets live only in Vercel, Supabase and GitHub Actions settings and in a local
 | **Google Cloud** | **$0**, no billing account: one project with an OAuth client for Google sign-in | — | Sign-in is free at any number of users. Never activate the "free trial": it asks for a card and we do not need it |
 | **GitHub** | Free: public code repository + private backups repository; Actions minutes within the free quota | — | — |
 | **Anthropic API** | **$0** (no AI in P1) | Pay as you go, ≈ $0.10–0.15 per active user per month (§6.6) | Prepaid credits; spending limit set in the console |
-| **Resend** | Not needed in P1a | Free tier from P1b if email is added | Sending to real users requires a verified own domain |
-| **Domain** | Not needed | ~$10–15/year, only if we want email sign-in, reminder emails, or the app name instead of the URL in Google's sign-in dialog; needed before the public page | Until then: `jaroflight.vercel.app` |
+| **Resend** | Not needed in P1a | Free tier from Horizon 2: 100 emails a day, 3,000 a month (checked 2026-11-08) | Sending to real users requires a verified own domain |
+| **Domain** | Not needed in P1a | ~$10–15/year from Horizon 2 ([ADR-0012](DECISIONS.md#adr-0012)): the one exception to "$0 and no card"; the site, email and Google's sign-in dialog move to it | Until then: `jaroflight.vercel.app` |
 | PostHog, Sentry | Not needed in P1a | Free tiers from P1b | — |
 
-**Bottom line:** P0 and P1 cost **$0** and need no payment card. The first real cost is the AI layer in P2; a domain (~$1/month) is optional until the public page.
+**Bottom line:** P0 and P1a cost **$0** and need no payment card. The first real cost is the domain in Horizon 2 (~$1/month), then the AI layer in P2.
 
 ### 3.1 Keep-alive and backups
 
@@ -120,6 +120,8 @@ Supabase Free pauses a project after 7 days without requests and keeps no backup
 | Restore test | Every night (automatic, above); decrypting a real artifact with the offline key: before inviting the first users, then quarterly | The nightly restore proves the dump is complete; the manual check proves the offline key opens it. First passed 2026-10-28 |
 
 Data deleted by a user stays in encrypted backups for up to 30 days; the privacy note says so (PRD DATA-02, DATA-04).
+
+After Horizon 1, backups hold ciphertext for moved accounts. The restore check must also cover `user_keys`: without that table a restored database cannot be decrypted (§5.6).
 
 ---
 
@@ -136,7 +138,7 @@ addressee_kind: 'close_person' | 'other_person' | 'public_figure' | 'role' | 'or
 visibility:     'L0' | 'L1' | 'L2' | 'L3' | 'L4'
 
 profiles (id uuid PK = auth.users.id, display_name, pseudonym, locale, timezone,
-          ai_enabled bool DEFAULT true, default_visibility visibility DEFAULT 'L0',
+          ai_enabled bool DEFAULT false, default_visibility visibility DEFAULT 'L0',  -- off by default: ADR-0011
           reminder jsonb,                 -- {days:[1,3,5], time:"21:00", channels:["push","email"]}
           created_at)
 
@@ -204,6 +206,8 @@ VIEW public_addressee_stats (public_addressee_id, authors_count, posts_count, po
 
 **Why `addressees` and `places` are tables, not text:** summaries "by people" and "by place" (CUM-02/03) need the same person to be one record ("Mom", "mom", "мама"). In P1 the guided form autocompletes from the user's existing records; in P2 AI suggests links for free-form entries.
 
+**Encryption changes this draft (Horizon 1).** The schema above shows fields as plain columns. Under [ADR-0011](DECISIONS.md#adr-0011), the fields listed as encrypted in §5.6 are stored as ciphertext, so no SQL can filter, sort or aggregate on them. Summaries by people and place are computed on the device. The separate records still hold: the same person stays one row.
+
 ---
 
 ## 5. Privacy model
@@ -270,9 +274,61 @@ stateDiagram-v2
 | Data location | Supabase US East (Ohio); Vercel functions in Cleveland (`cle1`). Stated in the privacy note |
 | Third parties | Entry text goes only to the LLM provider, only when AI is on, only server-side. Listed in the privacy policy |
 | Logs and analytics | No entry text in logs, Sentry, PostHog or `ai_runs` |
-| Encryption | TLS in transit; encryption at rest by the provider. **No end-to-end encryption**: it is incompatible with AI and the public page. Mitigation: AI can be switched off per user or per entry, and then text never leaves our database |
+| Encryption | Today: TLS in transit and encryption at rest by the provider. **Decided 2026-11-08: end-to-end encryption of journal content** (§5.6). The earlier statement that it is incompatible with AI and the public page was too strong: publishing is a deliberate disclosure, and AI can run on text the device sends with consent |
 | Retention | Account deletion removes data immediately; own encrypted backups expire within 30 days (§3.1, stated in the privacy note) |
 | Secrets | Never in the repository; `.env*` is ignored; key rotation documented |
+
+### 5.6 End-to-end encryption
+
+*Decided in [ADR-0011](DECISIONS.md#adr-0011); not built yet. Names of tables, columns and libraries below are a starting point for the implementation.*
+
+**The promise.** The operator cannot read what users write without deliberately shipping code that steals it. The code is public. The promise excludes metadata and the text a user chooses to send to AI or publish.
+
+**What is encrypted and what is not**
+
+| Encrypted on the device | Stays readable by the operator |
+|---|---|
+| `entries.body` | `auth.users`: email, sign-up and sign-in dates |
+| `categories.name_ru`, `name_en` (own categories) | `profiles`: display name, language, time zone, `category_order` |
+| `category_names.name_ru`, `name_en` | `entries`: owner, `occurred_on`, `occurred_time`, `created_at`, `updated_at`, ciphertext size |
+| Later: `why_it_matters`, `intensity`, labels of `addressees` and `places`, `generalizations`, `ai_result`, `actions.draft`, `outcome_note` | `entry_categories`, `stars`: which row links to which; built-in category slugs |
+| Default for any new field the user writes (ADR-0011, rule 5) | Published posts and thank-you cards, after the author's deliberate action |
+
+**Keys**
+
+- One random 256-bit **data key** per user, made on the device. Content is encrypted with AES-256-GCM through the browser's Web Crypto, with a fresh random nonce for every value.
+- Each ciphertext is bound to its user, table, row, field and format version through additional authenticated data, so it cannot be moved to another row. The client therefore generates the row id before encrypting.
+- The **diary password** (at least 8 characters, decided by the owner on 2026-11-08) goes through Argon2id (a vetted WebAssembly library), tuned to about a second on a mid-range phone and at least at the current OWASP minimum. The result wraps the data key.
+- The **recovery code** has at least 128 random bits, is shown once and must be typed back. It wraps a second copy of the data key.
+- `user_keys` (RLS: own row) holds the salt, the Argon2id parameters per user, both wrapped keys and a key version. Neither the password nor the code ever leaves the device.
+- On the device, the data key lives in IndexedDB as a non-extractable `CryptoKey`. Sign-out and account deletion remove it. Browser storage belongs to one web address, so a move of the site asks for the password again (ADR-0012).
+- Changing the password or replacing the code re-wraps the data key; entries are not touched.
+
+**The application**
+
+- Server components keep fetching rows and pass ciphertext to client components, which decrypt it. Without a key on the device the app shows a locked state inside the shell ([ADR-0004](DECISIONS.md#adr-0004)).
+- Server actions receive ciphertext. Length rules (1–4,000 characters, category names up to 40) run on the device; the database bounds ciphertext size only.
+- Search and statistics with a text query (`filter.q` in `lib/db/queries.ts`) run on the device over all of the user's rows, in pages. Filters by date, category and star stay in SQL.
+- A **Content Security Policy** is required before step 2 ships, because cross-site scripting could reach the key. The app has none today.
+- Never log keys or decrypted text, including in error reports.
+
+**Schema change: additive first.** Plaintext columns become nullable; each row holds plaintext or ciphertext. The checks on `body` and the name constraints (`categories_system_or_custom`, `category_names_not_empty`) change to accept either. Every migration grants privileges explicitly, as the project requires. The mark that an account is encrypted cannot be set by a direct update: `profiles` allows updates only on named columns.
+
+**Moving an existing account.** At the next sign-in, after setup:
+
+1. Setup creates the key and stores the wrapped copies. Content has not changed yet.
+2. The device encrypts every plaintext row and writes the ciphertext next to the plaintext.
+3. The device downloads the ciphertext, decrypts it and compares it with the original.
+4. A database function refuses if any row lacks ciphertext or a row changed since it was read. Otherwise, in one transaction, it erases plaintext and marks the account.
+5. From then on the database refuses plaintext for that account, including from an old open tab.
+
+| If this happens | Result |
+|---|---|
+| Tab closed or connection lost in steps 2–3 | Plaintext is intact; the run resumes from rows without ciphertext |
+| A comparison fails in step 3 | The run stops; plaintext stays; only an error code is reported |
+| Another device still has the old app open | Before step 4 its edit changes the row and step 4 refuses; after step 4 the database refuses the write |
+| The account never returns | Nothing changes and nothing is deleted; plaintext stays for that account, and the privacy note must say so |
+| An error is found after step 4 | Old backups hold the plaintext for up to 30 days |
 
 ---
 
@@ -280,6 +336,7 @@ stateDiagram-v2
 
 ### 6.1 Principles
 
+- **By consent, while the app is open ([ADR-0011](DECISIONS.md#adr-0011)).** AI is off by default. The device decrypts the text and sends it for one request; the server function does not store or log it; results are encrypted on the device before saving. Scheduled jobs never see entry text.
 - **All LLM calls are server-side.** Keys never reach the client.
 - **Provider abstraction** (`lib/ai/provider.ts`): tasks do not know which model runs them, so models can be compared or replaced per task.
 - **Structured outputs** (JSON Schema via Zod) for every parsing task; responses are validated.
@@ -287,7 +344,7 @@ stateDiagram-v2
 - **Every call is logged in `ai_runs`**: task, model, tokens, cost, latency, status. **Never the entry text.**
 - **Evals before release** of each AI feature and on every prompt or model change (§6.5).
 - **Per-user limits** (e.g. ≤ 50 AI calls per day) protect the budget.
-- **Aggregate first, then summarize.** Summaries (T6) receive SQL aggregates plus a few selected entries, not the whole history: cheaper and less data sent.
+- **Aggregate first, then summarize.** Summaries (T6) receive aggregates computed on the device plus a few selected entries, not the whole history: cheaper and less data sent.
 - **Effort set explicitly per task** (`low` for parsing and moderation), since some current models default to `medium`.
 
 ### 6.2 Task registry
@@ -296,12 +353,12 @@ Models are a **starting hypothesis**; the final choice comes from evals, quality
 
 | ID | Task | Trigger | Starting model | Mode | Output | Phase |
 |---|---|---|---|---|---|---|
-| **T1** | Entry parsing: kind, people and organizations (+ type, role), places, generalization ladder, categories, PII flag, crisis flag | After save | `claude-haiku-5-5` | Async | JSON (§6.4) | P2 |
+| **T1** | Entry parsing: kind, people and organizations (+ type, role), places, generalization ladder, categories, PII flag, crisis flag | After save, started by the app | `claude-haiku-5-5` | Sync, while the app is open | JSON (§6.4) | P2 |
 | **T2** | Action ideas + message draft | "Turn into action" | `claude-sonnet-5-5` | Sync, streaming | 1–3 actions + text | P3 |
 | **T3** | Anonymization (L2) and private-name / PII detection (L3–L4) | Choosing L2–L4 | `claude-sonnet-5-5` | Sync | Text + list of flagged fragments | P4 |
 | **T4** | Moderation | Before the queue | `claude-haiku-5-5` | Async | Labels + scores | P4 |
 | **T5** | Matching an addressee to the catalog | Publishing | `claude-haiku-5-5` + candidates from Postgres `pg_trgm` | Async | Catalog id or "new" | P4 |
-| **T6** | Summaries by period, place, topic, people; weekly digest | On demand; weekly cron | `claude-sonnet-5-5`; digest via **Batch API** (−50%) | Sync / batch | Text | P2 |
+| **T6** | Summaries by period, place, topic, people; weekly digest | On demand; digest when the app opens in a new week | `claude-sonnet-5-5` | Sync | Text | P2 |
 | **T7** | Profile understanding: free text → identities | Profile search | `claude-haiku-5-5` + `search_catalog` tool | Sync | List of identities | P5 |
 | T8 | Reflection coach | — | `claude-sonnet-5-5` / `claude-opus-5-5` | — | — | Later |
 
@@ -378,6 +435,8 @@ Process: datasets in `evals/datasets`, a runner in CI on changes to `prompts/` o
 | Scenario B | ~$60 | ~$600 | ~$6,000 |
 | Own GPU server 24/7 (rough, to verify) | $500–1,500 + DevOps | $500–1,500 + DevOps | from $1,500, needs scaling |
 
+**After [ADR-0011](DECISIONS.md#adr-0011)** the digest cannot use the Batch API, because no job can read entries while the app is closed. T6 doubles, which brings Scenario A to about $0.13 (about $0.19 with +50% for thinking) and Scenario B to about $0.46 (about $0.69). These are upper bounds per person using AI: only those who opt in create this cost.
+
 Conclusion and revisit triggers: [ADR-0001](DECISIONS.md#adr-0001).
 
 ---
@@ -386,11 +445,13 @@ Conclusion and revisit triggers: [ADR-0001](DECISIONS.md#adr-0001).
 
 ### 7.1 Creating an entry
 
-1. The client keeps a local draft → Server Action `createEntry` → INSERT under RLS (entry + people + place for guided mode) → response.
-2. If AI is on: `ai_status = pending`, `after()` starts T1.
-3. T1 → JSON validation → suggestions for categories, people and places saved → `ai_status = done`; a row in `ai_runs`.
-4. The client gets the update (Supabase Realtime or refetch) and shows suggestions.
-5. On failure: `ai_status = failed`; `pg_cron` retries every 10 minutes up to 3 times, then `skipped`.
+*Written for encrypted accounts ([ADR-0011](DECISIONS.md#adr-0011)).*
+
+1. The client keeps a local draft, encrypts the entry → Server Action `createEntry` → INSERT under RLS (entry + people + place for guided mode) → response.
+2. If AI is on: `ai_status = pending`, and the app sends the text to the T1 route.
+3. T1 → JSON validation → the app encrypts the suggestions for categories, people and places and saves them → `ai_status = done`; a row in `ai_runs`.
+4. The app shows the suggestions.
+5. On failure: `ai_status = failed`; the app retries up to 3 times when it is next open, then `skipped`.
 
 ### 7.1a Sign-in (P1a)
 
@@ -398,6 +459,34 @@ Conclusion and revisit triggers: [ADR-0001](DECISIONS.md#adr-0001).
 2. Google returns an ID token → `supabase.auth.signInWithIdToken({ provider: 'google', token, nonce })` → Supabase session in cookies (`@supabase/ssr`).
 3. On the first sign-in a database trigger creates `profiles` with the Google name; the client sends the browser time zone and language.
 4. Signing out clears the session. Account deletion (PRD DATA-02) runs a server action with the service key: delete the auth user, and `ON DELETE CASCADE` removes the profile, entries, categories and links.
+
+### 7.1b Email and password (Horizon 2)
+
+*Decided in [ADR-0012](DECISIONS.md#adr-0012); not built yet.*
+
+Data belongs to `auth.users.id`. Google and a password are two identities on the same row, so adding one touches no data, and the trigger that creates `profiles` runs only for a new row.
+
+**One sign-up flow**
+
+1. The person enters a name, an email and a password, and submits.
+2. The server checks whether the email exists, through a database function callable only with the secret key. Calling Supabase `signUp` alone would not do: for an existing address it returns a disguised success and sends nothing.
+3. New email → `signUp`, with the name in `full_name` so the trigger stores it. Existing email → `resetPasswordForEmail`. Either way the response is the same: "enter the code from the email".
+4. The email carries a 6-digit code (`{{ .Token }}` in the template), valid for 10–15 minutes.
+5. `verifyOtp` signs the person in (`signup` or `recovery`). For an existing account, `updateUser({ password })` then adds the password; Supabase creates the email identity for a first password. The password stays in the form until this step and is not stored.
+6. An account that already had a password ends up with the new one: the same result, and the same proof, as "Forgot password".
+
+| Situation | Result |
+|---|---|
+| Keeps using Google | Nothing changes |
+| Signed in, wants a password | "Add a password" in Settings |
+| "Forgot password" on a Google-only account | Code, then a password on the same account |
+| Types a password that was never set | Generic error plus the hint "Used Google? Sign in that way, or set a password" |
+| Signs up with the same email | Password added to the same account after the code (above) |
+| Signs up with a **different** email | A new empty account. A line above the form points existing users to Google and to email change |
+| Wants another email on the account | Email change in Settings, with confirmation; `user_id` stays |
+| New password user later uses Google with the same confirmed email | Supabase links them automatically and drops unconfirmed identities |
+
+A new account goes on to diary setup (§5.6). Resetting the sign-in password never touches the diary key.
 
 ### 7.2 Reminders
 
@@ -523,7 +612,10 @@ The warm beige is inspired by the calm interface of Claude, but the palette is o
 | Free-tier limits (Supabase pause, Vercel Hobby non-commercial, daily-only cron) | Daily keep-alive; `pg_cron` for frequent jobs; Vercel Pro if commercial |
 | Data loss on Supabase Free (no provider backups) | Nightly encrypted dumps with 30-day retention and restore tests (§3.1) |
 | iOS web push works only for installed PWAs | Onboarding explains "Add to Home Screen"; email as the fallback channel |
-| LLM cost growth | Haiku for bulk tasks, caching, Batch, per-user limits, alerts on `ai_runs` |
+| LLM cost growth | Haiku for bulk tasks, caching, per-user limits, alerts on `ai_runs` |
+| Data lost while moving existing users to encryption | Plaintext erased only after a verified encrypted copy; separate release; old backups for 30 days (§5.6) |
+| A user loses both the diary password and the recovery code | Plain warning at setup, typing the code back; entries cannot be recovered by design |
+| Cross-site scripting reaches the encryption key | Content Security Policy before Horizon 1 step 2 |
 | AI quality in Russian | Evals in RU and EN, model choice by data |
 | Vendor lock-in | Portable Postgres, provider abstraction, open export formats |
 
@@ -553,4 +645,6 @@ CLAUDE.md            project conventions for Claude Code
 
 Events **never contain entry text**, only metadata. Sent to PostHog.
 
-`signup_completed`, `entry_created {kind, mode: free|guided, has_people, has_place, length_bucket, source: composer|prompt|onboarding}`, `entry_ai_processed {task, latency_ms, status}`, `category_suggestion_{accepted|rejected|edited}`, `person_suggestion_{accepted|rejected}`, `jar_opened`, `stats_viewed`, `summary_viewed {dimension: period|place|topic|people}`, `on_this_day_viewed`, `digest_opened`, `reminder_{sent|opened}`, `action_{suggested|opened|completed}`, `card_{created|opened|claimed|revoked}`, `visibility_changed {from, to}`, `public_post_{submitted|published|rejected|unpublished}`, `commons_viewed {page_type}`, `profile_search {n_identities}`, `report_submitted`, `pulse_answered {job}`, `ai_disabled`, `data_exported`, `account_deleted`.
+Since [ADR-0011](DECISIONS.md#adr-0011), properties derived from what the user wrote are not sent.
+
+`signup_completed`, `entry_created {source: composer|prompt|onboarding}`, `entry_ai_processed {task, latency_ms, status}`, `category_suggestion_{accepted|rejected|edited}`, `person_suggestion_{accepted|rejected}`, `jar_opened`, `stats_viewed`, `summary_viewed {dimension: period|place|topic|people}`, `on_this_day_viewed`, `digest_opened`, `reminder_{sent|opened}`, `action_{suggested|opened|completed}`, `card_{created|opened|claimed|revoked}`, `visibility_changed {from, to}`, `public_post_{submitted|published|rejected|unpublished}`, `commons_viewed {page_type}`, `profile_search {n_identities}`, `report_submitted`, `pulse_answered {job}`, `ai_disabled`, `data_exported`, `account_deleted`.
