@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { keyErrorKey } from "./key-errors";
 import { useKeys } from "./key-provider";
 import { NewPasswordFields, newPasswordReady } from "./new-password-fields";
+import { RememberCheckbox } from "./remember-checkbox";
 
 /**
  * Unlock this device with the diary password; or, when the password is
@@ -22,6 +23,7 @@ export function UnlockForm({ onDone }: { onDone?: () => void }) {
   const [code, setCode] = useState("");
   const [next, setNext] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [remember, setRemember] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -42,7 +44,7 @@ export function UnlockForm({ onDone }: { onDone?: () => void }) {
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          run(() => resetPassword(code, next));
+          run(() => resetPassword(code, next, remember));
         }}
         className="flex flex-col gap-4"
       >
@@ -60,6 +62,7 @@ export function UnlockForm({ onDone }: { onDone?: () => void }) {
           />
         </div>
         <NewPasswordFields password={next} confirm={confirm} onPassword={setNext} onConfirm={setConfirm} />
+        <RememberCheckbox checked={remember} onChange={setRemember} />
         {error && (
           <p role="alert" className="text-sm text-destructive">
             {error}
@@ -81,7 +84,7 @@ export function UnlockForm({ onDone }: { onDone?: () => void }) {
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        run(() => unlock(password));
+        run(() => unlock(password, remember));
       }}
       className="flex flex-col gap-4"
     >
@@ -98,6 +101,7 @@ export function UnlockForm({ onDone }: { onDone?: () => void }) {
           className="bg-card"
         />
       </div>
+      <RememberCheckbox checked={remember} onChange={setRemember} />
       {error && (
         <p role="alert" className="text-sm text-destructive">
           {error}

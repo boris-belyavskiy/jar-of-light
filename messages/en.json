@@ -221,7 +221,7 @@
       "locked": "Diary locked on this device. Unlock",
       "unlocked": "Diary unlocked on this device",
       "unlockedTitle": "Your diary is unlocked",
-      "unlockedBody": "This device holds your key until you sign out or lock it.",
+      "unlockedBody": "This device has your key. Lock it to be asked for the password again.",
       "lockNow": "Lock this device",
       "settings": "Encryption settings"
     },
@@ -240,7 +240,8 @@
     "status": {
       "locked": "Encryption is on. This device is locked: enter your diary password to use your key here.",
       "unlocked": "Encryption is on. This device is unlocked.",
-      "lockHint": "Signing out also removes the key from this device."
+      "remembered": "This device remembers your key, even after you sign out. “Lock this device” makes it ask for the password again.",
+      "sessionOnly": "This device keeps your key only while this tab is open."
     },
     "change": {
       "open": "Change diary password",
@@ -257,6 +258,10 @@
       "password": "Enter your diary password to continue",
       "next": "Continue",
       "done": "New recovery code saved. The old one no longer works."
+    },
+    "remember": {
+      "label": "Remember on this device",
+      "hint": "You won't be asked for the password here again, even after signing out. Uncheck it on a shared computer."
     }
   },
   "languages": {
