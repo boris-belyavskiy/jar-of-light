@@ -17,6 +17,7 @@ erDiagram
   CATEGORIES ||--o{ CATEGORY_NAMES : "renamed by"
   USERS ||--o{ STARS : stars
   ENTRIES ||--o{ STARS : "starred in"
+  USERS ||--o| USER_KEYS : "protects with"
 ```
 
 In plain English:
@@ -50,6 +51,7 @@ Created automatically by a database trigger at sign-up. One-to-one with `auth.us
 | `locale` | text | `ru` or `en` |
 | `timezone` | text | A valid time zone name |
 | `category_order` | list of uuid | The user's own order of categories |
+| `encrypted_at` | timestamp | Empty until the account's content is fully encrypted ([ADR-0011](docs/DECISIONS.md#adr-0011)). Users can read it but cannot set it |
 | `created_at`, `updated_at` | timestamp | |
 
 ### `entries` — the main item
@@ -58,7 +60,8 @@ Created automatically by a database trigger at sign-up. One-to-one with `auth.us
 |---|---|---|
 | `id` | uuid | **Primary key** |
 | `user_id` | uuid | References `auth.users`; many-to-one |
-| `body` | text | 1–4,000 characters, not blank |
+| `body` | text | 1–4,000 characters, not blank. Optional once the text is encrypted |
+| `body_enc` | text | The text as ciphertext, made on the device. Every row has `body`, `body_enc` or both (both while an account is being moved) |
 | `occurred_on` | date | The user's local date, as entered |
 | `occurred_time` | time | The user's local time, as entered |
 | `created_at`, `updated_at` | timestamp | |
@@ -70,7 +73,8 @@ Created automatically by a database trigger at sign-up. One-to-one with `auth.us
 | `id` | uuid | **Primary key** |
 | `user_id` | uuid | References `auth.users`; empty for the six built-in categories |
 | `slug` | text | Only for built-in ones, for example `family` |
-| `name_ru`, `name_en` | text | Only for a user's own categories; at least one is required |
+| `name_ru`, `name_en` | text | Only for a user's own categories |
+| `name_ru_enc`, `name_en_enc` | text | The same names as ciphertext. An own category needs at least one name in either form; a built-in one has none |
 | `sort` | number | Default order |
 | `created_at` | timestamp | |
 
@@ -104,7 +108,24 @@ A user can star only their own entries and see only their own stars. The app cal
 |---|---|---|
 | `user_id` | uuid | **Primary key (both columns)**, references `auth.users` |
 | `category_id` | uuid | **Primary key (both columns)**, references `categories` |
-| `name_ru`, `name_en` | text | At least one is required |
+| `name_ru`, `name_en` | text | Plaintext names |
+| `name_ru_enc`, `name_en_enc` | text | The same names as ciphertext. At least one of the four is required |
+
+### `user_keys` — the wrapped encryption key, one row per user
+
+The server keeps only keys that are locked by the diary password and by the recovery code; it never sees either of them or the key itself ([Tech Spec §5.6](docs/TECH_SPEC.md#56-end-to-end-encryption)). Nothing writes to it before Horizon 1 step 2.
+
+| Column | Type | Notes |
+|---|---|---|
+| `user_id` | uuid | **Primary key**, references `auth.users` |
+| `key_version` | number | Starts at 1 |
+| `kdf_salt` | text | Base64 salt for the diary password |
+| `kdf_params` | json | Argon2id settings chosen on the device |
+| `wrapped_key_password` | text | The data key locked by the diary password |
+| `wrapped_key_recovery` | text | The data key locked by the recovery code |
+| `created_at`, `updated_at` | timestamp | |
+
+A user reads, adds and changes only their own row and cannot delete it, so a mistake cannot leave entries without a key.
 
 ## Compared with section 3 of the plan
 

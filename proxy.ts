@@ -1,8 +1,12 @@
 import type { NextRequest } from "next/server";
+import { buildCsp, newNonce } from "@/lib/csp";
+import { env } from "@/lib/env";
 import { updateSession } from "@/lib/supabase/proxy";
 
 export async function proxy(request: NextRequest) {
-  return updateSession(request);
+  const nonce = newNonce();
+  const policy = buildCsp({ nonce, supabaseUrl: env.supabaseUrl, isDev: process.env.NODE_ENV === "development" });
+  return updateSession(request, { nonce, policy });
 }
 
 export const config = {

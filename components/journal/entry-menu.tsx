@@ -21,7 +21,18 @@ const ITEM =
   "flex cursor-pointer items-center gap-2 rounded-md px-2.5 py-1.5 text-sm outline-none data-highlighted:bg-sky";
 
 /** The small "⋯" menu in an entry's top-right corner: edit, or delete after a confirmation (ENT-05). */
-export function EntryMenu({ id, editHref, afterDelete }: { id: string; editHref: string; afterDelete: string }) {
+export function EntryMenu({
+  id,
+  editHref,
+  afterDelete,
+  canEdit = true,
+}: {
+  id: string;
+  editHref: string;
+  afterDelete: string;
+  /** False while the entry is ciphertext this device cannot read (ADR-0011). */
+  canEdit?: boolean;
+}) {
   const t = useTranslations("entry");
   const [confirming, setConfirming] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -38,10 +49,12 @@ export function EntryMenu({ id, editHref, afterDelete }: { id: string; editHref:
         <Menu.Portal>
           <Menu.Positioner sideOffset={4} align="end" className="z-50">
             <Menu.Popup className="min-w-40 rounded-xl bg-popover p-1 text-popover-foreground shadow-lg ring-1 ring-foreground/10 outline-none">
-              <Menu.LinkItem render={<Link href={editHref} scroll={false} />} className={ITEM}>
-                <Pencil className="size-4" aria-hidden="true" />
-                {t("edit")}
-              </Menu.LinkItem>
+              {canEdit && (
+                <Menu.LinkItem render={<Link href={editHref} scroll={false} />} className={ITEM}>
+                  <Pencil className="size-4" aria-hidden="true" />
+                  {t("edit")}
+                </Menu.LinkItem>
+              )}
               <Menu.Item className={`${ITEM} text-destructive`} onClick={() => setConfirming(true)}>
                 <Trash2 className="size-4" aria-hidden="true" />
                 {t("deleteShort")}

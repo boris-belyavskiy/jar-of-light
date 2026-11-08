@@ -7,9 +7,15 @@ type Translate = (key: string) => string;
  * language; for a built-in category without one, its translation; otherwise
  * the name in the other language.
  */
-export function categoryLabel(category: Pick<Category, "slug" | "nameRu" | "nameEn">, t: Translate, locale: string) {
+export function categoryLabel(
+  category: Pick<Category, "slug" | "nameRu" | "nameEn"> & { locked?: boolean },
+  t: Translate,
+  locale: string,
+) {
   const own = locale === "ru" ? category.nameRu : category.nameEn;
   if (own) return own;
   if (category.slug) return t(`system.${category.slug}`);
-  return (locale === "ru" ? category.nameEn : category.nameRu) ?? "";
+  const other = (locale === "ru" ? category.nameEn : category.nameRu) ?? "";
+  // Names stored only as ciphertext cannot be read until the device has the key (ADR-0011).
+  return other || (category.locked ? t("locked") : "");
 }
