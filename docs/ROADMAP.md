@@ -94,14 +94,23 @@ Each step is its own pull request, and each leaves the app working. Horizon 2 st
 - [x] Content Security Policy in place
 - [ ] `user_keys` added to `COUNTS_SQL` in the backups repository (backups PR #4, merge by the owner)
 
-**Step 2. Keys and new content**
-- [ ] Crypto module with unit tests
-- [ ] Setup screen: diary password, recovery code, typing the code back
-- [ ] Unlock screen, locked state, sign-out wipes the key from the device
-- [ ] New entries and category names are written encrypted; decryption in the feed, entry window, filters, entry form, categories page
-- [ ] Search and statistics on the device
+**Step 2. Keys and new content** — four pull requests, each leaving the app working ([ADR-0013](DECISIONS.md#adr-0013))
+
+*2a. The crypto module, no visible change*
+- [x] `lib/crypto/` with unit tests: field encryption bound to user, table, row and field; data key wrapped by the diary password and by the recovery code; change of password, new recovery code, reset with the code
+- [x] Content Security Policy allows WebAssembly for Argon2id
+
+*2b. Setup and unlock, in Settings*
+- [ ] Settings: "Turn on encryption" with the diary password, recovery code and typing the code back; existing accounts opt in themselves
+- [ ] Unlock screen, locked state in the shell, sign-out wipes the key from the device
+- [ ] Change of diary password; use of the recovery code; a new recovery code
+
+*2c. Writing and reading encrypted content*
+- [ ] New entries and category names are written encrypted when the account has a key; decryption in the feed, entry window, filters, entry form, categories page; local drafts encrypted
 - [ ] New accounts go through setup before their first entry
-- [ ] Change of diary password; use of the recovery code
+
+*2d. Search and statistics on the device*
+- [ ] Search words stay on the device, never in the address; statistics with a text query
 
 **Step 3. Move existing content, without erasing anything**
 - [ ] Encrypt existing rows on the device and write the ciphertext next to the plaintext

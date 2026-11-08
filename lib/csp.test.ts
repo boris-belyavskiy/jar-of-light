@@ -20,6 +20,10 @@ describe("buildCsp", () => {
     expect(scripts).not.toContain("'unsafe-eval'");
   });
 
+  it("lets WebAssembly compile for Argon2id, which is not the same as allowing eval", () => {
+    expect(directive(csp, "script-src")).toContain("'wasm-unsafe-eval'");
+  });
+
   it("allows eval in development only", () => {
     expect(directive(buildCsp({ nonce: "N", supabaseUrl: SUPABASE, isDev: true }), "script-src")).toContain("'unsafe-eval'");
   });

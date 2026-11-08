@@ -26,6 +26,7 @@ Architecture Decision Records (ADRs) in one file. Each record captures one signi
 | [0010](#adr-0010) | English comes first wherever both languages are listed; points before sign-in are left-aligned | Accepted | 2026-11-02 |
 | [0011](#adr-0011) | Journal content is encrypted on the user's device; the operator sees profiles and activity, not what people write | Accepted, not built yet | 2026-11-08 |
 | [0012](#adr-0012) | An own domain, and email and password alongside Google on one account | Accepted, not built yet | 2026-11-08 |
+| [0013](#adr-0013) | How encryption reaches users in step 2: by choice in Settings, search on the device, a hint for weak passwords | Accepted | 2026-11-08 |
 
 ## Candidates
 
@@ -621,3 +622,46 @@ Facts from provider documentation were checked on 2026-11-08; recheck before rel
 ### Consequences
 ### Revisit when
 ```
+
+---
+
+<a id="adr-0013"></a>
+
+## ADR-0013: How encryption reaches users in step 2: by choice in Settings, search on the device, a hint for weak passwords
+
+- **Status:** Accepted
+- **Date:** 2026-11-08
+- **Deciders:** Boris Belyavskiy (owner), Claude Code (lead developer)
+
+Refines [ADR-0011](#adr-0011) rule 8 and Tech Spec §5.6 for step 2 of Horizon 1. Nothing in ADR-0011 is reversed.
+
+### Context
+
+Step 2 builds keys and the writing of encrypted content, but moving existing entries is step 3. If setup were required for everyone at their next sign-in, people would meet a password screen before the move exists and would hold a mix of open and encrypted entries for a while. Separately, search words currently travel in the page address, so the server's request logs see them; and the operator, the adversary of the whole design, could guess a short diary password offline.
+
+### Decision
+
+1. **Step 2 is voluntary.** Setup lives in Settings ("Turn on encryption"). New accounts go through it before their first entry (from 2c); existing accounts opt in themselves, the owner first on production. It becomes required for everyone in step 3, together with the move.
+2. **Search words stay on the device,** not in the address, for accounts that have a key. The feed filter by category, dates and favorites stays in the address. A search can no longer be bookmarked or restored with the back button.
+3. **A weak diary password is warned about, not forbidden.** The minimum stays 8 characters ([ADR-0011](#adr-0011)); setup shows how strong the password is and suggests a phrase of several words.
+4. **Step 2 is four pull requests:** 2a the crypto module, 2b setup and unlock in Settings, 2c writing and reading encrypted content, 2d search and statistics on the device. Each leaves the app working.
+
+### Options considered
+
+| Option | Pros | Cons |
+|---|---|---|
+| **Voluntary in step 2, required in step 3** *(chosen)* | Nobody is left half-way; the owner tries it on his own account first | Two paths for saving an entry until step 5 |
+| Required at the next sign-in for everyone | No permanent mixed mode of accounts | A password screen before the move exists; open and encrypted entries side by side for everyone |
+| Search words in the address | Nothing changes | Words from the diary stay in server logs, which breaks the promise |
+| Minimum of 12 characters | Stronger against offline guessing | Changes the owner's decision of 2026-11-08 and adds friction at setup |
+
+### Consequences
+
+- Two write paths exist until step 5: accounts with a key save ciphertext, others still save plaintext.
+- Search no longer works from a link; the feed's search box keeps its text only while the page is open.
+- The Content Security Policy gains `'wasm-unsafe-eval'` for the Argon2id WebAssembly module and nothing else.
+
+### Revisit when
+
+1. The weak-password warning is ignored in practice: raise the minimum.
+2. Users ask for bookmarkable searches: keep a hashed or local-only saved search.
