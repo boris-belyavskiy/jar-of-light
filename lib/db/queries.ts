@@ -27,6 +27,9 @@ export type Category = {
   slug: string | null;
   nameRu: string | null;
   nameEn: string | null;
+  /** The names as ciphertext, when they were saved by an encrypted account; the device decrypts them. */
+  nameRuCipher: string | null;
+  nameEnCipher: string | null;
   isSystem: boolean;
   hidden: boolean;
   /**
@@ -108,6 +111,18 @@ export const getKeyRecord = cache(async (): Promise<KeyRecord | null> => {
 });
 
 /**
+ * Whether this account has no entries yet. With no keys either, it is a new
+ * account, and it sets up encryption before writing its first entry (ADR-0013).
+ */
+export const hasNoEntries = cache(async (): Promise<boolean> => {
+  await requireUserId();
+  const supabase = await createClient();
+  const { count, error } = await supabase.from("entries").select("id", { count: "exact", head: true });
+  if (error) throw new Error(`entries count: ${error.code}`);
+  return (count ?? 0) === 0;
+});
+
+/**
  * Categories in the user's own order (lib/category-order); without one, system
  * categories first in their fixed order, then the user's own by creation time.
  */
@@ -139,6 +154,8 @@ export const listCategories = cache(async (): Promise<Category[]> => {
       slug: c.slug,
       nameRu,
       nameEn,
+      nameRuCipher: names?.name_ru_enc ?? null,
+      nameEnCipher: names?.name_en_enc ?? null,
       isSystem: c.user_id === null,
       hidden: hiddenIds.has(c.id),
       // A built-in category always falls back to its built-in translation.

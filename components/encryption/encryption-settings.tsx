@@ -36,7 +36,8 @@ export function EncryptionSettings() {
 
 // --- Off: set up -------------------------------------------------------------
 
-function TurnOn() {
+/** The steps to turn encryption on; also shown to a new account before its first entry. */
+export function TurnOn() {
   const t = useTranslations("encryption");
   const { prepareSetup, confirmSetup } = useKeys();
   const [started, setStarted] = useState(false);

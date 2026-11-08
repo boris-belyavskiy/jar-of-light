@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
-import { Lock, LockOpen } from "lucide-react";
+import { Lock, ShieldCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -24,7 +24,8 @@ export function LockButton() {
 
   if (status !== "locked" && status !== "unlocked") return null;
   const locked = status === "locked";
-  const Icon = locked ? Lock : LockOpen;
+  // A shield with a check says encryption is on and this device has the key (ADR-0014); a lock asks for the password.
+  const Icon = locked ? Lock : ShieldCheck;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

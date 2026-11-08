@@ -3,16 +3,24 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import type { FormState } from "@/app/actions/state";
+import { CategoryName } from "@/components/encryption/category-names";
+import { useKeys } from "@/components/encryption/key-provider";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { sealEntryBody, writeMode } from "@/lib/crypto/forms";
+import type { Category } from "@/lib/db/queries";
 import { charCount, ENTRY_MAX_LENGTH } from "@/lib/validation";
-import { categoryLabel } from "./category-label";
 import { DateTimePill } from "./date-time-pill";
 
-type Option = { id: string; slug: string | null; nameRu: string | null; nameEn: string | null };
+export type EntryFormOption = Pick<Category, "id" | "slug" | "nameRu" | "nameEn" | "nameRuCipher" | "nameEnCipher" | "locked">;
 type Values = { body: string; occurredOn: string; occurredTime: string; categoryIds: string[] };
+
+// For an encrypted account the draft never touches the disk: it stays in the
+// memory of this tab, which survives the trip to the categories page and back
+// but not a reload (ADR-0011).
+let memoryDraft: { path: string; values: Values } | null = null;
 
 // A draft is kept only in this browser tab (sessionStorage) and only while the
 // user is away on the categories page, so unsaved text is not lost.
@@ -21,6 +29,11 @@ function draftKey(path: string) {
 }
 
 function readDraft(path: string): Values | null {
+  if (memoryDraft?.path === path) {
+    const values = memoryDraft.values;
+    memoryDraft = null;
+    return values;
+  }
   try {
     const raw = sessionStorage.getItem(draftKey(path));
     sessionStorage.removeItem(draftKey(path));
@@ -30,7 +43,7 @@ function readDraft(path: string): Values | null {
   }
 }
 
-function saveDraft(path: string, form: HTMLFormElement) {
+function saveDraft(path: string, form: HTMLFormElement, memoryOnly: boolean) {
   const data = new FormData(form);
   const values: Values = {
     body: String(data.get("body") ?? ""),
@@ -38,6 +51,10 @@ function saveDraft(path: string, form: HTMLFormElement) {
     occurredTime: String(data.get("occurredTime") ?? ""),
     categoryIds: data.getAll("categoryIds").map(String),
   };
+  if (memoryOnly) {
+    memoryDraft = { path, values };
+    return;
+  }
   try {
     sessionStorage.setItem(draftKey(path), JSON.stringify(values));
   } catch {
@@ -54,21 +71,38 @@ export function EntryForm({
   action,
   categories,
   initial,
+  entryId,
   href,
   closeHref,
 }: {
   action: (state: FormState, formData: FormData) => Promise<FormState>;
-  categories: Option[];
+  categories: EntryFormOption[];
   initial: Values;
+  /** The id of the entry being edited; a new entry gets its id on the device when it is saved. */
+  entryId?: string;
   href: string;
   closeHref: string;
 }) {
   const t = useTranslations("entry");
-  const tc = useTranslations("categories");
   const tAll = useTranslations();
-  const locale = useLocale();
+  const { status, needsSetup, encrypt } = useKeys();
+  const mode = writeMode(status, needsSetup);
   const formRef = useRef<HTMLFormElement>(null);
-  const [state, formAction, pending] = useActionState(action, {});
+  const [state, formAction, pending] = useActionState(async (prev: FormState, formData: FormData): Promise<FormState> => {
+    if (mode === "encrypted") {
+      // The row id is made here, before encrypting, because the ciphertext is bound to it. The readable text
+      // is dropped from what is sent: the server receives ciphertext only (ADR-0011).
+      const id = entryId ?? crypto.randomUUID();
+      const sealed = await sealEntryBody(encrypt, id, String(formData.get("body") ?? ""));
+      if (!sealed.ok) return { error: sealed.error };
+      formData.delete("body");
+      formData.set("bodyCipher", sealed.cipher);
+      formData.set("entryId", id);
+    } else if (mode !== "plain") {
+      return { error: "encryption.errors.generic" }; // the write gate should have stopped this
+    }
+    return action(prev, formData);
+  }, {});
   const [values, setValues] = useState(initial);
   const [version, setVersion] = useState(0);
   const [body, setBody] = useState(initial.body);
@@ -135,7 +169,7 @@ export function EntryForm({
           <legend className="text-sm font-medium">{t("categories")}</legend>
           <Link
             href={`/app/categories?back=${encodeURIComponent(href)}`}
-            onClick={() => formRef.current && saveDraft(href, formRef.current)}
+            onClick={() => formRef.current && saveDraft(href, formRef.current, mode === "encrypted")}
             className="text-sm text-primary underline-offset-4 hover:underline"
           >
             {t("editCategories")}
@@ -152,7 +186,7 @@ export function EntryForm({
                 className="peer sr-only"
               />
               <span className="inline-block rounded-full bg-background px-3.5 py-1.5 text-sm ring-1 ring-border transition-colors peer-checked:bg-sky peer-checked:ring-primary peer-focus-visible:ring-2 peer-focus-visible:ring-ring">
-                {categoryLabel(c, tc, locale)}
+                <CategoryName category={c} />
               </span>
             </label>
           ))}

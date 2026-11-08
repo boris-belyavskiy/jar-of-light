@@ -31,7 +31,7 @@ export async function FeedFilters({
   prefix: string;
   filter: FeedFilter;
   items: Category[];
-  label: (c: Category) => string;
+  label: (c: Category) => React.ReactNode;
   stats: boolean;
 }) {
   const t = await getTranslations("feed");
@@ -223,7 +223,7 @@ function FilterItem({
 }: {
   href: string;
   active: boolean;
-  label: string;
+  label: React.ReactNode;
   icon?: React.ReactNode;
   strong?: boolean;
 }) {

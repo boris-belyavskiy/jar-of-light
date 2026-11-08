@@ -1,7 +1,12 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { createEntry, updateEntry } from "@/app/actions/entries";
+import { CategoryName } from "@/components/encryption/category-names";
+import { EditEntry } from "@/components/encryption/edit-entry";
+import { EntryText } from "@/components/encryption/entry-text";
+import { WriteGate } from "@/components/encryption/write-gate";
 import { categoryLabel } from "@/components/journal/category-label";
 import { EntryForm } from "@/components/journal/entry-form";
 import { EntryMenu } from "@/components/journal/entry-menu";
@@ -52,7 +57,9 @@ export default async function FeedPage({ searchParams }: PageProps<"/app">) {
     getTranslations("categories"),
     getLocale(),
   ]);
-  const label = (c: Category) => categoryLabel(c, tc, locale);
+  // Names saved as ciphertext are decrypted on the device, so they are drawn by a client component.
+  const label = (c: Category): ReactNode =>
+    c.nameRuCipher || c.nameEnCipher ? <CategoryName category={c} /> : categoryLabel(c, tc, locale);
   const items = categories.filter((c) => !c.hidden || filter.categoryIds.includes(c.id));
 
   const head = (
@@ -126,13 +133,15 @@ async function NewEntry({ filter, categories }: { filter: FeedFilter; categories
   // "Now" by default, in the user's time zone rather than the server's (ACC-04).
   const now = nowInTimeZone(profile.timezone);
   return (
-    <EntryForm
-      action={createEntry}
-      categories={categories.filter((c) => !c.hidden)}
-      initial={{ body: "", occurredOn: now.date, occurredTime: now.time, categoryIds: [] }}
-      href={feedHref(filter, { mode: "new" })}
-      closeHref={feedHref(filter)}
-    />
+    <WriteGate closeHref={feedHref(filter)}>
+      <EntryForm
+        action={createEntry}
+        categories={categories.filter((c) => !c.hidden)}
+        initial={{ body: "", occurredOn: now.date, occurredTime: now.time, categoryIds: [] }}
+        href={feedHref(filter, { mode: "new" })}
+        closeHref={feedHref(filter)}
+      />
+    </WriteGate>
   );
 }
 
@@ -143,7 +152,7 @@ async function EntryList({
   locale,
 }: {
   filter: FeedFilter;
-  label: (c: Category) => string;
+  label: (c: Category) => ReactNode;
   categories: Category[];
   locale: string;
 }) {
@@ -177,17 +186,17 @@ async function EntryList({
                   <StarButton id={entry.id} starred={entry.starred} />
                   <EntryMenu
                     id={entry.id}
-                    canEdit={entry.body !== null}
-                    editHref={feedHref(filter, { mode: "edit", id: entry.id })}
+                                        editHref={feedHref(filter, { mode: "edit", id: entry.id })}
                     afterDelete={feedHref(filter)}
                   />
                 </div>
               </div>
-              <p
-                className={`reading mt-3 line-clamp-6 whitespace-pre-wrap${entry.body === null ? " text-muted-foreground italic" : ""}`}
-              >
-                {entry.body ?? t("locked")}
-              </p>
+              <EntryText
+                entryId={entry.id}
+                body={entry.body}
+                bodyCipher={entry.bodyCipher}
+                className="reading mt-3 line-clamp-6 whitespace-pre-wrap"
+              />
               <EntryCategories entry={entry} byId={byId} label={label} />
               {/* The whole card opens the entry; the menu above sits on top of this link. */}
               <Link
@@ -215,7 +224,7 @@ async function OpenedEntry({
   view: Extract<FeedView, { id: string }>;
   filter: FeedFilter;
   categories: Category[];
-  label: (c: Category) => string;
+  label: (c: Category) => ReactNode;
   locale: string;
 }) {
   const t = await getTranslations("feed");
@@ -237,16 +246,15 @@ async function OpenedEntry({
   }
 
   const viewHref = feedHref(filter, { mode: "view", id: entry.id });
-  // An entry stored only as ciphertext cannot be edited until the device has the key (ADR-0011).
-  if (view.mode === "edit" && entry.body !== null) {
+  if (view.mode === "edit") {
     // Hidden categories stay selectable on entries that already use them.
     const options = categories.filter((c) => !c.hidden || entry.categoryIds.includes(c.id));
     return (
       <EntryOverlay closeHref={viewHref} label={te("edit")}>
-        <EntryForm
+        <EditEntry
           action={updateEntry.bind(null, entry.id)}
           categories={options}
-          initial={{ ...entry, body: entry.body }}
+          entry={entry}
           href={feedHref(filter, view)}
           closeHref={viewHref}
         />
@@ -264,8 +272,7 @@ async function OpenedEntry({
             <StarButton id={entry.id} starred={entry.starred} />
             <EntryMenu
               id={entry.id}
-              canEdit={entry.body !== null}
-              editHref={feedHref(filter, { mode: "edit", id: entry.id })} afterDelete={listHref} />
+                            editHref={feedHref(filter, { mode: "edit", id: entry.id })} afterDelete={listHref} />
             <Link
               href={listHref}
               scroll={false}
@@ -276,9 +283,7 @@ async function OpenedEntry({
             </Link>
           </div>
         </div>
-        <p className={`reading mt-4 whitespace-pre-wrap${entry.body === null ? " text-muted-foreground italic" : ""}`}>
-          {entry.body ?? t("locked")}
-        </p>
+        <EntryText entryId={entry.id} body={entry.body} bodyCipher={entry.bodyCipher} className="reading mt-4 whitespace-pre-wrap" />
         <EntryCategories entry={entry} byId={byId} label={label} />
       </article>
     </EntryOverlay>
@@ -292,7 +297,7 @@ function EntryCategories({
 }: {
   entry: Entry;
   byId: Map<string, Category>;
-  label: (c: Category) => string;
+  label: (c: Category) => ReactNode;
 }) {
   if (entry.categoryIds.length === 0) return null;
   return (

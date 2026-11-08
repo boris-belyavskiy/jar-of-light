@@ -17,7 +17,7 @@ export async function StatsView({
   entries: StatEntry[];
   filter: FeedFilter;
   categories: Category[];
-  label: (c: Category) => string;
+  label: (c: Category) => React.ReactNode;
   locale: string;
 }) {
   const t = await getTranslations("stats");
