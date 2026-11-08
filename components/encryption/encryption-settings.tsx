@@ -9,6 +9,7 @@ import { keyErrorKey } from "./key-errors";
 import { useKeys, type PreparedRecoveryCode, type PreparedSetup } from "./key-provider";
 import { NewPasswordFields, newPasswordReady } from "./new-password-fields";
 import { RecoveryCodeStep } from "./recovery-code-step";
+import { RememberCheckbox } from "./remember-checkbox";
 import { UnlockForm } from "./unlock-form";
 
 /**
@@ -41,6 +42,7 @@ function TurnOn() {
   const [started, setStarted] = useState(false);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [remember, setRemember] = useState(true);
   const [prepared, setPrepared] = useState<PreparedSetup | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -80,7 +82,7 @@ function TurnOn() {
           setError(null);
           startTransition(async () => {
             try {
-              await confirmSetup(prepared);
+              await confirmSetup(prepared, remember);
               setDone(true);
             } catch (e) {
               setError(t(`errors.${keyErrorKey(e)}`));
@@ -108,6 +110,7 @@ function TurnOn() {
     >
       <p className="text-sm">{t("turnOn.passwordExplain")}</p>
       <NewPasswordFields password={password} confirm={confirm} onPassword={setPassword} onConfirm={setConfirm} label={t("turnOn.password")} />
+      <RememberCheckbox checked={remember} onChange={setRemember} />
       {error && (
         <p role="alert" className="text-sm text-destructive">
           {error}
@@ -136,7 +139,7 @@ function Locked() {
 
 function On() {
   const t = useTranslations("encryption");
-  const { lock } = useKeys();
+  const { lock, remembered } = useKeys();
   const [pending, startTransition] = useTransition();
 
   return (
@@ -148,7 +151,7 @@ function On() {
         <Button type="button" variant="outline" disabled={pending} onClick={() => startTransition(() => lock())}>
           {t("header.lockNow")}
         </Button>
-        <p className="mt-2 text-sm text-muted-foreground">{t("status.lockHint")}</p>
+        <p className="mt-2 text-sm text-muted-foreground">{remembered ? t("status.remembered") : t("status.sessionOnly")}</p>
       </div>
       <ChangePassword />
       <NewRecoveryCode />

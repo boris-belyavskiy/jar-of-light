@@ -45,16 +45,18 @@ type KeysContext = {
   status: KeyStatus;
   /** For later steps: the key that encrypts and decrypts content. Null unless unlocked. */
   dataKey: CryptoKey | null;
+  /** Whether this device keeps the key between visits (and through sign-out), or only while the tab is open. */
+  remembered: boolean;
   prepareSetup(password: string): Promise<PreparedSetup>;
-  confirmSetup(prepared: PreparedSetup): Promise<void>;
-  unlock(password: string): Promise<void>;
-  resetPassword(code: string, newPassword: string): Promise<void>;
+  confirmSetup(prepared: PreparedSetup, remember: boolean): Promise<void>;
+  unlock(password: string, remember: boolean): Promise<void>;
+  resetPassword(code: string, newPassword: string, remember: boolean): Promise<void>;
   changePassword(current: string, next: string): Promise<void>;
   prepareNewRecoveryCode(password: string): Promise<PreparedRecoveryCode>;
   confirmNewRecoveryCode(prepared: PreparedRecoveryCode): Promise<void>;
   /** Forget the key on this device only; the keys stay on the server. */
   lock(): Promise<void>;
-  /** Forget every key on this device: before signing out and deleting the account. */
+  /** Forget every key on this device: before deleting the account. */
   wipeDevice(): Promise<void>;
 };
 
@@ -84,6 +86,7 @@ export function KeyProvider({
 }) {
   const [record, setRecord] = useState(initialRecord);
   const [dataKey, setDataKey] = useState<CryptoKey | null>(null);
+  const [remembered, setRemembered] = useState(false);
   const [status, setStatus] = useState<KeyStatus>(initialRecord ? "loading" : "off");
 
   // On arrival: forget other users' keys, then pick up this user's key if the device has it.
@@ -98,6 +101,7 @@ export function KeyProvider({
       const key = await loadDeviceKey(userId);
       if (cancelled) return;
       setDataKey(key);
+      setRemembered(key !== null); // found in storage, so this device remembers it
       setStatus(key ? "unlocked" : "locked");
     })();
     return () => {
@@ -108,8 +112,11 @@ export function KeyProvider({
   }, [userId]);
 
   const adopt = useCallback(
-    async (key: CryptoKey, next: KeyRecord) => {
-      await saveDeviceKey(userId, key); // if storage is blocked, the key stays in memory for this visit
+    async (key: CryptoKey, next: KeyRecord, remember: boolean) => {
+      // If storage is blocked the key stays in memory for this visit, as when the box is unchecked.
+      const stored = remember ? await saveDeviceKey(userId, key) : false;
+      if (!remember) await clearDeviceKeys({ userId });
+      setRemembered(stored);
       setRecord(next);
       setDataKey(key);
       setStatus("unlocked");
@@ -121,30 +128,31 @@ export function KeyProvider({
     () => ({
       status,
       dataKey,
+      remembered,
 
       async prepareSetup(password) {
         const kdfParams = await calibrateKdf();
         return createKeys({ userId, password, kdfParams });
       },
 
-      async confirmSetup(prepared) {
+      async confirmSetup(prepared, remember) {
         await store(persist.create(prepared.record));
-        await adopt(prepared.dataKey, prepared.record);
+        await adopt(prepared.dataKey, prepared.record, remember);
       },
 
-      async unlock(password) {
+      async unlock(password, remember) {
         if (!record) throw new CryptoError("bad_format");
         const key = await unlockWithPasswordCrypto(record, userId, password);
-        await adopt(key, record);
+        await adopt(key, record, remember);
       },
 
-      async resetPassword(code, newPassword) {
+      async resetPassword(code, newPassword, remember) {
         if (!record) throw new CryptoError("bad_format");
         const next = await resetPasswordWithCode({ record, userId, code, newPassword });
         await store(persist.update(next));
         // The new password opens the same data key; unlock with it to get a key for this device.
         const key = await unlockWithPasswordCrypto(next, userId, newPassword);
-        await adopt(key, next);
+        await adopt(key, next, remember);
       },
 
       async changePassword(current, next) {
@@ -173,15 +181,17 @@ export function KeyProvider({
       async lock() {
         await clearDeviceKeys({ userId });
         setDataKey(null);
+        setRemembered(false);
         setStatus(record ? "locked" : "off");
       },
 
       async wipeDevice() {
         await clearDeviceKeys();
         setDataKey(null);
+        setRemembered(false);
       },
     }),
-    [status, dataKey, record, userId, persist, adopt],
+    [status, dataKey, remembered, record, userId, persist, adopt],
   );
 
   return <Context.Provider value={value}>{children}</Context.Provider>;

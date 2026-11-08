@@ -102,12 +102,13 @@ Each step is its own pull request, and each leaves the app working. Horizon 2 st
 
 *2b. Setup and unlock, in Settings*
 - [x] Settings: "Turn on encryption" with the diary password (with a strength hint), recovery code and typing the code back; existing accounts opt in themselves. Keys are saved only after the code is typed back
-- [x] Unlock dialog from a lock in the header, locked state in the shell, sign-out and account deletion wipe the key from the device
+- [x] Unlock dialog from a lock in the header, locked state in the shell; "Remember on this device" keeps the key through sign-out, "Lock this device" and account deletion wipe it ([ADR-0014](DECISIONS.md#adr-0014))
 - [x] Change of diary password; a forgotten password reset with the recovery code; a new recovery code
 
 *2c. Writing and reading encrypted content*
 - [ ] New entries and category names are written encrypted when the account has a key; decryption in the feed, entry window, filters, entry form, categories page; local drafts encrypted
 - [ ] New accounts go through setup before their first entry
+- [ ] The header icon: a shield with a check when the device has the key, a lock when it does not ([ADR-0014](DECISIONS.md#adr-0014))
 
 *2d. Search and statistics on the device*
 - [ ] Search words stay on the device, never in the address; statistics with a text query

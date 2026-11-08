@@ -1,13 +1,14 @@
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { LogOut, Plus } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import { signOut } from "@/app/actions/account";
 import { saveKeyRecord, updateKeyRecord } from "@/app/actions/keys";
 import { KeyProvider } from "@/components/encryption/key-provider";
 import { LockButton } from "@/components/encryption/lock-button";
 import { LanguageSwitch } from "@/components/language-switch";
 import { NavTabs } from "@/components/nav-tabs";
-import { SignOutButton } from "@/components/sign-out-button";
 import { SiteHeader } from "@/components/site-header";
+import { Button } from "@/components/ui/button";
 import { getKeyRecord, requireUserId } from "@/lib/db/queries";
 
 /**
@@ -25,7 +26,13 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
           <NavTabs />
           <LockButton />
           <LanguageSwitch />
-          <SignOutButton />
+          {/* Signing out leaves the encryption key on this device when the person chose to remember it (ADR-0014). */}
+          <form action={signOut}>
+            <Button type="submit" variant="ghost" size="sm" aria-label={t("signOut")} className="-mr-[11px] text-muted-foreground">
+              <LogOut aria-hidden="true" />
+              <span className="hidden md:inline">{t("signOut")}</span>
+            </Button>
+          </form>
         </SiteHeader>
         <main className="mx-auto w-full max-w-5xl flex-1 px-4">{children}</main>
         <Link

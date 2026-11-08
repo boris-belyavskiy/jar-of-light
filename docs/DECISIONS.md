@@ -27,6 +27,7 @@ Architecture Decision Records (ADRs) in one file. Each record captures one signi
 | [0011](#adr-0011) | Journal content is encrypted on the user's device; the operator sees profiles and activity, not what people write | Accepted, not built yet | 2026-11-08 |
 | [0012](#adr-0012) | An own domain, and email and password alongside Google on one account | Accepted, not built yet | 2026-11-08 |
 | [0013](#adr-0013) | How encryption reaches users in step 2: by choice in Settings, search on the device, a hint for weak passwords | Accepted | 2026-11-08 |
+| [0014](#adr-0014) | The key is remembered on the device, through sign-out, unless the person says no | Accepted | 2026-11-08 |
 
 ## Candidates
 
@@ -665,3 +666,47 @@ Step 2 builds keys and the writing of encrypted content, but moving existing ent
 
 1. The weak-password warning is ignored in practice: raise the minimum.
 2. Users ask for bookmarkable searches: keep a hashed or local-only saved search.
+
+---
+
+<a id="adr-0014"></a>
+
+## ADR-0014: The key is remembered on the device, through sign-out, unless the person says no
+
+- **Status:** Accepted
+- **Date:** 2026-11-08
+- **Deciders:** Boris Belyavskiy (owner), Claude Code (lead developer)
+
+Refines [ADR-0011](#adr-0011) and [Tech Spec §5.6](TECH_SPEC.md#56-end-to-end-encryption), which said that sign-out removes the key from the device. Nothing else in ADR-0011 changes.
+
+### Context
+
+The owner wants the diary password asked once per device: set once, entered once on each new device, entered again to change it, and nothing more. Wiping the key at every sign-out turns "once per device" into "once per sign-in".
+
+Keeping the key does not open the diary to someone else on the same computer: the ciphertext is reachable only through the owner's own sign-in, and the key is a non-extractable browser key that scripts can use but not read.
+
+### Decision
+
+1. **Setup and unlock have a "Remember on this device" checkbox, on by default.** Checked, the key stays in the browser's storage until the person locks the device or clears site data, and survives sign-out. Unchecked, it lives in memory while the tab is open.
+2. **Sign-out no longer wipes the key.** "Lock this device" and account deletion still do. Signing in as another account on the same browser removes the first account's key.
+3. **Settings says which of the two this device does,** and the checkbox explains it in a line, with the advice to uncheck it on a shared computer.
+4. **The "encryption is on" icon waits for step 2c,** when new entries are really encrypted: a shield with a check when this device has the key, a lock "enter your password" when it does not. Until then the header shows the plain lock, which promises nothing.
+
+### Options considered
+
+| Option | Pros | Cons |
+|---|---|---|
+| **Remember by default, with a checkbox** *(chosen)* | One password entry per device, as the owner wants; a shared computer is one click away | On a shared computer with the box left checked, the next person who gets into the same signed-in session has the key |
+| Wipe at every sign-out (ADR-0011) | Nothing is left on a shared computer | The password is asked after every sign-in |
+| Never remember | The most private | The password at every visit; people will choose weak passwords or give up |
+
+### Consequences
+
+- A stolen unlocked laptop with a live Google session opens the diary. Full-disk encryption and a screen lock are the person's defence, as with any app.
+- The privacy note must say that the key stays on the device until locked.
+- Moving the site to another domain ([ADR-0012](#adr-0012)) still asks for the password once, because browser storage belongs to one address.
+
+### Revisit when
+
+1. Passkeys can unlock the diary: a remembered key becomes less needed.
+2. Users report shared-computer leaks: default the checkbox to off.
