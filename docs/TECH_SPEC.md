@@ -309,10 +309,10 @@ stateDiagram-v2
 - Server components keep fetching rows and pass ciphertext to client components, which decrypt it. Without a key on the device the app shows a locked state inside the shell ([ADR-0004](DECISIONS.md#adr-0004)).
 - Server actions receive ciphertext. Length rules (1–4,000 characters, category names up to 40) run on the device; the database bounds ciphertext size only.
 - Search and statistics with a text query (`filter.q` in `lib/db/queries.ts`) run on the device over all of the user's rows, in pages. Filters by date, category and star stay in SQL.
-- A **Content Security Policy** is required before step 2 ships, because cross-site scripting could reach the key. The app has none today.
+- A **Content Security Policy** is required before step 2 ships, because cross-site scripting could reach the key. It is built per request in `proxy.ts` from `lib/csp.ts` (step 1): scripts run only with the request's nonce or when started by one that has it (`'strict-dynamic'`), no inline scripts, no `eval` in production; the only outside origins are our Supabase project and Google Identity Services. Styles allow inline attributes because the charts size bars with `style`. Step 2 will need `'wasm-unsafe-eval'` for the Argon2id WebAssembly module, and nothing more.
 - Never log keys or decrypted text, including in error reports.
 
-**Schema change: additive first.** Plaintext columns become nullable; each row holds plaintext or ciphertext. The checks on `body` and the name constraints (`categories_system_or_custom`, `category_names_not_empty`) change to accept either. Every migration grants privileges explicitly, as the project requires. The mark that an account is encrypted cannot be set by a direct update: `profiles` allows updates only on named columns.
+**Schema change: additive first** (built in step 1, `20261109000000_encryption_prepare.sql`). Plaintext columns become nullable; each row holds plaintext, ciphertext, or both while an account is being moved (step 3), never neither. The checks on `body` and the name constraints (`categories_system_or_custom`, `category_names_not_empty`) change to accept either. Every migration grants privileges explicitly, as the project requires. The mark that an account is encrypted cannot be set by a direct update: `profiles` allows updates only on named columns.
 
 **Moving an existing account.** At the next sign-in, after setup:
 

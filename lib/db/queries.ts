@@ -28,11 +28,22 @@ export type Category = {
   nameEn: string | null;
   isSystem: boolean;
   hidden: boolean;
+  /**
+   * An own category whose names exist only as ciphertext, which this device
+   * cannot read yet (ADR-0011). Show `categories.locked` instead of a name.
+   */
+  locked: boolean;
 };
 
+/**
+ * `body` is the readable text, or null when the row holds ciphertext only
+ * (ADR-0011): then `bodyCipher` is what a device with the key decrypts. A row
+ * may hold both while an account is being moved; plaintext wins until it is erased.
+ */
 export type Entry = {
   id: string;
-  body: string;
+  body: string | null;
+  bodyCipher: string | null;
   occurredOn: string;
   occurredTime: string;
   categoryIds: string[];
@@ -81,12 +92,12 @@ export const listCategories = cache(async (): Promise<Category[]> => {
   const [categories, hidden, renamed, profile] = await Promise.all([
     supabase
       .from("categories")
-      .select("id, slug, name_ru, name_en, user_id")
+      .select("id, slug, name_ru, name_en, name_ru_enc, name_en_enc, user_id")
       .order("user_id", { ascending: true, nullsFirst: true })
       .order("sort", { ascending: true })
       .order("created_at", { ascending: true }),
     supabase.from("hidden_categories").select("category_id"),
-    supabase.from("category_names").select("category_id, name_ru, name_en"),
+    supabase.from("category_names").select("category_id, name_ru, name_en, name_ru_enc, name_en_enc"),
     getProfile(),
   ]);
   if (categories.error) throw new Error(`categories: ${categories.error.code}`);
@@ -96,24 +107,30 @@ export const listCategories = cache(async (): Promise<Category[]> => {
   const renames = new Map(renamed.data.map((r) => [r.category_id, r]));
   const list = categories.data.map((c) => {
     const names = c.user_id === null ? renames.get(c.id) : c;
+    const nameRu = names?.name_ru ?? null;
+    const nameEn = names?.name_en ?? null;
     return {
       id: c.id,
       slug: c.slug,
-      nameRu: names?.name_ru ?? null,
-      nameEn: names?.name_en ?? null,
+      nameRu,
+      nameEn,
       isSystem: c.user_id === null,
       hidden: hiddenIds.has(c.id),
+      // A built-in category always falls back to its built-in translation.
+      locked: c.user_id !== null && !nameRu && !nameEn && Boolean(names?.name_ru_enc || names?.name_en_enc),
     };
   });
   return sortByOrder(list, profile.categoryOrder);
 });
 
 // `stars` holds at most this user's own star: row level security hides anyone else's.
-const ENTRY_COLUMNS = "id, body, occurred_on, occurred_time, cats:entry_categories(category_id), stars(user_id)";
+const ENTRY_COLUMNS =
+  "id, body, body_enc, occurred_on, occurred_time, cats:entry_categories(category_id), stars(user_id)";
 
 type EntryRow = {
   id: string;
-  body: string;
+  body: string | null;
+  body_enc: string | null;
   occurred_on: string;
   occurred_time: string;
   cats: { category_id: string }[];
@@ -124,6 +141,7 @@ function toEntry(row: EntryRow): Entry {
   return {
     id: row.id,
     body: row.body,
+    bodyCipher: row.body_enc,
     occurredOn: row.occurred_on,
     occurredTime: row.occurred_time.slice(0, 5),
     categoryIds: row.cats.map((c) => c.category_id),

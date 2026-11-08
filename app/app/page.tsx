@@ -177,13 +177,16 @@ async function EntryList({
                   <StarButton id={entry.id} starred={entry.starred} />
                   <EntryMenu
                     id={entry.id}
+                    canEdit={entry.body !== null}
                     editHref={feedHref(filter, { mode: "edit", id: entry.id })}
                     afterDelete={feedHref(filter)}
                   />
                 </div>
               </div>
-              <p className="reading mt-3 line-clamp-6 whitespace-pre-wrap">
-                {entry.body}
+              <p
+                className={`reading mt-3 line-clamp-6 whitespace-pre-wrap${entry.body === null ? " text-muted-foreground italic" : ""}`}
+              >
+                {entry.body ?? t("locked")}
               </p>
               <EntryCategories entry={entry} byId={byId} label={label} />
               {/* The whole card opens the entry; the menu above sits on top of this link. */}
@@ -234,7 +237,8 @@ async function OpenedEntry({
   }
 
   const viewHref = feedHref(filter, { mode: "view", id: entry.id });
-  if (view.mode === "edit") {
+  // An entry stored only as ciphertext cannot be edited until the device has the key (ADR-0011).
+  if (view.mode === "edit" && entry.body !== null) {
     // Hidden categories stay selectable on entries that already use them.
     const options = categories.filter((c) => !c.hidden || entry.categoryIds.includes(c.id));
     return (
@@ -242,7 +246,7 @@ async function OpenedEntry({
         <EntryForm
           action={updateEntry.bind(null, entry.id)}
           categories={options}
-          initial={entry}
+          initial={{ ...entry, body: entry.body }}
           href={feedHref(filter, view)}
           closeHref={viewHref}
         />
@@ -258,7 +262,10 @@ async function OpenedEntry({
           <span className={PILL}>{entryDateLabel(entry.occurredOn, entry.occurredTime, locale)}</span>
           <div className="ml-auto flex items-center">
             <StarButton id={entry.id} starred={entry.starred} />
-            <EntryMenu id={entry.id} editHref={feedHref(filter, { mode: "edit", id: entry.id })} afterDelete={listHref} />
+            <EntryMenu
+              id={entry.id}
+              canEdit={entry.body !== null}
+              editHref={feedHref(filter, { mode: "edit", id: entry.id })} afterDelete={listHref} />
             <Link
               href={listHref}
               scroll={false}
@@ -269,7 +276,9 @@ async function OpenedEntry({
             </Link>
           </div>
         </div>
-        <p className="reading mt-4 whitespace-pre-wrap">{entry.body}</p>
+        <p className={`reading mt-4 whitespace-pre-wrap${entry.body === null ? " text-muted-foreground italic" : ""}`}>
+          {entry.body ?? t("locked")}
+        </p>
         <EntryCategories entry={entry} byId={byId} label={label} />
       </article>
     </EntryOverlay>

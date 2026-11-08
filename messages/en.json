@@ -54,7 +54,8 @@
     "backToFeed": "Back to the feed",
     "statsButton": "Statistics",
     "statsTitle": "Statistics",
-    "openEntry": "Open entry"
+    "openEntry": "Open entry",
+    "locked": "Locked. This device does not have your key yet."
   },
   "stats": {
     "title": "Statistics",
@@ -120,6 +121,7 @@
     "deleteTitle": "Delete “{name}”?",
     "deleteBody": "The category will be removed from your entries. The entries themselves stay.",
     "deleteConfirm": "Delete",
+    "locked": "Locked name",
     "system": {
       "family": "Family",
       "friends": "Friends",
