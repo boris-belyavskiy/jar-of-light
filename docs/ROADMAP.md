@@ -87,12 +87,12 @@ Why and what: [ADR-0011](DECISIONS.md#adr-0011). How: [Tech Spec §5.6](TECH_SPE
 
 Each step is its own pull request, and each leaves the app working. Horizon 2 starts only after step 4 is live.
 
-**Step 1. Prepare, with no visible change**
-- [ ] Run an extra backup and confirm it restores
+**Step 1. Prepare, with no visible change** — live on production since 2026-11-08 (PR #64)
+- [x] Run an extra backup and confirm it restores
 - [x] Additive migration: `user_keys`, ciphertext columns on `entries`, `categories`, `category_names`, the plaintext columns become optional, the account's encryption mark (`profiles.encrypted_at`, which a user cannot set)
 - [x] The app reads both formats row by row (ciphertext shows as locked until step 2)
 - [x] Content Security Policy in place
-- [ ] `user_keys` added to `COUNTS_SQL` in the backups repository
+- [ ] `user_keys` added to `COUNTS_SQL` in the backups repository (backups PR #4, merge by the owner)
 
 **Step 2. Keys and new content**
 - [ ] Crypto module with unit tests

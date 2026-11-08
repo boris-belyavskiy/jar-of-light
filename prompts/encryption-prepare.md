@@ -16,3 +16,8 @@ Prompts are quoted as written, in Russian (the chat language), with English summ
 - A row may hold plaintext and ciphertext at the same time (`num_nonnulls(...) >= 1`). The first draft in the Tech Spec said "or", but step 3 writes ciphertext next to plaintext, so "or" would have refused it; the Tech Spec now says so.
 - The Content Security Policy uses a nonce with `'strict-dynamic'` and allows inline style attributes, because the charts size bars with `style`.
 - Applying the migration to the dev database through the agent's database tool was refused by the permission system, so the owner applies it by hand as `supabase/README.md` describes.
+
+## Release notes (added after the merge)
+
+- The owner merged PR #64 before applying the migration to production, so the new code read columns that did not exist for a few minutes; nothing was lost, because the app only reads them. The order is now written in `CLAUDE.md`: migration first, merge second.
+- Before the production migration an extra backup was run and restored; the backups repository got `user_keys` in its restore check (backups PR #4).
