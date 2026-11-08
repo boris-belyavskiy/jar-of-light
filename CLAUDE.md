@@ -6,8 +6,8 @@ Guidance for Claude Code working in this repository.
 
 - [docs/PRD.md](docs/PRD.md) — what we build and why; requirement IDs (ACC-01, ENT-01, …); open questions in §11.
 - [docs/TECH_SPEC.md](docs/TECH_SPEC.md) — stack, data model, privacy, routes, visual design.
-- [docs/ROADMAP.md](docs/ROADMAP.md) — phases; **P0 and P1a are done (2026-10-28); next is P1b** (rest of the journal without AI + customer research).
-- [docs/DECISIONS.md](docs/DECISIONS.md) — all architecture decisions (ADRs) in one append-only file: ADR-0001 (no own servers), ADR-0002 (free stack, keep-alive, backups), ADR-0003 (app foundations: no Cache Components, language without URL prefix, RLS tests on PGlite), ADR-0004 (UX: same features on web and mobile, one shell — every page uses `PageLayout` inside the app or public shell). ADR-0008 (one frame for every edge, one baseline, one set of fonts, justified main text: measure visible edges in the browser before calling a layout done). A new decision is a new record at the end; never rewrite an accepted one.
+- [docs/ROADMAP.md](docs/ROADMAP.md) — phases; **P0 and P1a are done (2026-10-28); next are Horizon 1 (end-to-end encryption) and Horizon 2 (own domain, email and password)**, then the rest of P1b.
+- [docs/DECISIONS.md](docs/DECISIONS.md) — all architecture decisions (ADRs) in one append-only file: ADR-0001 (no own servers), ADR-0002 (free stack, keep-alive, backups), ADR-0003 (app foundations: no Cache Components, language without URL prefix, RLS tests on PGlite), ADR-0004 (UX: same features on web and mobile, one shell — every page uses `PageLayout` inside the app or public shell). ADR-0008 (one frame for every edge, one baseline, one set of fonts, justified main text: measure visible edges in the browser before calling a layout done), ADR-0011 (journal content encrypted on the device), ADR-0012 (own domain, email and password alongside Google). A new decision is a new record at the end; never rewrite an accepted one.
 
 These documents are the source of truth. If a decision changes, update the document (or add a record to `docs/DECISIONS.md`) in the same pull request.
 
@@ -19,6 +19,10 @@ These documents are the source of truth. If a decision changes, update the docum
 - `main` is protected: no direct commits, no force pushes, also for admins. Boris merges pull requests himself. The app is also the MBA 296 solo app: each change needs an Issue, a branch, `prompts/<feature>.md` and a PR with `Closes #N`; `PLAN.md` sections 1–7 stay as merged.
 - Commands: `npm run dev`, `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`. Environment variables: copy `.env.example` to `.env.local`.
 - Next.js 16 has breaking changes against older docs (`proxy.ts` instead of `middleware.ts`, typed `PageProps`/`LayoutProps`): read `node_modules/next/dist/docs/` before using an unfamiliar API.
+
+## Next work (decided 2026-11-08, not built yet)
+
+Start with **Horizon 1, step 1** in [docs/ROADMAP.md](docs/ROADMAP.md#horizon-1--end-to-end-encryption). Read [ADR-0011](docs/DECISIONS.md#adr-0011) and [Tech Spec §5.6](docs/TECH_SPEC.md#56-end-to-end-encryption) first. One step, one pull request; horizons do not run in parallel, because only encryption can lose data and it must ship alone. Erasing plaintext is its own pull request, first on Boris's account. Do not rewrite `/privacy` until the move is finished: the current note stays true until then. Tech Spec §6 and §7.1 already describe AI and entry saving for encrypted accounts, while [schema.md](schema.md) describes what the database holds today.
 
 ## People and language
 
@@ -45,9 +49,9 @@ Google sign-in open to any Google account · profile (name, time zone, language 
 
 ## Rules
 
-- **$0 and no payment card** in P0–P1. Never enable a paid plan, trial or add-on; ask Boris first if something seems to need one.
+- **$0 and no payment card** in P0–P1, with one exception decided by Boris: the domain in Horizon 2 (ADR-0012). Never enable a paid plan, trial or add-on; ask Boris first if something seems to need one.
 - **Secrets never enter the repository or the chat.** `.env.local` (git-ignored) holds **dev** keys only — the folder syncs to OneDrive. Production keys live only in Vercel environment variables. Boris fills secret values himself; give him a template with placeholders.
-- **Privacy by design:** RLS on every user table with automated tests ("user A cannot read or change user B's rows"); no entry text in logs, analytics or error reports.
+- **Privacy by design:** RLS on every user table with automated tests ("user A cannot read or change user B's rows"); no entry text in logs, analytics or error reports. From Horizon 1: any new field the user writes is encrypted on the device, and no key or decrypted text is ever logged (ADR-0011).
 - **Flow:** `main` is always deployable; work on a branch, open a pull request, Vercel builds a preview. Google sign-in does not work on preview URLs (no wildcard origins) — test sign-in locally and on production.
 - **Commits:** Conventional Commits (`feat:`, `fix:`, `docs:` …). Author is Boris's noreply address `340406159+boris-belyavskiy@users.noreply.github.com` (already in the repo's git config).
 - **GitHub CLI:** the machine also has an edu account (`borisbelyavskiy-edu`). Before pushing or creating repos, check `gh auth status` shows `boris-belyavskiy` as active; switch with `gh auth switch`.

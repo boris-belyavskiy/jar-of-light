@@ -1,6 +1,6 @@
 # PRD — Jar of Light
 
-> **Status:** Draft v0.3 · **Updated:** 2026-10-28 · **Owner (PM):** Boris Belyavskiy · **Tech review:** Claude (lead dev)
+> **Status:** Draft v0.3 · **Updated:** 2026-11-08 · **Owner (PM):** Boris Belyavskiy · **Tech review:** Claude (lead dev)
 > **Built from:** Plan v0.1 (2026-10-16), PM notes on audience, JTBD and features (2026-10-19) and the PM's decisions on the first build step (2026-10-27).
 > **Related:** [Tech Spec](TECH_SPEC.md) · [Roadmap](ROADMAP.md) · [Decisions](DECISIONS.md)
 
@@ -133,11 +133,15 @@ PM's feature list (2026-10-19) maps as: F1 → ENT-01 · F2 → ENT-02 · F3 →
 ### 7.1 Account and onboarding
 
 - **ACC-01** — Sign in with **Google**. Anyone with a Google account can sign up. No passwords. *(Must, P1a)*
-  - Email sign-in (one-time code) comes later: it needs an own domain and an email service. *(Should, P1b)*
+  - Email and password join Google in Horizon 2: see ACC-05 and [ADR-0012](DECISIONS.md#adr-0012).
 - **ACC-02** — The first entry can be written **before sign-up**: the draft is kept locally and moved into the account after sign-in. *(Should, P1b)*
 - **ACC-03** — Three-screen onboarding: language and time zone (auto-detected), reminder schedule, AI consent with a plain explanation. *(Must, P1b without the AI step; AI step in P2)*
 - **ACC-04** — Profile: display name (from Google, editable), time zone (auto-detected from the browser, editable), interface language RU / EN. *(Must, P1a)* Pseudonym. *(Must, P4)*
   - **AC:** "today" and the default entry time follow the user's time zone, not the server's.
+- **ACC-05** — Sign up and sign in with **any email and a password**, alongside Google. Sign-up confirms the address with a 6-digit code from an email; "Forgot password" works the same way. *(Must, Horizon 2)*
+  - **AC:** the form behaves identically whether or not the email is registered; a password is never attached without the code.
+- **ACC-06** — An existing account keeps its data when a password is added. Signing up with an email that already has an account adds the password to that account after the code, and both Google and the password then work. Settings offer "add a password" and "change email". *(Must, Horizon 2)*
+  - **AC:** after adding a password, both ways of signing in reach the same account and all its entries.
 
 ### 7.2 Entries
 
@@ -173,14 +177,15 @@ PM's feature list (2026-10-19) maps as: F1 → ENT-01 · F2 → ENT-02 · F3 →
 - **CUM-01 Open the jar** — The "I need some light" button shows a random past entry (weighted by brightness); the user can keep drawing. *(Must, P1b)*
 - **CUM-02 Simple stats (no AI)** — Entries per week, top people, top places, top categories, built from guided fields and categories. *(Should, P1b)*
 - **CUM-03 AI summaries (F3)** — Summaries by **period** (week, month, year), **place**, **topic** and **people**: "October: 23 bright moments, most often with Anna and in the park; you thanked doctors three times." Works for free-form entries too, thanks to AI extraction. *(Must, P2)*
-- **CUM-04 Weekly digest** — In-app and email: count, top categories and people, 1–2 bright entries, an AI summary and one gentle reflection question. *(Should, P2)*
+- **CUM-04 Weekly digest** — In the app: count, top categories and people, 1–2 bright entries, an AI summary and one gentle reflection question. Prepared when the app opens; email can only say that it is ready, because the server cannot read entries ([ADR-0011](DECISIONS.md#adr-0011)). *(Should, P2)*
 - **CUM-05 On this day** — Entries from a month, six months and a year ago. *(Should, P2)*
 - **CUM-06 The jar visualization** — The jar fills with lights: one light per entry, color by category. Clickable prototype tested with 5 users in P2; full build *Later*. *(Could)*
 - **CUM-07 Book of the year** — Export a year of gratitude as a beautiful PDF. *(Later)*
 
 ### 7.6 AI understanding of entries
 
-- **AI-01** — After saving, an entry is parsed asynchronously: kind, people and organizations (with type), places, generalization ladder, categories, personal data flag, crisis signal. *(Must, P2)*
+- **AI-00** — AI is **off by default** and runs only with the user's consent, while the app is open. The device sends the text for that request; the server does not store it; results are encrypted on the device ([ADR-0011](DECISIONS.md#adr-0011)). *(Must, P2)*
+- **AI-01** — After saving, an entry is parsed: kind, people and organizations (with type), places, generalization ladder, categories, personal data flag, crisis signal. *(Must, P2)*
 - **AI-02** — The UI shows that AI is working; results appear as **suggestions**, not changes. *(Must, P2)*
 - **AI-03** — AI can be switched off globally and per entry. Then the entry is never sent to the LLM provider. *(Must, P2)*
 - **AI-04** — On a crisis signal (self-harm, violence) the app shows a caring message and help-line contacts for the user's locale. AI does not "counsel". *(Must, P2)*
@@ -250,10 +255,14 @@ Readable without an account.
 
 ### 7.12 User data
 
-- **DATA-01** — Export all entries to JSON and Markdown. *(Must, P1b)*
+- **DATA-01** — Export all entries to JSON and Markdown; once entries are encrypted, the export is made on the device. *(Must, P1b)*
 - **DATA-02** — Account deletion: immediate deletion of the profile, entries and categories (later also posts, cards and identities); encrypted backups expire within 30 days (stated in the privacy note). *(Must, P1a)*
 - **DATA-03** — Privacy policy and terms in plain language: what goes to the AI provider and what gets published. *(Must before public beta)*
-- **DATA-04** — Short privacy note on the site, linked from the sign-in screen: only you see your entries, and the database itself enforces it; the operator technically has database access and does not read entries; no end-to-end encryption, and why; backups and how long they are kept. It is also the privacy-policy link that Google sign-in requires. *(Must, P1a)*
+- **DATA-04** — Short privacy note on the site, linked from the sign-in screen: only you see your entries, and the database itself enforces it; the operator technically has database access and does not read entries; no end-to-end encryption, and why; backups and how long they are kept. It is also the privacy-policy link that Google sign-in requires. *(Must, P1a)* Stays as written until existing users have moved to encryption, then is rewritten (Horizon 1, step 5).
+- **DATA-05 End-to-end encryption** — Entry text and everything else the user writes, including names of own categories and renames of built-in ones, is encrypted on the device; the key never reaches the server. The operator sees profiles and activity (email, name, language, time zone, dates and counts) but not content. *(Must, Horizon 1)*
+  - **AC:** a query as the database owner shows no readable content for an encrypted account.
+- **DATA-06 Diary password and recovery code** — Set once; asked once per device. A sign-in password or its reset never unlocks the diary. Losing both the diary password and the code loses the entries, and setup says so plainly and requires typing the code back. *(Must, Horizon 1)*
+- **DATA-07 Moving existing users** — A required setup screen at the next sign-in. Plaintext is erased only after the encrypted copy has been downloaded back, decrypted and compared with the original. Nothing is deleted for accounts that do not return. *(Must, Horizon 1)*
 
 ### 7.13 Reflection coach *(Later)*
 
@@ -291,7 +300,7 @@ Starting targets, to be revisited after P1.
 | AI cost | LLM cost per active user per month | ≤ $0.20 |
 | **Guardrails** | Personal data leaks on the public page | **0** |
 | Guardrails | Reports and takedowns | < 1% of posts |
-| Guardrails | Users switching AI off | Tracked as a trust signal |
+| Guardrails | Users turning AI on (off by default since [ADR-0011](DECISIONS.md#adr-0011)) | Tracked as a trust signal |
 | Guardrails | Reminder opt-out in the first 14 days | < 30% |
 
 ### 8.3 JTBD outcome pulse (opt-in)
@@ -313,13 +322,13 @@ Event taxonomy: [Tech Spec §12](TECH_SPEC.md#12-analytics-events). Events never
 
 In the current horizon we do **not** build:
 
-- Native iOS / Android apps (a PWA is enough; Q1)
+- Native iOS / Android apps (a PWA is enough; Q1; store apps parked on 2026-11-08, see the [Roadmap](ROADMAP.md#later))
 - Sending messages or reviews on the user's behalf
 - Searching for or identifying private individuals
 - A social network: public profiles, likes, comments, follows
 - Therapy features or diagnostics
 - Monetization (hypotheses only)
-- End-to-end encryption (incompatible with AI and the public page; trade-off in [Tech Spec §5.5](TECH_SPEC.md#55-data-protection))
+- Background AI on entry text (it would need the server to hold the user's key; [ADR-0011](DECISIONS.md#adr-0011))
 
 ---
 
@@ -334,6 +343,8 @@ In the current horizon we do **not** build:
 | R5 | Crisis content; S2 makes this more likely | Medium | Critical | Crisis signal, help screen, "not therapy" disclaimer, coach only *Later* with an expert |
 | R6 | Scope creep for a solo builder | High | Medium | Strict phases, a *Later* bucket, decision gates in the [Roadmap](ROADMAP.md) |
 | R7 | Legal: GDPR, Russian data localization law (152-FZ), AI provider terms | Medium | High | Plain-language note on where data is stored (US East), privacy policy, server-side LLM calls only, legal check before public beta (Q9) |
+| R8 | A user loses both the diary password and the recovery code, and the entries are gone | Medium | High | Plain warning at setup, typing the code back, export on the device (DATA-01), the code can be replaced while unlocked |
+| R9 | An error during the move of existing users loses entries | Low | **Critical** | Plaintext erased only after an encrypted copy is verified; a separate release for erasing, first on the owner's account; 30 days of old backups as a safety net |
 
 Technical risks are in the [Tech Spec §10](TECH_SPEC.md#10-non-functional-requirements) and [Decisions](DECISIONS.md).
 
@@ -346,7 +357,7 @@ Technical risks are in the [Tech Spec §10](TECH_SPEC.md#10-non-functional-requi
 | Q1 | Platform: PWA, Telegram Mini App or native? | **Web app on Next.js**, mobile-first; PWA install and offline in P1b | ✅ Decided 2026-10-27 | — |
 | Q2 | Languages: RU, EN or both? | **RU + EN from day one**; first beta users Russian-speaking, portfolio case in English | ✅ Decided 2026-10-27 | — |
 | Q3 | Hours per week for the build | 12–15 h/week (roadmap estimates assume this) | Open | P0 |
-| Q4 | Monthly budget for infrastructure and AI | **$0 and no payment card in P0–P1**: free tiers only ([ADR-0002](DECISIONS.md#adr-0002)). Revisit before P2, when AI adds cost | ✅ Decided for P0–P1, 2026-10-27 | P2 |
+| Q4 | Monthly budget for infrastructure and AI | **$0 and no payment card in P0–P1**: free tiers only ([ADR-0002](DECISIONS.md#adr-0002)). One exception on 2026-11-08: a domain, about $10–15 a year ([ADR-0012](DECISIONS.md#adr-0012)). Revisit before P2, when AI adds cost | ✅ Decided for P0–P1, 2026-10-27 | P2 |
 | Q5 | Product name | **Jar of Light** («Банка света») | ✅ Decided 2026-10-19 | — |
 | Q6 | Public repository? | Yes, without secrets | ✅ Decided 2026-10-19 | — |
 | Q7 | Models: mix (A) or one strong model (B)? | Start with the mix; run B on the same evals and decide on data | Proposed | P2 |
@@ -359,10 +370,12 @@ Technical risks are in the [Tech Spec §10](TECH_SPEC.md#10-non-functional-requi
 | Q14 | Private people in full-text levels (L3–L4) | First names allowed; full names and contact details blocked | Open | P4 |
 | Q15 | Keep L1 "count only"? | Yes: the cheapest way to fill public pages with zero privacy risk | Open | P4 |
 | Q16 | Beachhead segment: S1 or S2? | Decide after interviews; compare activation and W2 retention | Open | End of P1 |
-| Q17 | Sign-in methods at start | **Google only**; email later (needs a domain) | ✅ Decided 2026-10-27 | — |
+| Q17 | Sign-in methods at start | **Google only** at start; **email and password alongside Google** in Horizon 2 ([ADR-0012](DECISIONS.md#adr-0012)) | ✅ Decided 2026-10-27, extended 2026-11-08 | — |
 | Q18 | Who can sign up | **Anyone with a Google account** | ✅ Decided 2026-10-27 | — |
 | Q19 | Database on a free tier that pauses when idle | **Supabase Free + daily keep-alive + own nightly backups** ([ADR-0002](DECISIONS.md#adr-0002)) | ✅ Decided 2026-10-27 | — |
 | Q20 | Color palette | **Option A "Morning sky"** out of three ([options](design/palettes/)) | ✅ Decided 2026-10-27 | — |
+| Q21 | With AI off by default, how do people in crisis get support (AI-04)? | Help contacts always reachable in the app, whether or not AI is on; decide on local pattern checks with a psychologist's input | Open | P2 |
+| Q22 | Which domain do we buy? | Short and tied to the name; check availability when Horizon 2 starts | Open | Horizon 2 |
 
 ---
 

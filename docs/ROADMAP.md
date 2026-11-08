@@ -1,6 +1,6 @@
 # Roadmap — Jar of Light
 
-> **Status:** Draft v0.3 · **Updated:** 2026-10-28 · **Owner:** Boris Belyavskiy (PM)
+> **Status:** Draft v0.3 · **Updated:** 2026-11-08 · **Owner:** Boris Belyavskiy (PM)
 > **Related:** [PRD](PRD.md) · [Tech Spec](TECH_SPEC.md) · [Decisions](DECISIONS.md)
 
 **Logic of the sequence.** From simple to complex. First a minimal private journal (P1a: sign in, write, categorize), then the rest of the journal **without AI**, built while doing **customer research**. Then the **AI layer**, then **gratitude → action**, then the **public page**, then **profile search**. Each phase climbs one step of the JTBD ladder (Notice → Own → Connect → Give back) and ends with a decision gate.
@@ -15,7 +15,9 @@
 |---|---|---|---|
 | **P0** | Foundation: repo, docs, accounts, skeleton, design tokens | Late Oct – early Nov 2026 (1–2 wks) | Skeleton live on `jaroflight.vercel.app` · ✅ done 2026-10-28 (Q3 still open) |
 | **P1a** | **First build step:** Google sign-in, entries with date, time and categories, feed with filter | Nov 2026 (2–3 wks) | **R0:** the author and first friends use it · ✅ done 2026-10-28 |
-| **P1b** | Rest of the private journal **without AI** + **customer research** (two parallel tracks) | Late Nov – mid Dec 2026 (3–4 wks) | **R1: closed beta** (10–20 people) |
+| **Horizon 1** | **End-to-end encryption** of journal content and the move of existing users ([ADR-0011](DECISIONS.md#adr-0011)) | Next; window set when scoped | Operator cannot read what users write |
+| **Horizon 2** | **Own domain**, and **email and password** alongside Google ([ADR-0012](DECISIONS.md#adr-0012)) | After Horizon 1 | Sign-in with any email |
+| **P1b** | Rest of the private journal **without AI** + **customer research** (two parallel tracks) | Late Nov – mid Dec 2026 (3–4 wks), shifted by the two horizons | **R1: closed beta** (10–20 people) |
 | **P2** | AI layer: entry parsing, suggestions, summaries, digest | Mid Dec 2026 – mid Jan 2027 (3 wks + holiday buffer) | Beta update |
 | **P3** | Gratitude → action + thank-you cards | Late Jan – early Feb 2027 (2–3 wks) | Beta update |
 | **P4** | Public page: visibility levels, moderation, addressee pages | Feb – mid Mar 2027 (4–5 wks) | **R2: public beta** |
@@ -38,6 +40,8 @@ gantt
   Customer research         :r1, after p0, 35d
   Jar prototype test        :r2, after p1, 21d
 ```
+
+The chart shows the plan of 2026-10-28. Horizons 1 and 2 come before the rest of P1b and shift P1b and everything after it by their length; new windows are set once Horizon 1 is scoped. Customer research does not wait for them.
 
 ---
 
@@ -77,16 +81,85 @@ Requirements: ACC-01, ACC-04, ENT-01, ENT-04 (category filter), ENT-05, CAT-01, 
 
 ---
 
+## Horizon 1 — End-to-end encryption
+
+Why and what: [ADR-0011](DECISIONS.md#adr-0011). How: [Tech Spec §5.6](TECH_SPEC.md#56-end-to-end-encryption). Requirements: DATA-05, DATA-06, DATA-07.
+
+Each step is its own pull request, and each leaves the app working. Horizon 2 starts only after step 4 is live.
+
+**Step 1. Prepare, with no visible change**
+- [ ] Run an extra backup and confirm it restores
+- [ ] Additive migration: `user_keys`, ciphertext columns on `entries`, `categories`, `category_names`, the plaintext columns become optional, the account's encryption mark
+- [ ] The app reads both formats row by row
+- [ ] Content Security Policy in place
+- [ ] `user_keys` added to `COUNTS_SQL` in the backups repository
+
+**Step 2. Keys and new content**
+- [ ] Crypto module with unit tests
+- [ ] Setup screen: diary password, recovery code, typing the code back
+- [ ] Unlock screen, locked state, sign-out wipes the key from the device
+- [ ] New entries and category names are written encrypted; decryption in the feed, entry window, filters, entry form, categories page
+- [ ] Search and statistics on the device
+- [ ] New accounts go through setup before their first entry
+- [ ] Change of diary password; use of the recovery code
+
+**Step 3. Move existing content, without erasing anything**
+- [ ] Encrypt existing rows on the device and write the ciphertext next to the plaintext
+- [ ] Download it again, decrypt, compare with the original
+- [ ] The run can resume after a closed tab or a lost connection
+
+**Step 4. Erase plaintext** (a small pull request of its own)
+- [ ] Database function: refuses if any row lacks ciphertext; otherwise erases plaintext and marks the account in one transaction
+- [ ] Database refuses plaintext for marked accounts (protection against an old open tab)
+- [ ] First on the owner's account in production, then for everyone
+- [ ] Tell the other existing users in person what will be asked of them
+
+**Step 5. Finish, 30 days after the last move**
+- [ ] Old backups with plaintext have expired
+- [ ] Remove the code path for reading plaintext where no plaintext remains
+- [ ] Rewrite `/privacy` (RU and EN): what the operator can and cannot see, AI, metadata, what losing the password and code means. Not earlier: the current note is true until the move is done
+
+**Definition of Done:** unit tests: encrypt and decrypt round trip; tampered data or data moved to another row fails to decrypt; wrong password fails cleanly. RLS tests cover `user_keys`. Database tests prove that plaintext is refused for marked accounts and that the erase function refuses incomplete data. Checked by hand on dev: closing the tab mid-move, a second device, recovery code, password change, sign-out. A nightly backup restored on a clean Postgres, and an entry decrypted from it with the diary password. A query as the operator shows no readable content for marked accounts. RU and EN strings complete; no key or decrypted text in logs.
+
+---
+
+## Horizon 2 — Own domain and email and password
+
+Why and what: [ADR-0012](DECISIONS.md#adr-0012). How: [Tech Spec §7.1b](TECH_SPEC.md#71b-email-and-password-horizon-2). Requirements: ACC-05, ACC-06.
+
+**Step 1. Domain and email**
+- [ ] Choose and buy the domain (Q22); this is the one exception to the $0 rule
+- [ ] Verify it in Resend through DNS records; connect Resend to Supabase dev as custom SMTP, then prod
+- [ ] Letter templates with the 6-digit code; code lifetime 10–15 minutes; review the rate limit (30 letters an hour by default)
+
+**Step 2. Check risky behavior on dev** (the list in [ADR-0012](DECISIONS.md#adr-0012))
+
+**Step 3. Sign-in screens**
+- [ ] One sign-up flow with the code, for new and existing emails; name field
+- [ ] Sign-in with a password; "Forgot password"; hints for people who used Google
+- [ ] Settings: add a password, change email
+- [ ] A clear line above the form for people who already have an account
+
+**Step 4. Move the site to the domain**
+- [ ] Warn users and remind them of their recovery code: each device asks for the diary password once
+- [ ] Vercel domain and redirect from the old address; Google allowed origins and consent screen; Supabase Site URL and redirect URLs
+
+**Definition of Done:** on dev and production: a new person signs up with any email; a Google-only account adds a password through the code and then signs in both ways with the same `user_id` and all its entries; a stranger typing someone's email gets nowhere without the code; a reset of the sign-in password leaves the diary locked until its own password is given. Docs and `/privacy` updated; RU and EN strings complete.
+
+---
+
 ## P1b — Rest of the private journal without AI + customer research
 
 Two tracks run in parallel: building the journal, and talking to users. Interviewees become the first beta users. Customer research can start during P1a.
+
+Since [ADR-0011](DECISIONS.md#adr-0011), the build track comes after Horizons 1 and 2, and every new field follows its default rule: what the user writes is encrypted, and search, autocomplete, stats and export run on the device.
 
 ### Track A — Build
 
 Requirements: ACC-01 (email), ACC-02, ACC-03, ENT-01 (addressee, brightness, local draft), ENT-02, ENT-03, ENT-04 (full), CAT-02 (color, icon, order), HAB-01…04, CUM-01…02, DATA-01.
 
 - [x] Category filter with tick boxes, search, sort, favorites, statistics by date and category ([ADR-0007](DECISIONS.md#adr-0007)) *(2026-11-02, for the MBA 296 solo app)*
-- [ ] Optional email sign-in (needs an own domain + Resend), onboarding
+- [ ] Onboarding (email and password moved to Horizon 2)
 - [ ] Guided entries; "to whom", brightness; grouping by day, more filters and search
 - [ ] People and places of my life (autocomplete from earlier entries)
 - [ ] Category color, icon, order
@@ -130,17 +203,19 @@ Requirements: ACC-01 (email), ACC-02, ACC-03, ENT-01 (addressee, brightness, loc
 
 Requirements: CAT-03, AI-01…04, CUM-03…05 (+ CUM-06 prototype).
 
+Since [ADR-0011](DECISIONS.md#adr-0011), AI is off by default and runs by consent, only while the app is open: the device sends the text, the server stores none of it, and results are encrypted on the device.
+
 - [ ] Provider abstraction, `ai_runs` logging, per-user limits, feature flag
-- [ ] T1 entry parsing: prompt, Zod schema, prompt caching
+- [ ] T1 entry parsing started by the app when saving: prompt, Zod schema, prompt caching
 - [ ] Suggestions UI for categories, people and places
 - [ ] Crisis signal → support screen with help-line contacts (RU/EN)
 - [ ] AI consent in onboarding; switch in settings and per entry
-- [ ] T6 summaries by period, place, topic, people; weekly digest (Batch API)
+- [ ] T6 summaries by period, place, topic, people, from aggregates computed on the device; weekly digest prepared when the app opens
 - [ ] On this day
 - [ ] Evals for T1 and T6 (dataset, runner, report)
 - [ ] Clickable prototype of the jar visualization, tested with 5 users
 
-**Definition of Done:** T1 and T6 pass [eval thresholds](TECH_SPEC.md#65-evals); cost per user visible in the admin panel; suggestion acceptance measured; the digest goes out on schedule in each user's time zone.
+**Definition of Done:** T1 and T6 pass [eval thresholds](TECH_SPEC.md#65-evals); cost per user visible in the admin panel; suggestion acceptance measured; the digest is ready when the user opens the app in a new week; Q21 (crisis support without AI) is closed.
 
 ---
 
@@ -218,3 +293,5 @@ Requirements: ID-01…04.
 ## Later
 
 Reflection coach (with a psychologist, [PRD §7.13](PRD.md#713-reflection-coach-later)) · full jar visualization · organization pages (B2B) · Telegram bot for reminders · Book of the year · photos and own voice transcription · revisit self-hosting ([ADR-0001](DECISIONS.md#adr-0001) triggers).
+
+**Parked by the PM on 2026-11-08: Google Play and App Store apps.** Not decided. What was found: Google Play costs $25 once and a new personal account must run a closed test with at least 12 testers for 14 days; Apple costs $99 a year, requires more than a repackaged website (guideline 4.2) and an equivalent to Google sign-in (guideline 4.8). The likely wrapper is Capacitor with the interface bundled inside the app. Recheck before starting.
