@@ -101,9 +101,9 @@ Each step is its own pull request, and each leaves the app working. Horizon 2 st
 - [x] Content Security Policy allows WebAssembly for Argon2id
 
 *2b. Setup and unlock, in Settings*
-- [ ] Settings: "Turn on encryption" with the diary password, recovery code and typing the code back; existing accounts opt in themselves
-- [ ] Unlock screen, locked state in the shell, sign-out wipes the key from the device
-- [ ] Change of diary password; use of the recovery code; a new recovery code
+- [x] Settings: "Turn on encryption" with the diary password (with a strength hint), recovery code and typing the code back; existing accounts opt in themselves. Keys are saved only after the code is typed back
+- [x] Unlock dialog from a lock in the header, locked state in the shell, sign-out and account deletion wipe the key from the device
+- [x] Change of diary password; a forgotten password reset with the recovery code; a new recovery code
 
 *2c. Writing and reading encrypted content*
 - [ ] New entries and category names are written encrypted when the account has a key; decryption in the feed, entry window, filters, entry form, categories page; local drafts encrypted
