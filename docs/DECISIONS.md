@@ -468,7 +468,7 @@ Row Level Security separates users from each other. It does not limit the operat
 
 The owner wants the second promise: what users write must be unavailable to the owner, while profiles and activity stay visible.
 
-The moment is cheap. On 2026-11-08 production holds 5 accounts and 7 entries, and every new user adds data that would have to be moved later.
+The moment is cheap: production holds little data so far, and every new user adds data that would have to be moved later.
 
 ### Decision
 
@@ -550,7 +550,7 @@ Allows one exception to the $0 rule of [ADR-0002](#adr-0002) and PRD Q4: the yea
 
 ### Context
 
-Sign-in is Google only. The owner wants people to sign in with any email and a password, with Google still available, and without existing users losing anything. On 2026-11-08 production has 5 accounts, all through Google, all with a confirmed email, none with a password.
+Sign-in is Google only. The owner wants people to sign in with any email and a password, with Google still available, and without existing users losing anything. On 2026-11-08 every account in production came through Google, with a confirmed email and no password.
 
 Passwords need email: to prove the address belongs to the person and to reset a forgotten password. Supabase's built-in sender delivers only to the project's team, 2 messages an hour. Receiving servers check that a sender may use an address, through DNS records of the domain, and the DNS of `jaroflight.vercel.app` belongs to Vercel.
 
