@@ -43,8 +43,15 @@ export function buildCsp({
   const supabase = originOf(supabaseUrl);
   const directives: Record<string, string[]> = {
     "default-src": ["'self'"],
-    // React needs eval only in development, for readable server error stacks.
-    "script-src": ["'self'", `'nonce-${nonce}'`, "'strict-dynamic'", ...(isDev ? ["'unsafe-eval'"] : [])],
+    // 'wasm-unsafe-eval' lets the Argon2id WebAssembly module (lib/crypto) compile; it does not
+    // allow eval() or new Function(). React needs eval only in development, for readable error stacks.
+    "script-src": [
+      "'self'",
+      `'nonce-${nonce}'`,
+      "'strict-dynamic'",
+      "'wasm-unsafe-eval'",
+      ...(isDev ? ["'unsafe-eval'"] : []),
+    ],
     "style-src": ["'self'", "'unsafe-inline'", GOOGLE_SIGN_IN.style],
     "img-src": ["'self'", "data:", "blob:"],
     "font-src": ["'self'"],
