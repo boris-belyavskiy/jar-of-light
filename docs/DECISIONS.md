@@ -28,6 +28,7 @@ Architecture Decision Records (ADRs) in one file. Each record captures one signi
 | [0012](#adr-0012) | An own domain, and email and password alongside Google on one account | Accepted, not built yet | 2026-11-08 |
 | [0013](#adr-0013) | How encryption reaches users in step 2: by choice in Settings, search on the device, a hint for weak passwords | Accepted | 2026-11-08 |
 | [0014](#adr-0014) | The key is remembered on the device, through sign-out, unless the person says no | Accepted | 2026-11-08 |
+| [0015](#adr-0015) | Moving existing content: stateless, guarded, checked by a fresh download; setup is required with Settings kept reachable | Accepted | 2026-11-08 |
 
 ## Candidates
 
@@ -710,3 +711,47 @@ Keeping the key does not open the diary to someone else on the same computer: th
 
 1. Passkeys can unlock the diary: a remembered key becomes less needed.
 2. Users report shared-computer leaks: default the checkbox to off.
+
+---
+
+<a id="adr-0015"></a>
+
+## ADR-0015: Moving existing content is stateless, guarded and checked; setup is required, with Settings kept reachable
+
+- **Status:** Accepted
+- **Date:** 2026-11-08
+- **Deciders:** Boris Belyavskiy (owner), Claude Code (lead developer)
+
+Builds [ADR-0011](#adr-0011) rule 8 and [ADR-0013](#adr-0013) rule 1: Horizon 1, step 3.
+
+### Context
+
+Everything written before encryption is readable text in the database. It has to become ciphertext without losing a word, with the device doing the work because only it has the key, and with a way to stop and continue, since a journal may take longer than a person keeps a tab open. Step 4 will erase the readable text, so step 3 must leave nothing in doubt.
+
+### Decision
+
+1. **The run keeps no state.** "What is left" is the rows that have readable text and no ciphertext, asked of the server each time. A closed tab, a lost connection or a second device costs nothing: the next run continues.
+2. **Nothing is erased in step 3.** Ciphertext is saved next to the readable text. Each write applies only to a row that still has readable text, so a row that was edited meanwhile on an encrypted device keeps its newer ciphertext.
+3. **The result is checked by a fresh download.** The device reads every row that has both, decrypts the ciphertext and compares it with the readable text. A mismatch (stale after an edit on an old tab, corrupt, or bound to another row) is replaced from the readable text, which is the truth until step 4, and checked again; after three rounds it stops with an error and nothing is erased.
+4. **Setup is required at the next sign-in.** An account with no keys sets up encryption before it uses the journal. An account with content still to move unlocks this device and lets the move finish. **Settings and the public pages stay open,** so a person who does not want this can still delete their account.
+5. **The server counts what is left on each page load** (three small counts), so the gate needs no stored flag. Step 4 may replace this with a mark on the profile.
+
+### Options considered
+
+| Option | Pros | Cons |
+|---|---|---|
+| **Stateless run on the device** *(chosen)* | Nothing to keep in sync; safe to repeat; works from any device | Several small requests; the tab has to stay open while it runs |
+| A database function that moves a batch | One request per batch | Needs a migration and a place where the key lives, which is the device; no gain for the part that matters |
+| A background job on the server | The tab can close | The server has no key, so it cannot encrypt |
+| Optional move, left to the person | No wall at sign-in | A permanent mixed mode, and plaintext that never leaves |
+
+### Consequences
+
+- Writing ciphertext updates `updated_at` on every moved row, so the operator sees one burst of "changed" on the day of the move. This reveals no content.
+- Other existing users meet the required setup at their next sign-in after this reaches production. They must be told in person first (Roadmap step 4).
+- A person who forgets both the password and the recovery code before the move finishes still has readable text, because nothing is erased until step 4; after step 4 that is no longer so.
+
+### Revisit when
+
+1. A journal is so large that the run is a nuisance: move in the background of the open app instead of in front of it.
+2. Step 4 adds a mark on the profile: replace the counts with it.

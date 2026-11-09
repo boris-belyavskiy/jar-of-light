@@ -325,7 +325,7 @@ stateDiagram-v2
 
 | If this happens | Result |
 |---|---|
-| Tab closed or connection lost in steps 2–3 | Plaintext is intact; the run resumes from rows without ciphertext |
+| Tab closed or connection lost in steps 2–3 | Plaintext is intact; the run resumes from rows without ciphertext (built in step 3: `lib/crypto/move.ts`, with the rule "readable text and no ciphertext" asked of the server each time, writes in batches under 300 KB, and writes that touch only rows that still have readable text, so newer ciphertext is never overwritten) |
 | A comparison fails in step 3 | The run stops; plaintext stays; only an error code is reported |
 | Another device still has the old app open | Before step 4 its edit changes the row and step 4 refuses; after step 4 the database refuses the write |
 | The account never returns | Nothing changes and nothing is deleted; plaintext stays for that account, and the privacy note must say so |
