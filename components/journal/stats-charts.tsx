@@ -1,4 +1,5 @@
-import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
+import { CategoryName } from "@/components/encryption/category-names";
 import { monthLabel } from "@/components/journal/month-label";
 import { cn } from "@/lib/utils";
 import type { CategoryCount, DateSeries } from "@/lib/dashboard-stats";
@@ -13,8 +14,8 @@ const CARD = "rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border dark:shadow-n
  * tapping a bar names its date and count; a hidden table repeats the data for
  * screen readers.
  */
-export async function EntriesByDateChart({ series, locale }: { series: DateSeries; locale: string }) {
-  const t = await getTranslations("stats");
+export function EntriesByDateChart({ series, locale }: { series: DateSeries; locale: string }) {
+  const t = useTranslations("stats");
   const title = series.unit === "day" ? t("byDateTitle") : t("byMonthTitle");
   const name = (key: string) => (series.unit === "day" ? displayDate(key, locale) : monthLabel(key, locale));
   const max = Math.max(...series.points.map((p) => p.count));
@@ -79,21 +80,14 @@ export async function EntriesByDateChart({ series, locale }: { series: DateSerie
 }
 
 /** How the entries spread across categories: one labelled bar per category. */
-export async function EntriesByCategoryChart({
-  counts,
-  categories,
-  label,
-}: {
-  counts: CategoryCount[];
-  categories: Category[];
-  label: (c: Category) => React.ReactNode;
-}) {
-  const t = await getTranslations("stats");
+export function EntriesByCategoryChart({ counts, categories }: { counts: CategoryCount[]; categories: Category[] }) {
+  const t = useTranslations("stats");
   const byId = new Map(categories.map((c) => [c.id, c]));
-  const rows = counts.flatMap(({ categoryId, count }) => {
+  const rows = counts.flatMap(({ categoryId, count }): { key: string; name: React.ReactNode; count: number }[] => {
     if (categoryId === null) return [{ key: "none", name: t("noCategory"), count }];
     const category = byId.get(categoryId);
-    return category ? [{ key: categoryId, name: label(category), count }] : [];
+    // A name saved as ciphertext is decrypted on the device, so it is drawn by a client component.
+    return category ? [{ key: categoryId, name: <CategoryName category={category} />, count }] : [];
   });
   const max = Math.max(...rows.map((r) => r.count));
 

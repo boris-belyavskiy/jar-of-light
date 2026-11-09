@@ -221,6 +221,45 @@ export async function listEntries(filter: FeedFilter): Promise<Entry[]> {
   return (data as unknown as EntryRow[]).map(toEntry);
 }
 
+/**
+ * One page of the user's entries that the filter selects, with their text as
+ * stored (readable or ciphertext), for the device to search (ADR-0011). It
+ * ignores `filter.q`: the server never sees the search words of an account with
+ * keys. The order is the feed's, with the id as a tie-break so pages do not overlap.
+ */
+export async function listEntryRowsPage(
+  filter: FeedFilter,
+  start: number,
+  size: number,
+): Promise<{ rows: Entry[]; done: boolean }> {
+  await requireUserId();
+  const supabase = await createClient();
+  const byCategory = filter.categoryIds.length > 0;
+  const ascending = filter.sort === "oldest";
+  const columns = [
+    ENTRY_COLUMNS,
+    byCategory && "f:entry_categories!inner(category_id)",
+    filter.starred && "s:stars!inner(user_id)",
+  ]
+    .filter(Boolean)
+    .join(", ");
+  let query = supabase
+    .from("entries")
+    .select(columns)
+    .order("occurred_on", { ascending })
+    .order("occurred_time", { ascending })
+    .order("created_at", { ascending })
+    .order("id", { ascending })
+    .range(start, start + size - 1);
+  if (byCategory) query = query.in("f.category_id", filter.categoryIds);
+  if (filter.from) query = query.gte("occurred_on", filter.from);
+  if (filter.to) query = query.lte("occurred_on", filter.to);
+  const { data, error } = await query;
+  if (error) throw new Error(`entry rows: ${error.code}`);
+  const rows = (data as unknown as EntryRow[]).map(toEntry);
+  return { rows, done: rows.length < size };
+}
+
 const STATS_PAGE = 1000;
 
 /** What the dashboard counts: every entry the filter selects, not only the feed's newest 200. */

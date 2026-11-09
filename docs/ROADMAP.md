@@ -111,7 +111,7 @@ Each step is its own pull request, and each leaves the app working. Horizon 2 st
 - [x] The header icon: a shield with a check when the device has the key, a lock when it does not ([ADR-0014](DECISIONS.md#adr-0014))
 
 *2d. Search and statistics on the device*
-- [ ] Search words stay on the device, never in the address; statistics with a text query
+- [x] Search words stay on the device for accounts with keys, never in the address or a request; the device fetches the entries the other filters select, page by page, decrypts and matches them; the statistics page honours the words the same way; a locked device asks for the password to search; accounts without keys keep the server-side search
 
 **Step 3. Move existing content, without erasing anything**
 - [ ] Encrypt existing rows on the device and write the ciphertext next to the plaintext
