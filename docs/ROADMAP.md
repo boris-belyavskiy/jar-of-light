@@ -15,7 +15,7 @@
 |---|---|---|---|
 | **P0** | Foundation: repo, docs, accounts, skeleton, design tokens | Late Oct – early Nov 2026 (1–2 wks) | Skeleton live on `jaroflight.vercel.app` · ✅ done 2026-10-28 (Q3 still open) |
 | **P1a** | **First build step:** Google sign-in, entries with date, time and categories, feed with filter | Nov 2026 (2–3 wks) | **R0:** the author and first friends use it · ✅ done 2026-10-28 |
-| **Horizon 1** | **End-to-end encryption** of journal content and the move of existing users ([ADR-0011](DECISIONS.md#adr-0011)) | Next; window set when scoped | Operator cannot read what users write |
+| **Horizon 1** | **End-to-end encryption** of journal content and the move of existing users ([ADR-0011](DECISIONS.md#adr-0011)) | Steps 1–3 merged 2026-11-08; step 4 (erase plaintext) and step 5 (finish, 30 days later) to go | Operator cannot read what users write |
 | **Horizon 2** | **Own domain**, and **email and password** alongside Google ([ADR-0012](DECISIONS.md#adr-0012)) | After Horizon 1 | Sign-in with any email |
 | **P1b** | Rest of the private journal **without AI** + **customer research** (two parallel tracks) | Late Nov – mid Dec 2026 (3–4 wks), shifted by the two horizons | **R1: closed beta** (10–20 people) |
 | **P2** | AI layer: entry parsing, suggestions, summaries, digest | Mid Dec 2026 – mid Jan 2027 (3 wks + holiday buffer) | Beta update |
@@ -92,9 +92,9 @@ Each step is its own pull request, and each leaves the app working. Horizon 2 st
 - [x] Additive migration: `user_keys`, ciphertext columns on `entries`, `categories`, `category_names`, the plaintext columns become optional, the account's encryption mark (`profiles.encrypted_at`, which a user cannot set)
 - [x] The app reads both formats row by row (ciphertext shows as locked until step 2)
 - [x] Content Security Policy in place
-- [ ] `user_keys` added to `COUNTS_SQL` in the backups repository (backups PR #4, merge by the owner)
+- [x] `user_keys` added to `COUNTS_SQL` in the backups repository (backups PR #4, merged)
 
-**Step 2. Keys and new content** — four pull requests, each leaving the app working ([ADR-0013](DECISIONS.md#adr-0013))
+**Step 2. Keys and new content** — four pull requests (#68, #70 with #72, #74, #76), each leaving the app working, merged 2026-11-08 ([ADR-0013](DECISIONS.md#adr-0013), [ADR-0014](DECISIONS.md#adr-0014))
 
 *2a. The crypto module, no visible change*
 - [x] `lib/crypto/` with unit tests: field encryption bound to user, table, row and field; data key wrapped by the diary password and by the recovery code; change of password, new recovery code, reset with the code
@@ -113,7 +113,7 @@ Each step is its own pull request, and each leaves the app working. Horizon 2 st
 *2d. Search and statistics on the device*
 - [x] Search words stay on the device for accounts with keys, never in the address or a request; the device fetches the entries the other filters select, page by page, decrypts and matches them; the statistics page honours the words the same way; a locked device asks for the password to search; accounts without keys keep the server-side search
 
-**Step 3. Move existing content, without erasing anything**
+**Step 3. Move existing content, without erasing anything** — merged 2026-11-08 (PR #78); nothing is erased yet
 - [x] Encrypt existing rows on the device and write the ciphertext next to the plaintext (entry text, own category names, renames of built-in ones); writes apply only to rows that still have readable text
 - [x] Download it again, decrypt, compare with the original; a stale or corrupt ciphertext is replaced from the readable text and checked again, up to three rounds
 - [x] The run can resume after a closed tab or a lost connection: the list of what is left comes from the server each time
