@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { signOut } from "@/app/actions/account";
 import { saveKeyRecord, updateKeyRecord } from "@/app/actions/keys";
 import { CategoryNamesProvider } from "@/components/encryption/category-names";
+import { EncryptionGate } from "@/components/encryption/encryption-gate";
 import { FeedSearchProvider } from "@/components/encryption/feed-search";
 import { KeyProvider } from "@/components/encryption/key-provider";
 import { LockButton } from "@/components/encryption/lock-button";
@@ -11,6 +12,7 @@ import { LanguageSwitch } from "@/components/language-switch";
 import { NavTabs } from "@/components/nav-tabs";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
+import { countUnmoved } from "@/lib/db/move";
 import { getKeyRecord, hasNoEntries, listCategories, requireUserId } from "@/lib/db/queries";
 
 /**
@@ -19,13 +21,15 @@ import { getKeyRecord, hasNoEntries, listCategories, requireUserId } from "@/lib
  * by the public pages (/about, /privacy) when the visitor is signed in.
  */
 export async function AppShell({ children }: { children: React.ReactNode }) {
-  const [t, userId, keyRecord, categories, noEntries] = await Promise.all([
+  const [t, userId, keyRecord, categories, noEntries, counts] = await Promise.all([
     getTranslations("nav"),
     requireUserId(),
     getKeyRecord(),
     listCategories(),
     hasNoEntries(),
+    countUnmoved(),
   ]);
+  const unmoved = counts.entries + counts.categories + counts.category_names;
 
   return (
     <KeyProvider
@@ -49,7 +53,9 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
                 </Button>
               </form>
             </SiteHeader>
-            <main className="mx-auto w-full max-w-5xl flex-1 px-4">{children}</main>
+            <main className="mx-auto w-full max-w-5xl flex-1 px-4">
+                <EncryptionGate unmoved={unmoved}>{children}</EncryptionGate>
+              </main>
             <Link
               href="/app?new=1"
               aria-label={t("newEntry")}

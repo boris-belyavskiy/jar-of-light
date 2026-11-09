@@ -114,9 +114,10 @@ Each step is its own pull request, and each leaves the app working. Horizon 2 st
 - [x] Search words stay on the device for accounts with keys, never in the address or a request; the device fetches the entries the other filters select, page by page, decrypts and matches them; the statistics page honours the words the same way; a locked device asks for the password to search; accounts without keys keep the server-side search
 
 **Step 3. Move existing content, without erasing anything**
-- [ ] Encrypt existing rows on the device and write the ciphertext next to the plaintext
-- [ ] Download it again, decrypt, compare with the original
-- [ ] The run can resume after a closed tab or a lost connection
+- [x] Encrypt existing rows on the device and write the ciphertext next to the plaintext (entry text, own category names, renames of built-in ones); writes apply only to rows that still have readable text
+- [x] Download it again, decrypt, compare with the original; a stale or corrupt ciphertext is replaced from the readable text and checked again, up to three rounds
+- [x] The run can resume after a closed tab or a lost connection: the list of what is left comes from the server each time
+- [x] Setup is required at the next sign-in ([ADR-0015](DECISIONS.md#adr-0015)): an account without keys sets up encryption before using the journal; an account with unmoved content unlocks and lets the move finish. Settings and the public pages stay reachable
 
 **Step 4. Erase plaintext** (a small pull request of its own)
 - [ ] Database function: refuses if any row lacks ciphertext; otherwise erases plaintext and marks the account in one transaction

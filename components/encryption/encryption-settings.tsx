@@ -11,6 +11,7 @@ import { NewPasswordFields, newPasswordReady } from "./new-password-fields";
 import { RecoveryCodeStep } from "./recovery-code-step";
 import { RememberCheckbox } from "./remember-checkbox";
 import { UnlockForm } from "./unlock-form";
+import { useUnmoved } from "./unmoved";
 
 /**
  * The "Encryption" section of Settings (ADR-0011, ADR-0013): turn it on, then
@@ -141,13 +142,19 @@ function Locked() {
 function On() {
   const t = useTranslations("encryption");
   const { lock, remembered } = useKeys();
+  const unmoved = useUnmoved();
   const [pending, startTransition] = useTransition();
 
   return (
     <div className="flex flex-col gap-6">
-      <p role="status" className="text-sm">
-        {t("status.unlocked")}
-      </p>
+      <div>
+        <p role="status" className="text-sm">
+          {t("status.unlocked")}
+        </p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {unmoved === 0 ? t("status.allMoved") : t("status.notMoved", { count: unmoved })}
+        </p>
+      </div>
       <div>
         <Button type="button" variant="outline" disabled={pending} onClick={() => startTransition(() => lock())}>
           {t("header.lockNow")}

@@ -239,7 +239,7 @@
       "intro": "Encrypt your diary on this device, so that only you can read it, not even the person who runs this app.",
       "pointOperator": "You choose a diary password. It never leaves your device.",
       "pointLoss": "You get a recovery code. If you lose both the password and the code, encrypted entries can't be read by anyone, ever.",
-      "pointRollout": "Entries and category names you write from now on are encrypted on your device. What you wrote before stays as it is for now and is moved in a later update, with a safety check.",
+      "pointRollout": "Everything you wrote before is encrypted on this device too, and checked before anything else happens. Nothing is deleted at this stage.",
       "start": "Turn on encryption",
       "passwordExplain": "Choose a diary password. You'll enter it once on each device. It is separate from signing in with Google.",
       "password": "Diary password",
@@ -251,7 +251,9 @@
       "locked": "Encryption is on. This device is locked: enter your diary password to use your key here.",
       "unlocked": "Encryption is on. This device is unlocked.",
       "remembered": "This device remembers your key, even after you sign out. “Lock this device” makes it ask for the password again.",
-      "sessionOnly": "This device keeps your key only while this tab is open."
+      "sessionOnly": "This device keeps your key only while this tab is open.",
+      "allMoved": "Everything you wrote has an encrypted copy. The readable copies are removed in a later step, after another check.",
+      "notMoved": "{count, plural, one {# item is} other {# items are}} still waiting to be encrypted. Open the journal on an unlocked device to finish."
     },
     "change": {
       "open": "Change diary password",
@@ -280,6 +282,26 @@
       "setupTitle": "Turn on encryption first",
       "setupBody": "New diaries are encrypted from the first entry. Choose a diary password and save a recovery code, then write.",
       "cancel": "Cancel"
+    },
+    "gate": {
+      "setupTitle": "Set up encryption to continue",
+      "setupBody": "Diaries are now encrypted on your device. Choose a diary password and save a recovery code. Everything you have already written will be encrypted for you and checked, and nothing is deleted.",
+      "unlockTitle": "Unlock to finish encrypting your diary",
+      "unlockBody": "Some of what you wrote is not encrypted yet, and only a device that has your key can do it. Enter your diary password."
+    },
+    "move": {
+      "title": "Encrypting what you wrote",
+      "body": "Your entries and category names are being encrypted on this device. Each one is then read back and compared with the original. Nothing is deleted.",
+      "starting": "Starting…",
+      "encrypting": "Encrypting: {done} of {total}",
+      "checking": "Checking that everything reads back correctly: {count} checked",
+      "keepOpen": "Keep this tab open. If you close it, the work continues next time from where it stopped.",
+      "retry": "Try again",
+      "errors": {
+        "stuck": "Saving did not go through. Nothing was lost or deleted. Check your connection and try again.",
+        "unverified": "Some encrypted copies did not match the originals even after a second try. Nothing was deleted. Please try again, and tell the owner if this repeats.",
+        "failed": "Something interrupted the work. Nothing was lost or deleted. Check your connection and try again."
+      }
     }
   },
   "languages": {
