@@ -5,6 +5,8 @@ import { buttonVariants, Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { CategoryName } from "@/components/encryption/category-names";
+import { DeviceSearchBox } from "@/components/encryption/feed-search";
 import { cn } from "@/lib/utils";
 import type { Category } from "@/lib/db/queries";
 import { feedHref, SEARCH_MAX_LENGTH, toggleCategory, type FeedFilter } from "@/lib/feed-filter";
@@ -25,14 +27,15 @@ export async function FeedFilters({
   prefix,
   filter,
   items,
-  label,
   stats,
+  deviceSearch,
 }: {
   prefix: string;
   filter: FeedFilter;
   items: Category[];
-  label: (c: Category) => React.ReactNode;
   stats: boolean;
+  /** The account has encryption keys: its words are searched on the device and never sent (ADR-0011). */
+  deviceSearch: boolean;
 }) {
   const t = await getTranslations("feed");
   // Changing a filter keeps the user where they are: on the dashboard, or on the list.
@@ -45,26 +48,30 @@ export async function FeedFilters({
     <>
       {/* Plain GET forms: each carries the rest of the filter along in hidden fields. The key
           resets a form's fields when its filter is cleared, which a soft navigation would not. */}
-      <form key={`q-${filter.q ?? ""}`} action="/app" className="mt-3 flex shrink-0 flex-col gap-1.5 md:mt-0">
-        <KeptFields filter={filter} stats={stats} omit="search" />
-        <Label htmlFor={`${prefix}q`} className={SECTION_TITLE}>
-          {t("searchTitle")}
-        </Label>
-        <Input
-          id={`${prefix}q`}
-          type="search"
-          name="q"
-          defaultValue={filter.q}
-          maxLength={SEARCH_MAX_LENGTH}
-          placeholder={t("searchPlaceholder")}
-          className="md:h-7 md:px-2 md:text-xs"
-        />
-        <FormButtons
-          apply={t("searchApply")}
-          clear={t("clear")}
-          clearHref={hasSearch ? feedHref({ ...filter, q: undefined }, view) : undefined}
-        />
-      </form>
+      {deviceSearch ? (
+        <DeviceSearchBox prefix={prefix} />
+      ) : (
+        <form key={`q-${filter.q ?? ""}`} action="/app" className="mt-3 flex shrink-0 flex-col gap-1.5 md:mt-0">
+          <KeptFields filter={filter} stats={stats} omit="search" />
+          <Label htmlFor={`${prefix}q`} className={SECTION_TITLE}>
+            {t("searchTitle")}
+          </Label>
+          <Input
+            id={`${prefix}q`}
+            type="search"
+            name="q"
+            defaultValue={filter.q}
+            maxLength={SEARCH_MAX_LENGTH}
+            placeholder={t("searchPlaceholder")}
+            className="md:h-7 md:px-2 md:text-xs"
+          />
+          <FormButtons
+            apply={t("searchApply")}
+            clear={t("clear")}
+            clearHref={hasSearch ? feedHref({ ...filter, q: undefined }, view) : undefined}
+          />
+        </form>
+      )}
 
       <section className={cn(SECTION, "flex shrink-0 flex-col gap-1.5")}>
         <p className={SECTION_TITLE}>{t("datesTitle")}</p>
@@ -127,7 +134,7 @@ export async function FeedFilters({
               <FilterItem
                 href={feedHref(toggleCategory(filter, c.id), view)}
                 active={filter.categoryIds.includes(c.id)}
-                label={label(c)}
+                label={<CategoryName category={c} />}
               />
             </li>
           ))}

@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 import { EntriesByCategoryChart, EntriesByDateChart } from "@/components/journal/stats-charts";
 import { monthLabel } from "@/components/journal/month-label";
 import { entriesByCategory, entriesByDate, summaryStats, type StatEntry } from "@/lib/dashboard-stats";
@@ -6,21 +6,23 @@ import type { Category } from "@/lib/db/queries";
 import type { FeedFilter } from "@/lib/feed-filter";
 import { displayDate } from "@/lib/time";
 
-/** The dashboard: what the entries selected by the filter add up to, in the feed's column. */
-export async function StatsView({
+/**
+ * The dashboard: what the entries selected by the filter add up to, in the feed's column.
+ * Rendered by the server for an account without keys, and by the device when it
+ * searches an encrypted account (ADR-0011), so it has no server-only parts.
+ */
+export function StatsView({
   entries,
   filter,
   categories,
-  label,
   locale,
 }: {
   entries: StatEntry[];
   filter: FeedFilter;
   categories: Category[];
-  label: (c: Category) => React.ReactNode;
   locale: string;
 }) {
-  const t = await getTranslations("stats");
+  const t = useTranslations("stats");
   const period =
     filter.from && filter.to
       ? t("periodRange", { from: displayDate(filter.from, locale), to: displayDate(filter.to, locale) })
@@ -56,7 +58,7 @@ export async function StatsView({
         )}
       </dl>
       <EntriesByDateChart series={entriesByDate(entries, filter)} locale={locale} />
-      <EntriesByCategoryChart counts={entriesByCategory(entries)} categories={categories} label={label} />
+      <EntriesByCategoryChart counts={entriesByCategory(entries)} categories={categories} />
     </section>
   );
 }

@@ -1,13 +1,12 @@
-import type { ReactNode } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { createEntry, updateEntry } from "@/app/actions/entries";
-import { CategoryName } from "@/components/encryption/category-names";
 import { EditEntry } from "@/components/encryption/edit-entry";
+import { DeviceFeed, DeviceStats } from "@/components/encryption/feed-search";
 import { EntryText } from "@/components/encryption/entry-text";
 import { WriteGate } from "@/components/encryption/write-gate";
-import { categoryLabel } from "@/components/journal/category-label";
+import { EntryCard, EntryCategories } from "@/components/journal/entry-card";
 import { EntryForm } from "@/components/journal/entry-form";
 import { EntryMenu } from "@/components/journal/entry-menu";
 import { EntryOverlay } from "@/components/journal/entry-overlay";
@@ -21,12 +20,12 @@ import { PageLayout } from "@/components/page-layout";
 import { buttonVariants } from "@/components/ui/button";
 import {
   getEntry,
+  getKeyRecord,
   getProfile,
   listCategories,
   listEntries,
   listStatEntries,
   type Category,
-  type Entry,
 } from "@/lib/db/queries";
 import {
   feedHref,
@@ -43,23 +42,22 @@ import { entryDateLabel, nowInTimeZone } from "@/lib/time";
  * new entry; an entry opens as a window over the feed, as wide as the frame,
  * and "Edit" turns that window into the form. The title, composer and filters
  * stick in place; only the entries scroll.
+ *
+ * An account with encryption keys is searched by the device, not the server
+ * (ADR-0011, ADR-0013): its search words never come in the address, and an old
+ * link with `q` is ignored. The server list and statistics are what shows until
+ * the person searches.
  */
 export default async function FeedPage({ searchParams }: PageProps<"/app">) {
   const params = await searchParams;
-  const filter = parseFeedFilter(params);
+  const keyed = (await getKeyRecord()) !== null;
+  const parsed = parseFeedFilter(params);
+  const filter: FeedFilter = keyed ? { ...parsed, q: undefined } : parsed;
   const view = parseFeedView(params);
   const filtered = isFiltered(filter);
   const stats = view.mode === "stats";
 
-  const [categories, t, tc, locale] = await Promise.all([
-    listCategories(),
-    getTranslations("feed"),
-    getTranslations("categories"),
-    getLocale(),
-  ]);
-  // Names saved as ciphertext are decrypted on the device, so they are drawn by a client component.
-  const label = (c: Category): ReactNode =>
-    c.nameRuCipher || c.nameEnCipher ? <CategoryName category={c} /> : categoryLabel(c, tc, locale);
+  const [categories, t, locale] = await Promise.all([listCategories(), getTranslations("feed"), getLocale()]);
   const items = categories.filter((c) => !c.hidden || filter.categoryIds.includes(c.id));
 
   const head = (
@@ -82,7 +80,9 @@ export default async function FeedPage({ searchParams }: PageProps<"/app">) {
     </>
   );
 
-  const filters = (prefix: string) => <FeedFilters prefix={prefix} filter={filter} items={items} label={label} stats={stats} />;
+  const filters = (prefix: string) => (
+    <FeedFilters prefix={prefix} filter={filter} items={items} stats={stats} deviceSearch={keyed} />
+  );
 
   return (
     <PageLayout
@@ -109,22 +109,41 @@ export default async function FeedPage({ searchParams }: PageProps<"/app">) {
       {view.mode === "new" ? (
         <NewEntry filter={filter} categories={categories} />
       ) : stats ? (
-        <StatsView
-          entries={await listStatEntries(filter)}
-          filter={filter}
-          categories={categories}
-          label={label}
-          locale={locale}
-        />
+        <StatsPane filter={filter} categories={categories} locale={locale} keyed={keyed} />
       ) : (
         <>
-          <EntryList filter={filter} label={label} categories={categories} locale={locale} />
-          {view.mode !== "list" && (
-            <OpenedEntry view={view} filter={filter} categories={categories} label={label} locale={locale} />
+          {keyed ? (
+            <DeviceFeed filter={filter} categories={categories} locale={locale}>
+              <EntryList filter={filter} categories={categories} locale={locale} />
+            </DeviceFeed>
+          ) : (
+            <EntryList filter={filter} categories={categories} locale={locale} />
           )}
+          {view.mode !== "list" && <OpenedEntry view={view} filter={filter} categories={categories} locale={locale} />}
         </>
       )}
     </PageLayout>
+  );
+}
+
+async function StatsPane({
+  filter,
+  categories,
+  locale,
+  keyed,
+}: {
+  filter: FeedFilter;
+  categories: Category[];
+  locale: string;
+  keyed: boolean;
+}) {
+  const view = <StatsView entries={await listStatEntries(filter)} filter={filter} categories={categories} locale={locale} />;
+  return keyed ? (
+    <DeviceStats filter={filter} categories={categories} locale={locale}>
+      {view}
+    </DeviceStats>
+  ) : (
+    view
   );
 }
 
@@ -147,12 +166,10 @@ async function NewEntry({ filter, categories }: { filter: FeedFilter; categories
 
 async function EntryList({
   filter,
-  label,
   categories,
   locale,
 }: {
   filter: FeedFilter;
-  label: (c: Category) => ReactNode;
   categories: Category[];
   locale: string;
 }) {
@@ -179,33 +196,14 @@ async function EntryList({
       <ol className="flex flex-col gap-3">
         {entries.map((entry) => (
           <li key={entry.id}>
-            <article className="relative rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border transition-colors hover:ring-primary/40 dark:shadow-none">
-              <div className="flex items-center gap-2">
-                <span className={PILL}>{entryDateLabel(entry.occurredOn, entry.occurredTime, locale)}</span>
-                <div className="ml-auto flex items-center">
-                  <StarButton id={entry.id} starred={entry.starred} />
-                  <EntryMenu
-                    id={entry.id}
-                                        editHref={feedHref(filter, { mode: "edit", id: entry.id })}
-                    afterDelete={feedHref(filter)}
-                  />
-                </div>
-              </div>
-              <EntryText
-                entryId={entry.id}
-                body={entry.body}
-                bodyCipher={entry.bodyCipher}
-                className="reading mt-3 line-clamp-6 whitespace-pre-wrap"
-              />
-              <EntryCategories entry={entry} byId={byId} label={label} />
-              {/* The whole card opens the entry; the menu above sits on top of this link. */}
-              <Link
-                href={feedHref(filter, { mode: "view", id: entry.id })}
-                scroll={false}
-                aria-label={t("openEntry")}
-                className="absolute inset-0 rounded-2xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-              />
-            </article>
+            <EntryCard
+              entry={entry}
+              byId={byId}
+              locale={locale}
+              viewHref={feedHref(filter, { mode: "view", id: entry.id })}
+              editHref={feedHref(filter, { mode: "edit", id: entry.id })}
+              afterDelete={feedHref(filter)}
+            />
           </li>
         ))}
       </ol>
@@ -218,13 +216,11 @@ async function OpenedEntry({
   view,
   filter,
   categories,
-  label,
   locale,
 }: {
   view: Extract<FeedView, { id: string }>;
   filter: FeedFilter;
   categories: Category[];
-  label: (c: Category) => ReactNode;
   locale: string;
 }) {
   const t = await getTranslations("feed");
@@ -270,9 +266,7 @@ async function OpenedEntry({
           <span className={PILL}>{entryDateLabel(entry.occurredOn, entry.occurredTime, locale)}</span>
           <div className="ml-auto flex items-center">
             <StarButton id={entry.id} starred={entry.starred} />
-            <EntryMenu
-              id={entry.id}
-                            editHref={feedHref(filter, { mode: "edit", id: entry.id })} afterDelete={listHref} />
+            <EntryMenu id={entry.id} editHref={feedHref(filter, { mode: "edit", id: entry.id })} afterDelete={listHref} />
             <Link
               href={listHref}
               scroll={false}
@@ -283,33 +277,14 @@ async function OpenedEntry({
             </Link>
           </div>
         </div>
-        <EntryText entryId={entry.id} body={entry.body} bodyCipher={entry.bodyCipher} className="reading mt-4 whitespace-pre-wrap" />
-        <EntryCategories entry={entry} byId={byId} label={label} />
+        <EntryText
+          entryId={entry.id}
+          body={entry.body}
+          bodyCipher={entry.bodyCipher}
+          className="reading mt-4 whitespace-pre-wrap"
+        />
+        <EntryCategories entry={entry} byId={byId} />
       </article>
     </EntryOverlay>
-  );
-}
-
-function EntryCategories({
-  entry,
-  byId,
-  label,
-}: {
-  entry: Entry;
-  byId: Map<string, Category>;
-  label: (c: Category) => ReactNode;
-}) {
-  if (entry.categoryIds.length === 0) return null;
-  return (
-    <ul className="mt-3 flex flex-wrap gap-1.5">
-      {entry.categoryIds.map((id) => {
-        const c = byId.get(id);
-        return c ? (
-          <li key={id} className="rounded-full bg-sky px-2.5 py-0.5 text-xs">
-            {label(c)}
-          </li>
-        ) : null;
-      })}
-    </ul>
   );
 }

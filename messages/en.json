@@ -56,7 +56,15 @@
     "statsTitle": "Statistics",
     "openEntry": "Open entry",
     "locked": "Locked. This device does not have your key yet.",
-    "cannotRead": "This entry could not be decrypted."
+    "cannotRead": "This entry could not be decrypted.",
+    "deviceSearchNote": "Searched on this device. Your words are never sent.",
+    "searchLockedTitle": "Unlock to search",
+    "searchLockedBody": "Your entries are encrypted, so only a device that has your key can search them. Enter your diary password.",
+    "searching": "Searching…",
+    "searchFailed": "The search could not read your entries. Please try again.",
+    "searchResults": "{count, plural, one {# entry found} other {# entries found}}",
+    "searchFirst": "Showing the first {count}.",
+    "statsForSearch": "Counting only the {count, plural, one {# entry} other {# entries}} that match your search."
   },
   "stats": {
     "title": "Statistics",
